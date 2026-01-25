@@ -16,6 +16,9 @@ class Pago extends Model
         'monto',
         'estatus',
         'fecha_pago',
+        'dias_atraso',
+        'recargo',
+        'total_con_recargo',
     ];
 
     public function contrato()

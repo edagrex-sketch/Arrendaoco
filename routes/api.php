@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\InmuebleController;
 use App\Http\Controllers\Api\ContratoController;
 use App\Http\Controllers\Api\PagoController;
-
+use App\Http\Controllers\Api\ReporteController;
 /*
 |--------------------------------------------------------------------------
 | Auth
@@ -43,4 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
         '/contratos/{contrato}/estado-cuenta',
         [PagoController::class, 'estadoCuenta']
     );
+    Route::get('/contratos/{contrato}/estado-cuenta', [ContratoController::class, 'estadoCuenta']);
+    
+Route::get('/reportes/ingresos', [ReporteController::class, 'ingresos']);
 });

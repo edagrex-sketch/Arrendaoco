@@ -66,4 +66,25 @@ class ContratoController extends Controller
 
         return response()->json($contrato, 201);
     }
+    public function estadoCuenta(Contrato $contrato)
+{
+    $pagos = $contrato->pagos()->orderBy('anio')->orderBy('mes')->get();
+
+    return response()->json([
+        'contrato_id' => $contrato->id,
+        'inmueble_id' => $contrato->inmueble_id,
+        'estatus_contrato' => $contrato->estatus,
+
+        'resumen' => [
+            'total_pagos'      => $pagos->count(),
+            'pagados'          => $pagos->where('estatus', 'pagado')->count(),
+            'pendientes'       => $pagos->where('estatus', 'pendiente')->count(),
+            'vencidos'         => $pagos->where('estatus', 'vencido')->count(),
+            'total_pagado'     => $pagos->where('estatus','pagado')->sum('monto'),
+            'total_pendiente'  => $pagos->whereIn('estatus',['pendiente','vencido'])->sum('monto'),
+        ],
+
+        'pagos' => $pagos
+    ]);
+}
 }
