@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\PagoController;
 | Auth
 |--------------------------------------------------------------------------
 */
+
 Route::post('/login', [AuthController::class, 'login']);
 
 /*
@@ -37,4 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Pagos
     Route::post('/contratos/{contrato}/pagos/generar', [PagoController::class, 'generar']);
     Route::post('/pagos/{pago}/pagar', [PagoController::class, 'pagar']);
+
+    Route::middleware('auth:sanctum')->get(
+        '/contratos/{contrato}/estado-cuenta',
+        [PagoController::class, 'estadoCuenta']
+    );
 });
