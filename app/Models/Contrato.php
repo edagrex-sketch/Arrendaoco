@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Inmueble;
+use App\Models\Usuario;
+use App\Models\Pago;
 
 class Contrato extends Model
 {
@@ -45,4 +48,8 @@ class Contrato extends Model
     {
         return $this->belongsTo(Usuario::class, 'inquilino_id');
     }
+    public function pagos()
+{
+    return $this->hasMany(Pago::class);
+}
 }

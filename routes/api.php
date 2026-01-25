@@ -4,19 +4,37 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\InmuebleController;
 use App\Http\Controllers\Api\ContratoController;
+use App\Http\Controllers\Api\PagoController;
 
+/*
+|--------------------------------------------------------------------------
+| Auth
+|--------------------------------------------------------------------------
+*/
 Route::post('/login', [AuthController::class, 'login']);
 
+/*
+|--------------------------------------------------------------------------
+| Rutas protegidas
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth:sanctum')->group(function () {
+
+    // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', function () {
         return auth()->user();
     });
-});
 
-Route::middleware('auth:sanctum')->group(function () {
+    // Inmuebles
     Route::apiResource('inmuebles', InmuebleController::class);
+
+    // Contratos
+    Route::post('/inmuebles/{inmueble}/rentar', [ContratoController::class, 'rentar']);
+    Route::post('/contratos/{contrato}/renovar', [ContratoController::class, 'renovar']);
+    Route::post('/contratos/{contrato}/cancelar', [ContratoController::class, 'cancelar']);
+
+    // Pagos
+    Route::post('/contratos/{contrato}/pagos/generar', [PagoController::class, 'generar']);
+    Route::post('/pagos/{pago}/pagar', [PagoController::class, 'pagar']);
 });
-Route::post('/inmuebles/{inmueble}/rentar', [ContratoController::class, 'rentar']);
-Route::post('/contratos/{contrato}/renovar', [ContratoController::class, 'renovar']);
-Route::post('/contratos/{contrato}/cancelar', [ContratoController::class, 'cancelar']);
