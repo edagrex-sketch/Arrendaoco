@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Inmueble;
+use App\Models\Contrato;
 
 class Usuario extends Authenticatable
 {
@@ -25,9 +26,18 @@ class Usuario extends Authenticatable
         'password',
         'remember_token',
     ];
-        public function inmuebles()
+    public function inmuebles()
     {
-    return $this->hasMany(Inmueble::class, 'propietario_id');
+        return $this->hasMany(Inmueble::class, 'propietario_id');
+    }
+
+    public function contratosComoPropietario()
+    {
+        return $this->hasMany(Contrato::class, 'propietario_id');
+    }
+
+    public function contratosComoInquilino()
+    {
+        return $this->hasMany(Contrato::class, 'inquilino_id');
     }
 }
-
