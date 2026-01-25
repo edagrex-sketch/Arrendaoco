@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Inmueble;
 
 class Usuario extends Authenticatable
 {
@@ -20,9 +21,13 @@ class Usuario extends Authenticatable
         'es_admin',
         'estatus',
     ];
-
     protected $hidden = [
         'password',
         'remember_token',
     ];
+        public function inmuebles()
+    {
+    return $this->hasMany(Inmueble::class, 'propietario_id');
+    }
 }
+
