@@ -8,6 +8,9 @@ use App\Models\Inmueble;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Exports\EstadoCuentaExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ContratoController extends Controller
 {
@@ -71,7 +74,7 @@ class ContratoController extends Controller
      */
     public function estadoCuenta(Contrato $contrato, Request $request)
     {
-        // 🔐 Solo propietario o inquilino
+        // 🔐 Seguridad: solo propietario o inquilino
         if (
             $contrato->propietario_id !== $request->user()->id &&
             $contrato->inquilino_id !== $request->user()->id
@@ -90,19 +93,45 @@ class ContratoController extends Controller
             'estatus_contrato' => $contrato->estatus,
 
             'resumen' => [
-                'total_pagos'      => $pagos->count(),
-                'pagados'          => $pagos->where('estatus', 'pagado')->count(),
-                'pendientes'       => $pagos->where('estatus', 'pendiente')->count(),
-                'vencidos'         => $pagos->where('estatus', 'vencido')->count(),
-                'total_pagado'     => $pagos->where('estatus','pagado')->sum('monto'),
-                'total_pendiente'  => $pagos
-                    ->whereIn('estatus',['pendiente','vencido'])
+                'total_pagos' => $pagos->count(),
+
+                'pagados' => $pagos->where('estatus', 'pagado')->count(),
+                'pendientes' => $pagos->where('estatus', 'pendiente')->count(),
+                'vencidos' => $pagos->where('estatus', 'vencido')->count(),
+
+                'total_pagado' => $pagos->where('estatus', 'pagado')->sum('monto'),
+
+                'total_pendiente' => $pagos
+                    ->whereIn('estatus', ['pendiente', 'vencido'])
                     ->sum('monto'),
+
+                'total_recargos' => $pagos->sum('recargo'),
+
+                'total_a_pagar' => $pagos
+                    ->whereIn('estatus', ['pendiente', 'vencido'])
+                    ->sum('total_con_recargo'),
             ],
 
-            'pagos' => $pagos
+            'pagos' => $pagos->map(function ($pago) {
+                return [
+                    'id' => $pago->id,
+                    'mes' => $pago->mes,
+                    'anio' => $pago->anio,
+                    'estatus' => $pago->estatus,
+
+                    'monto_base' => $pago->monto,
+                    'recargo' => $pago->recargo,
+                    'total' => $pago->estatus === 'pagado'
+                        ? $pago->monto
+                        : $pago->total_con_recargo,
+
+                    'dias_atraso' => $pago->dias_atraso,
+                    'fecha_pago' => $pago->fecha_pago,
+                ];
+            })
         ]);
     }
+
 
     /**
      * Renovar contrato
@@ -138,4 +167,37 @@ class ContratoController extends Controller
             'contrato' => $contrato
         ]);
     }
+
+    public function exportarEstadoCuentaExcel(Contrato $contrato, Request $request)
+    {
+        // 🔐 Seguridad
+        if (
+            $contrato->propietario_id !== $request->user()->id &&
+            $contrato->inquilino_id !== $request->user()->id
+        ) {
+            abort(403, 'No autorizado');
+        }
+
+        return Excel::download(
+            new EstadoCuentaExport($contrato),
+            'estado_cuenta_contrato_' . $contrato->id . '.xlsx'
+        );
+    }
+public function exportarEstadoCuentaPdf(Contrato $contrato, Request $request)
+{
+    // 🔐 Seguridad
+    if (
+        $contrato->propietario_id !== $request->user()->id &&
+        $contrato->inquilino_id !== $request->user()->id
+    ) {
+        abort(403, 'No autorizado');
+    }
+
+    $pdf = Pdf::loadView('pdf.estado_cuenta', [
+        'contrato' => $contrato
+    ]);
+
+    return $pdf->download('estado_cuenta_contrato_'.$contrato->id.'.pdf');
+}
+
 }

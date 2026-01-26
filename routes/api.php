@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', function () {
-        return auth()->user();
+        return auth()->Usuario();
     });
 
     // Inmuebles
@@ -44,6 +44,16 @@ Route::middleware('auth:sanctum')->group(function () {
         [PagoController::class, 'estadoCuenta']
     );
     Route::get('/contratos/{contrato}/estado-cuenta', [ContratoController::class, 'estadoCuenta']);
-    
-Route::get('/reportes/ingresos', [ReporteController::class, 'ingresos']);
+
+    Route::get('/reportes/ingresos', [ReporteController::class, 'ingresos']);
+
+    Route::get(
+        '/contratos/{contrato}/estado-cuenta/excel',
+        [ContratoController::class, 'exportarEstadoCuentaExcel']
+    )->middleware('auth:sanctum');
+
+    Route::get(
+        '/contratos/{contrato}/estado-cuenta/pdf',
+        [ContratoController::class, 'exportarEstadoCuentaPdf']
+    )->middleware('auth:sanctum');
 });
