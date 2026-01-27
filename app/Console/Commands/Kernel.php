@@ -12,12 +12,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        // Pagos
         $schedule->command('pagos:marcar-vencidos')->daily();
         $schedule->command('pagos:calcular-recargos')->daily();
 
+        // Estados de cuenta (mensual, día 1 a las 02:00)
+        $schedule->command('estados-cuenta:generar')->monthlyOn(1, '02:00');
     }
-    
-
 
     /**
      * Register the commands for the application.
@@ -26,6 +27,4 @@ class Kernel extends ConsoleKernel
     {
         $this->load(__DIR__ . '/Commands');
     }
-    
 }
-

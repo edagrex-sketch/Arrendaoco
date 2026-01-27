@@ -5,47 +5,45 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Contrato;
 use App\Models\Inmueble;
+use App\Models\EstadoCuenta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Exports\EstadoCuentaExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Mail\EstadoCuentaMail;
+use Carbon\Carbon;
 
 class ContratoController extends Controller
 {
     use AuthorizesRequests;
 
-    /**
-     * Rentar un inmueble (crear contrato)
-     */
+    /* ======================================================
+     *  CREAR CONTRATO (RENTAR INMUEBLE)
+     * ====================================================== */
     public function rentar(Request $request, Inmueble $inmueble)
     {
-        // 1️⃣ Validar datos de entrada
         $data = $request->validate([
-            'inquilino_id'   => 'required|exists:usuarios,id',
-            'fecha_inicio'   => 'required|date',
-            'fecha_fin'      => 'nullable|date|after:fecha_inicio',
-            'renta_mensual'  => 'required|numeric|min:0',
-            'deposito'       => 'nullable|numeric|min:0',
+            'inquilino_id'  => 'required|exists:usuarios,id',
+            'fecha_inicio'  => 'required|date',
+            'fecha_fin'     => 'nullable|date|after:fecha_inicio',
+            'renta_mensual' => 'required|numeric|min:0',
+            'deposito'      => 'nullable|numeric|min:0',
         ]);
 
-        // 2️⃣ Validar que el usuario sea el propietario
         if ($inmueble->propietario_id !== $request->user()->id) {
             abort(403, 'Solo el propietario puede rentar este inmueble');
         }
 
-        // 3️⃣ Validar que el inmueble esté disponible
         if ($inmueble->estatus !== 'disponible') {
-            abort(422, 'El inmueble no está disponible para renta');
+            abort(422, 'El inmueble no está disponible');
         }
 
-        // 4️⃣ Evitar que el propietario sea el inquilino
         if ($data['inquilino_id'] == $request->user()->id) {
             abort(422, 'El propietario no puede ser el inquilino');
         }
 
-        // 5️⃣ Transacción: contrato + cambio de estado
         $contrato = DB::transaction(function () use ($data, $inmueble, $request) {
 
             $contrato = Contrato::create([
@@ -53,15 +51,13 @@ class ContratoController extends Controller
                 'propietario_id' => $request->user()->id,
                 'inquilino_id'   => $data['inquilino_id'],
                 'fecha_inicio'   => $data['fecha_inicio'],
-                'fecha_fin'      => $data['fecha_fin'] ?? null,
+                'fecha_fin'      => $data['fecha_fin'],
                 'renta_mensual'  => $data['renta_mensual'],
-                'deposito'       => $data['deposito'] ?? null,
+                'deposito'       => $data['deposito'],
                 'estatus'        => 'activo',
             ]);
 
-            $inmueble->update([
-                'estatus' => 'rentado'
-            ]);
+            $inmueble->update(['estatus' => 'rentado']);
 
             return $contrato;
         });
@@ -69,17 +65,16 @@ class ContratoController extends Controller
         return response()->json($contrato, 201);
     }
 
-    /**
-     * Estado de cuenta del contrato
-     */
+    /* ======================================================
+     *  ESTADO DE CUENTA (JSON)
+     * ====================================================== */
     public function estadoCuenta(Contrato $contrato, Request $request)
     {
-        // 🔐 Seguridad: solo propietario o inquilino
         if (
             $contrato->propietario_id !== $request->user()->id &&
             $contrato->inquilino_id !== $request->user()->id
         ) {
-            abort(403, 'No autorizado para ver este contrato');
+            abort(403, 'No autorizado');
         }
 
         $pagos = $contrato->pagos()
@@ -89,88 +84,20 @@ class ContratoController extends Controller
 
         return response()->json([
             'contrato_id' => $contrato->id,
-            'inmueble_id' => $contrato->inmueble_id,
-            'estatus_contrato' => $contrato->estatus,
-
             'resumen' => [
-                'total_pagos' => $pagos->count(),
-
-                'pagados' => $pagos->where('estatus', 'pagado')->count(),
-                'pendientes' => $pagos->where('estatus', 'pendiente')->count(),
-                'vencidos' => $pagos->where('estatus', 'vencido')->count(),
-
-                'total_pagado' => $pagos->where('estatus', 'pagado')->sum('monto'),
-
-                'total_pendiente' => $pagos
-                    ->whereIn('estatus', ['pendiente', 'vencido'])
-                    ->sum('monto'),
-
-                'total_recargos' => $pagos->sum('recargo'),
-
-                'total_a_pagar' => $pagos
-                    ->whereIn('estatus', ['pendiente', 'vencido'])
-                    ->sum('total_con_recargo'),
+                'total_pagado'    => $pagos->where('estatus', 'pagado')->sum('monto'),
+                'total_pendiente' => $pagos->whereIn('estatus', ['pendiente', 'vencido'])->sum('monto'),
+                'vencidos'        => $pagos->where('estatus', 'vencido')->count(),
             ],
-
-            'pagos' => $pagos->map(function ($pago) {
-                return [
-                    'id' => $pago->id,
-                    'mes' => $pago->mes,
-                    'anio' => $pago->anio,
-                    'estatus' => $pago->estatus,
-
-                    'monto_base' => $pago->monto,
-                    'recargo' => $pago->recargo,
-                    'total' => $pago->estatus === 'pagado'
-                        ? $pago->monto
-                        : $pago->total_con_recargo,
-
-                    'dias_atraso' => $pago->dias_atraso,
-                    'fecha_pago' => $pago->fecha_pago,
-                ];
-            })
+            'pagos' => $pagos
         ]);
     }
 
-
-    /**
-     * Renovar contrato
-     * ❌ Bloqueado si existen pagos vencidos
-     */
-    public function renovar(Request $request, Contrato $contrato)
+    /* ======================================================
+     *  ESTADO DE CUENTA PDF + HISTÓRICO + CORREO
+     * ====================================================== */
+    public function estadoCuentaPdf(Contrato $contrato, Request $request)
     {
-        // 🔐 Solo el propietario puede renovar
-        if ($contrato->propietario_id !== $request->user()->id) {
-            abort(403, 'No autorizado para renovar este contrato');
-        }
-
-        // ❌ Bloquear si hay pagos vencidos
-        $tieneVencidos = $contrato->pagos()
-            ->where('estatus', 'vencido')
-            ->exists();
-
-        if ($tieneVencidos) {
-            abort(422, 'No se puede renovar el contrato: existen pagos vencidos');
-        }
-
-        // ✅ Validar nueva fecha
-        $data = $request->validate([
-            'fecha_fin' => 'required|date|after:fecha_inicio',
-        ]);
-
-        $contrato->update([
-            'fecha_fin' => $data['fecha_fin'],
-        ]);
-
-        return response()->json([
-            'message' => 'Contrato renovado correctamente',
-            'contrato' => $contrato
-        ]);
-    }
-
-    public function exportarEstadoCuentaExcel(Contrato $contrato, Request $request)
-    {
-        // 🔐 Seguridad
         if (
             $contrato->propietario_id !== $request->user()->id &&
             $contrato->inquilino_id !== $request->user()->id
@@ -178,26 +105,103 @@ class ContratoController extends Controller
             abort(403, 'No autorizado');
         }
 
-        return Excel::download(
-            new EstadoCuentaExport($contrato),
-            'estado_cuenta_contrato_' . $contrato->id . '.xlsx'
+        // Cargar relaciones
+        $contrato->load(['pagos', 'inmueble', 'inquilino', 'propietario']);
+
+        $pagos = $contrato->pagos()
+            ->orderBy('anio')
+            ->orderBy('mes')
+            ->get();
+
+        $resumen = [
+            'total_pagado'    => $pagos->where('estatus', 'pagado')->sum('monto'),
+            'total_pendiente' => $pagos->whereIn('estatus', ['pendiente', 'vencido'])->sum('monto'),
+            'vencidos'        => $pagos->where('estatus', 'vencido')->count(),
+        ];
+
+        $fecha = Carbon::now();
+
+        $ruta = "estados_cuenta/contrato_{$contrato->id}";
+        $nombre = "estado_cuenta_{$fecha->year}_{$fecha->month}.pdf";
+        $pathRelativo = "{$ruta}/{$nombre}";
+        $pathAbsoluto = storage_path("app/{$pathRelativo}");
+
+        // Crear carpeta si no existe (CRÍTICO)
+        if (!Storage::disk('local')->exists($ruta)) {
+            Storage::disk('local')->makeDirectory($ruta);
+        }
+
+        // Generar PDF
+        $pdf = Pdf::loadView('pdf.estado_cuenta', [
+            'contrato' => $contrato,
+            'pagos'    => $pagos,
+            'resumen'  => $resumen,
+        ])->setPaper('letter');
+
+        // GUARDADO DEFINITIVO (WINDOWS SAFE)
+        file_put_contents($pathAbsoluto, $pdf->output());
+
+        // Guardar / actualizar histórico
+        $estadoCuenta = EstadoCuenta::updateOrCreate(
+            [
+                'contrato_id' => $contrato->id,
+                'mes'  => $fecha->month,
+                'anio' => $fecha->year,
+            ],
+            [
+                'ruta_pdf'     => $pathRelativo,
+                'generado_por' => $request->user()->id,
+            ]
+        );
+
+        // Enviar correo al inquilino
+        Mail::to($contrato->inquilino->email)
+            ->send(new EstadoCuentaMail($estadoCuenta));
+
+        return $pdf->download($nombre);
+    }
+
+    /* ======================================================
+     *  LISTAR ESTADOS DE CUENTA HISTÓRICOS
+     * ====================================================== */
+    public function listarEstadosCuenta(Contrato $contrato, Request $request)
+    {
+        if (
+            $contrato->propietario_id !== $request->user()->id &&
+            $contrato->inquilino_id !== $request->user()->id
+        ) {
+            abort(403, 'No autorizado');
+        }
+
+        return response()->json(
+            $contrato->estadosCuenta()
+                ->orderByDesc('anio')
+                ->orderByDesc('mes')
+                ->get()
         );
     }
-public function exportarEstadoCuentaPdf(Contrato $contrato, Request $request)
-{
-    // 🔐 Seguridad
-    if (
-        $contrato->propietario_id !== $request->user()->id &&
-        $contrato->inquilino_id !== $request->user()->id
-    ) {
-        abort(403, 'No autorizado');
+
+    /* ======================================================
+     *  DESCARGAR ESTADO DE CUENTA
+     * ====================================================== */
+    public function descargarEstadoCuenta(EstadoCuenta $estadoCuenta, Request $request)
+    {
+        $contrato = $estadoCuenta->contrato;
+
+        if (
+            $contrato->propietario_id !== $request->user()->id &&
+            $contrato->inquilino_id !== $request->user()->id
+        ) {
+            abort(403, 'No autorizado');
+        }
+
+        if (!Storage::disk('local')->exists($estadoCuenta->ruta_pdf)) {
+            abort(404, 'Archivo no encontrado');
+        }
+
+        return Storage::disk('local')->download(
+            $estadoCuenta->ruta_pdf,
+            basename($estadoCuenta->ruta_pdf)
+        );
     }
-
-    $pdf = Pdf::loadView('pdf.estado_cuenta', [
-        'contrato' => $contrato
-    ]);
-
-    return $pdf->download('estado_cuenta_contrato_'.$contrato->id.'.pdf');
-}
-
 }

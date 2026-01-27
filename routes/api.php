@@ -6,12 +6,12 @@ use App\Http\Controllers\Api\InmuebleController;
 use App\Http\Controllers\Api\ContratoController;
 use App\Http\Controllers\Api\PagoController;
 use App\Http\Controllers\Api\ReporteController;
+
 /*
 |--------------------------------------------------------------------------
 | Auth
 |--------------------------------------------------------------------------
 */
-
 Route::post('/login', [AuthController::class, 'login']);
 
 /*
@@ -23,8 +23,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // ✅ Esto regresa tu App\Models\Usuario (aunque la función se llame user())
     Route::get('/me', function () {
-        return auth()->Usuario();
+        return auth()->user();
     });
 
     // Inmuebles
@@ -35,25 +37,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/contratos/{contrato}/renovar', [ContratoController::class, 'renovar']);
     Route::post('/contratos/{contrato}/cancelar', [ContratoController::class, 'cancelar']);
 
+    // Estado de cuenta (JSON)
+    Route::get('/contratos/{contrato}/estado-cuenta', [ContratoController::class, 'estadoCuenta']);
+
     // Pagos
     Route::post('/contratos/{contrato}/pagos/generar', [PagoController::class, 'generar']);
     Route::post('/pagos/{pago}/pagar', [PagoController::class, 'pagar']);
 
-    Route::middleware('auth:sanctum')->get(
-        '/contratos/{contrato}/estado-cuenta',
-        [PagoController::class, 'estadoCuenta']
-    );
-    Route::get('/contratos/{contrato}/estado-cuenta', [ContratoController::class, 'estadoCuenta']);
-
+    // Reportes
     Route::get('/reportes/ingresos', [ReporteController::class, 'ingresos']);
 
-    Route::get(
-        '/contratos/{contrato}/estado-cuenta/excel',
-        [ContratoController::class, 'exportarEstadoCuentaExcel']
-    )->middleware('auth:sanctum');
-
-    Route::get(
-        '/contratos/{contrato}/estado-cuenta/pdf',
-        [ContratoController::class, 'exportarEstadoCuentaPdf']
-    )->middleware('auth:sanctum');
+    // Excel
+    Route::get('/contratos/{contrato}/estado-cuenta/excel', [ContratoController::class, 'exportarEstadoCuentaExcel']);
 });

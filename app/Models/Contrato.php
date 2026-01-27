@@ -52,4 +52,8 @@ class Contrato extends Model
 {
     return $this->hasMany(Pago::class);
 }
+public function estadosCuenta()
+{
+    return $this->hasMany(EstadoCuenta::class);
+}
 }
