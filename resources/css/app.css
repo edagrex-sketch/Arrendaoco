@@ -1,11 +1,84 @@
 @import 'tailwindcss';
+/* FORZAR LA DETECCIÓN DE ARCHIVOS BLADE */
+@source '../views/**/*.blade.php';
+@source '../js/**/*.vue';
+/* Por si usas Vue */
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+/* --- 1. Definimos los colores base del diseño ArrendaOco --- */
+:root {
+    /* Fondo Crema Suave (#F5F1E8) - Da sensación de calidez/hogar */
+    --background: #F5F1E8;
 
+    /* Azul Marino Profundo (#1F3A5F) - Usado para textos y elementos principales */
+    --foreground: #1F3A5F;
+
+    /* Tarjetas Blancas (#FFFFFF) - Para destacar contenido sobre el fondo crema */
+    --card: #FFFFFF;
+    --card-foreground: #1F3A5F;
+
+    /* Color Primario (#1F3A5F) - Botones principales y encabezados fuertes */
+    --primary: #1F3A5F;
+    --primary-foreground: #FFFFFF;
+
+    /* Color Secundario (#F5F1E8) - Botones secundarios o fondos alternos */
+    --secondary: #F5F1E8;
+    --secondary-foreground: #1F3A5F;
+
+    /* Texto Silenciado (#5A6B7D) - Para subtítulos o textos menos importantes */
+    --muted: #E8E4DB;
+    --muted-foreground: #5A6B7D;
+
+    /* Acento (#2E5E8C) - Un azul más vibrante para interacciones/hovers */
+    --accent: #2E5E8C;
+    --accent-foreground: #FFFFFF;
+
+    /* Bordes Suaves (#D4CFC3) - Separan elementos sin ser agresivos */
+    --border: #D4CFC3;
+    --input: #E8E4DB;
+    --ring: #2E5E8C;
+
+    /* Radio de bordes (Qué tan redondos son los botones/tarjetas) */
+    --radius: 0.625rem;
+}
+
+/* --- 2. Conectamos esas variables con Tailwind v4 --- */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Fuente Instrument Sans que ya tenías */
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Mapeo de colores del diseño a clases de Tailwind */
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    /* Radios de borde personalizados */
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+}
+
+/* --- 3. Estilos Base --- */
+@layer base {
+    body {
+        /* Aplicamos el fondo crema y el texto azul oscuro por defecto a toda la web */
+        @apply bg-background text-foreground;
+    }
 }

@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->validateCsrfTokens(except: [
+            '/publicar', // Desactivar CSRF para debug de subida de archivos
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
