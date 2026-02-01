@@ -14,6 +14,8 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     {{-- VITE --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="icon" href="{{ asset('logo1.png') }}" type="image/x-icon">
+
 </head>
 
 <body class="bg-background text-foreground font-sans antialiased">
@@ -21,49 +23,59 @@
     <div class="min-h-screen flex flex-col">
 
         <!-- Barra de Navegación -->
-        <nav class="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
+        <nav class="bg-[#003049] border-b border-[#003049] sticky top-0 z-50 shadow-lg">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-
-                <!-- Logo -->
-                <a href="{{ route('inicio') }}" class="flex items-center gap-2 group">
-                    <div
-                        class="h-8 w-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm">
-                        AO
-                    </div>
-                    <span
-                        class="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-                        ArrendaOco
+                <!-- 1. Logo y Nombre -->
+                <a href="{{ route('inicio') }}" class="flex items-center gap-2 group hover:opacity-90 transition-opacity">
+                    <!-- Cuadrado del logo en un azul más claro para resaltar -->
+                    <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco" class="h-10 w-auto object-contain">
+                    <span class="text-xl font-bold text-white tracking-tight">
+                        ArrendaOco<span class="text-[#669BBC]"></span>
                     </span>
                 </a>
-
-                <!-- Menú -->
+                <!-- 2. Menú Central (Enlaces) -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="{{ route('inicio') }}" class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
+                        Inicio
+                    </a>
+                    <a href="#" class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
+                        Nosotros
+                    </a>
+                    <a href="#" class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
+                        Propiedades
+                    </a>
+                </div>
+                <!-- 3. Botones (Auth) -->
                 <div class="flex items-center gap-4">
-                    <a href="#"
-                        class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
-                        Mis Rentas
-                    </a>
-
-                    <a href="#"
-                        class="hidden sm:inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        Publicar
-                    </a>
-
-                    <form method="POST" action="{{ route('logout') }}" class="ml-2 border-l border-border pl-4">
-                        @csrf
-                        <button type="submit" class="text-xs font-medium text-destructive hover:underline">
-                            Salir
-                        </button>
-                    </form>
+                    @auth
+                        <!-- Usuario: Hola + Botón Publicar -->
+                        <span class="text-sm text-gray-200 hidden sm:inline">
+                            Hola, <span class="font-bold text-white">{{ Auth::user()->nombre }}</span>
+                        </span>
+                        
+                        <a href="{{ route('inmuebles.create') }}" class="inline-flex items-center justify-center rounded-full bg-[#C1121F] px-5 py-2 text-sm font-bold text-white shadow-md hover:bg-[#780000] transition-colors">
+                            Publicar
+                        </a>
+                        
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="text-sm font-medium text-gray-300 hover:text-white hover:underline transition-colors">
+                                Salir
+                            </button>
+                        </form>
+                    @else
+                        <!-- Invitado: Login + Registro -->
+                        <a href="{{ route('login') }}" class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors">
+                            Iniciar Sesión
+                        </a>
+                        
+                        <a href="{{ route('registro') }}" class="inline-flex items-center justify-center rounded-lg bg-[#FDF0D5] px-5 py-2 text-sm font-bold text-[#003049] shadow hover:bg-white transition-transform active:scale-95">
+                            Registrarse
+                        </a>
+                    @endauth
                 </div>
             </div>
         </nav>
-
         <!-- Contenido Principal -->
         <main class="flex-1 w-full max-w-7xl mx-auto py-8">
             @yield('content')
