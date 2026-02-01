@@ -84,22 +84,22 @@ Route::post('/logout', function (Request $request) {
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\InmuebleController; // Importar el controlador
+use App\Http\Controllers\InmuebleController;
+
+Route::get('/inmuebles/{inmueble}', [InmuebleController::class, 'show'])->name('inmuebles.show');
 
 Route::middleware('auth')->group(function () {
-
     Route::get('/inicio', function () {
         return view('inicio');
     })->name('inicio');
 
-    Route::get('/inmuebles/{inmueble}', function (\App\Models\Inmueble $inmueble) {
-        return view('inmuebles.show', compact('inmueble'));
-    })->name('inmuebles.show');
-    
     // Rutas de Inmuebles
-    Route::get('/publicar', function () {
-        return view('inmuebles.create');
-    })->name('inmuebles.create');
+    Route::get('/mis-propiedades', [InmuebleController::class, 'index'])->name('inmuebles.index');
+    Route::get('/publicar', [InmuebleController::class, 'create'])->name('inmuebles.create');
+    Route::post('/publicar', [InmuebleController::class, 'store'])->name('inmuebles.guardar');
+    Route::get('/inmuebles/{inmueble}/editar', [InmuebleController::class, 'edit'])->name('inmuebles.edit');
+    Route::put('/inmuebles/{inmueble}', [InmuebleController::class, 'update'])->name('inmuebles.update');
+    Route::delete('/inmuebles/{inmueble}', [InmuebleController::class, 'destroy'])->name('inmuebles.destroy');
 
     // PDFs con sesión
     Route::get(
@@ -162,6 +162,3 @@ Route::post('/reset-password', function (\Illuminate\Http\Request $request) {
         ->withErrors(['email' => __($status)]);
 })->name('password.update');
 
-// 🔓 RUTA DE PRUEBA (FUERA DE AUTH)
-// Esto es para ver si llegamos al controlador sin que nos pida login
-Route::post('/publicar', [InmuebleController::class, 'store'])->name('inmuebles.guardar');

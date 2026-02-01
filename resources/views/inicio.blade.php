@@ -62,7 +62,7 @@
                         <div class="flex justify-between items-start mb-2">
                             <div>
                                 <h3 class="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                                    {{ $inmueble->nombre ?? 'Inmueble sin nombre' }}
+                                    {{ $inmueble->titulo ?? 'Inmueble sin nombre' }}
                                 </h3>
                                 <p class="text-sm text-muted-foreground line-clamp-1">
                                     {{ $inmueble->direccion ?? 'Ubicación no especificada' }}
@@ -76,7 +76,7 @@
 
                         <div class="flex items-baseline gap-1 mt-4">
                             <span class="text-2xl font-bold text-primary">
-                                ${{ number_format($inmueble->precio ?? 0) }}
+                                ${{ number_format($inmueble->renta_mensual ?? 0) }}
                             </span>
                             <span class="text-xs text-muted-foreground">/mes</span>
                         </div>

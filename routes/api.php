@@ -30,7 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Inmuebles
-    Route::apiResource('inmuebles', InmuebleController::class);
+    Route::apiResource('inmuebles', InmuebleController::class)->names('api.inmuebles');
 
     // Contratos
     Route::post('/inmuebles/{inmueble}/rentar', [ContratoController::class, 'rentar']);

@@ -189,56 +189,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Caso 1: Éxito (Viene desde el Controller)
-            @if (session('success'))
-                Swal.fire({
-                    title: '¡Excelente!',
-                    text: "{{ session('success') }}",
-                    icon: 'success',
-                    confirmButtonText: 'Ver mis propiedades',
-                    confirmButtonColor: '#16a34a'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "{{ route('inicio') }}";
-                    }
-                });
-            @endif
-
-            // Caso 2: Error General (Desde el Controller)
-            @if (session('error'))
-                Swal.fire({
-                    title: 'Error',
-                    text: "{{ session('error') }}",
-                    icon: 'error',
-                    confirmButtonText: 'Entendido'
-                });
-            @endif
-
-            // Caso 3: Errores de Validación (Laravel)
-            @if ($errors->any())
-                let mensajes = "";
-                @foreach ($errors->all() as $error)
-                    mensajes += "• {{ $error }}\n";
-                @endforeach
-
-                Swal.fire({
-                    title: 'Atención',
-                    text: 'Por favor revisa los siguientes campos:',
-                    html: '<ul style="text-align: left;">' +
-                        @foreach ($errors->all() as $error)
-                            '<li>{{ $error }}</li>' +
-                        @endforeach
-                    '</ul>',
-                    icon: 'warning',
-                    confirmButtonText: 'Corregir'
-                });
-            @endif
-        });
-    </script>
-
     {{-- Script Alpine Avanzado --}}
     <script>
         document.addEventListener('alpine:init', () => {
