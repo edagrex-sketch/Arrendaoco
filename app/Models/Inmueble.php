@@ -23,6 +23,11 @@ class Inmueble extends Model
         'renta_mensual',
         'deposito',
         'estatus',
+        'tipo',
+        'habitaciones',
+        'banos',
+        'metros',
+        'imagen',
     ];
 
     public function propietario()

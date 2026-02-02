@@ -62,11 +62,11 @@
                             Publicar
                         </a>
 
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form id="logout-form" method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit"
+                            <button type="button" onclick="confirmLogout()"
                                 class="text-sm font-medium text-gray-300 hover:text-white hover:underline transition-colors">
-                                Salir
+                                Cerrar sesión
                             </button>
                         </form>
                     @else
@@ -131,6 +131,24 @@
                 borderRadius: '1.5rem',
             });
         @endif
+
+        function confirmLogout() {
+            Swal.fire({
+                title: '¿Cerrar sesión?',
+                text: "¿Desea salir de su cuenta?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#003049',
+                cancelButtonColor: '#C1121F',
+                confirmButtonText: 'Sí, salir',
+                cancelButtonText: 'Cancelar',
+                borderRadius: '1.5rem',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form').submit();
+                }
+            })
+        }
 
         function confirmDelete(id) {
             Swal.fire({

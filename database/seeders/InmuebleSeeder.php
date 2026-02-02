@@ -2,54 +2,33 @@
 
 namespace Database\Seeders;
 
-use App\Models\Inmueble;
-use App\Models\Usuario;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Inmueble;
 
 class InmuebleSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        $juan = Usuario::where('email', 'juan@arrendaoco.com')->first();
-        $maria = Usuario::where('email', 'maria@arrendaoco.com')->first();
-
-        Inmueble::create([
-            'propietario_id' => $juan->id,
-            'titulo' => 'Departamento Centro',
-            'descripcion' => 'Departamento amueblado en el centro',
-            'direccion' => 'Calle 10 #123',
-            'ciudad' => 'Mérida',
-            'estado' => 'Yucatán',
-            'codigo_postal' => '97000',
-            'renta_mensual' => 8500,
-            'deposito' => 8500,
-            'estatus' => 'disponible',
+        // 7 Departamentos
+        Inmueble::factory()->count(7)->create([
+            'tipo' => 'Departamento',
         ]);
 
-        Inmueble::create([
-            'propietario_id' => $juan->id,
-            'titulo' => 'Casa Norte',
-            'descripcion' => 'Casa con patio amplio',
-            'direccion' => 'Av. 60 #456',
-            'ciudad' => 'Mérida',
-            'estado' => 'Yucatán',
-            'codigo_postal' => '97110',
-            'renta_mensual' => 12000,
-            'deposito' => 12000,
-            'estatus' => 'rentado',
+        // 7 Cuartos
+        Inmueble::factory()->count(7)->create([
+            'tipo' => 'Cuarto',
         ]);
 
-        Inmueble::create([
-            'propietario_id' => $maria->id,
-            'titulo' => 'Departamento Playa',
-            'descripcion' => 'Vista al mar',
-            'direccion' => 'Malecón #89',
-            'ciudad' => 'Progreso',
-            'estado' => 'Yucatán',
-            'codigo_postal' => '97320',
-            'renta_mensual' => 15000,
-            'deposito' => 15000,
-            'estatus' => 'disponible',
+        // 6 Casas
+        Inmueble::factory()->count(6)->create([
+            'tipo' => 'Casa',
         ]);
+        
+        // Mensaje de confirmación en consola (opcional)
+        $this->command->info('Se han creado 20 inmuebles de prueba con éxito.');
     }
 }

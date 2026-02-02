@@ -1,19 +1,24 @@
 @extends('layouts.app')
 
-@section('title', 'Inicio')
+@section('title', 'Resultados de Búsqueda')
 
 @section('content')
-
     {{-- 
-       1. HERO SECTION & BUSCADOR INTELIGENTE 
-       (Integración del diseño "New Code" adaptado a Blade)
+       1. HERO SECTION & BUSCADOR INTELIGENTE (Consistente con Inicio)
     --}}
     <section class="mb-12 px-4 py-8">
         <div class="w-full max-w-5xl mx-auto rounded-xl bg-card p-6 shadow-lg border border-border">
             
             <h2 class="mb-6 text-center text-3xl font-semibold text-card-foreground">
-                Encuentra tu próximo hogar en Ocosingo
+                Propiedades Encontradas
             </h2>
+            <p class="text-center text-muted-foreground mb-6">
+                @if(request('ubicacion') || request('categoria') || request('rango_precio'))
+                    Resultados para tus filtros seleccionados.
+                @else
+                    Mostrando todas las propiedades disponibles.
+                @endif
+            </p>
 
             {{-- Formulario funcional que envía los filtros al controlador --}}
             <form action="{{ route('inmuebles.public_search') }}" method="GET" class="flex flex-col gap-4 md:flex-row items-end">
@@ -86,27 +91,37 @@
         </div>
     </section>
 
-    {{-- 
-        2. SECCIÓN DE PROPIEDADES 
-        (Lógica original de Laravel + Estilo de tarjetas pulido)
-    --}}
     <section class="container mx-auto px-4 mb-16">
+
+    @if ($inmuebles->isEmpty())
+        <div class="bg-white rounded-3xl p-20 text-center border-2 border-dashed border-slate-200">
+            <div class="bg-[#FDF0D5] w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 text-[#003049]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-[#003049] mb-2">No se encontraron resultados</h3>
+            <p class="text-muted-foreground text-lg mb-8">Intenta ajustar tus filtros de búsqueda para encontrar lo que buscas.</p>
+            <a href="{{ route('inmuebles.public_search') }}" class="text-[#C1121F] font-bold hover:underline flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                </svg>
+                Seguir buscando
+            </a>
+        </div>
+    @else
         <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl font-bold text-foreground">
-                Propiedades Disponibles
+                Estos son tus resultados
             </h2>
             <span class="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full">
-                {{ \App\Models\Inmueble::count() }} resultados
+                {{ $inmuebles->count() }} resultados
             </span>
         </div>
 
-        {{-- Grid de Tarjetas --}}
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-
-            @forelse ($inmuebles as $inmueble)
-                {{-- Tarjeta de Propiedad --}}
+            @foreach ($inmuebles as $inmueble)
                 <div class="group relative overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all hover:shadow-lg hover:-translate-y-1">
-
                     {{-- Imagen --}}
                     <div class="relative h-52 w-full overflow-hidden bg-muted">
                         @if ($inmueble->imagen)
@@ -172,66 +187,12 @@
                         </a>
                     </div>
                 </div>
-            @empty
-                {{-- ESTADO VACÍO --}}
-                <div class="col-span-full py-16 text-center rounded-2xl border border-dashed border-border bg-card/50">
-                    <div class="mx-auto mb-4 h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-foreground">No se encontraron inmuebles</h3>
-                    <p class="text-muted-foreground mb-6 max-w-sm mx-auto">
-                        Intenta ajustar los filtros de búsqueda o sé el primero en publicar una propiedad.
-                    </p>
-                    <a href="{{ route('inmuebles.create') }}" class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
-                        Publicar Propiedad
-                    </a>
-                </div>
-            @endforelse
+            @endforeach
         </div>
-        
-        {{-- Paginación --}}
+
         <div class="mt-12">
-            {{ $inmuebles->links() }}
+            {{ $inmuebles->withQueryString()->links() }}
         </div>
-    </section>
-
-    {{-- 3. CTA: Publicar Inmueble (Manteniendo el original que funciona bien) --}}
-    <section class="mb-12">
-        <div class="bg-primary px-6 py-16 rounded-3xl text-center relative overflow-hidden">
-            {{-- Efecto de fondo sutil --}}
-            <div class="absolute top-0 left-0 w-full h-full bg-white/5 pointer-events-none"></div>
-            
-            <div class="relative z-10">
-                <h2 class="mb-4 text-3xl font-bold text-primary-foreground">
-                    ¿Tienes una propiedad en Ocosingo?
-                </h2>
-                <p class="mb-8 text-lg text-primary-foreground/90 max-w-2xl mx-auto">
-                    Únete a ArrendaOco y conecta con inquilinos verificados de la universidad y la ciudad.
-                </p>
-                <a href="{{ route('inmuebles.create') }}"
-                    class="inline-flex h-12 items-center justify-center rounded-md bg-background px-8 text-sm font-medium text-primary shadow transition-colors hover:bg-background/90">
-                    Publicar Inmueble Gratis
-                </a>
-            </div>
-        </div>
-    </section>
-
-    {{-- Script de Alertas (Original) --}}
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            @if (session('success'))
-                Swal.fire({
-                    title: '¡Excelente!',
-                    text: "{{ session('success') }}",
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                    confirmButtonColor: 'hsl(var(--primary))' // Usando variable CSS si existe, o un color hex
-                });
-            @endif
-        });
-    </script>
-
+    @endif
+</div>
 @endsection

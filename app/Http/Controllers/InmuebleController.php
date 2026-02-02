@@ -15,6 +15,52 @@ class InmuebleController extends Controller
         return view('inmuebles.index', compact('inmuebles'));
     }
 
+    public function home()
+    {
+        $inmuebles = Inmueble::where('estatus', 'disponible')->latest()->paginate(9); // 9 es múltiplo de 3 para el grid
+        return view('inicio', compact('inmuebles'));
+    }
+
+    public function publicSearch(Request $request)
+    {
+        $query = Inmueble::query();
+
+        // Filtro por ubicación (nombre o dirección)
+        if ($request->filled('ubicacion')) {
+            $query->where(function($q) use ($request) {
+                $q->where('direccion', 'like', '%' . $request->ubicacion . '%')
+                  ->orWhere('ciudad', 'like', '%' . $request->ubicacion . '%');
+            });
+        }
+
+        // Filtro por categoría (tipo: casa, departamento, cuarto)
+        if ($request->filled('categoria')) {
+            $query->where('tipo', $request->categoria);
+        }
+
+        // Filtro por rango de precio
+        if ($request->filled('rango_precio')) {
+            switch ($request->rango_precio) {
+                case '0-2000':
+                    $query->whereBetween('renta_mensual', [0, 2000]);
+                    break;
+                case '2000-4000':
+                    $query->whereBetween('renta_mensual', [2000, 4000]);
+                    break;
+                case '4000-6000':
+                    $query->whereBetween('renta_mensual', [4000, 6000]);
+                    break;
+                case '6000+':
+                    $query->where('renta_mensual', '>=', 6000);
+                    break;
+            }
+        }
+
+        $inmuebles = $query->paginate(5);
+
+        return view('inmuebles.public_index', compact('inmuebles'));
+    }
+
     public function create()
     {
         return view('inmuebles.create');

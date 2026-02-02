@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Api\ContratoController;
+use App\Http\Controllers\InmuebleController;
 
 // 1. Mostrar formulario
 Route::get('/registro', function () {
@@ -34,9 +35,12 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
 |--------------------------------------------------------------------------
 */
 
+
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/buscar', [InmuebleController::class, 'publicSearch'])->name('inmuebles.public_search');
 
 /*
 |--------------------------------------------------------------------------
@@ -84,14 +88,11 @@ Route::post('/logout', function (Request $request) {
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\InmuebleController;
 
 Route::get('/inmuebles/{inmueble}', [InmuebleController::class, 'show'])->name('inmuebles.show');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/inicio', function () {
-        return view('inicio');
-    })->name('inicio');
+    Route::get('/inicio', [InmuebleController::class, 'home'])->name('inicio');
 
     // Rutas de Inmuebles
     Route::get('/mis-propiedades', [InmuebleController::class, 'index'])->name('inmuebles.index');
