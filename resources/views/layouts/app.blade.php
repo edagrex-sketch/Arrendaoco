@@ -40,11 +40,11 @@
                         class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
                         Inicio
                     </a>
-                    @if(Auth::check() && Auth::user()->tieneRol('propietario'))
-                    <a href="{{ route('inmuebles.index') }}"
-                        class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
-                        Mis Propiedades
-                    </a>
+                    @if (Auth::check() && !Auth::user()->es_admin && !Auth::user()->tieneRol('admin'))
+                        <a href="{{ route('inmuebles.index') }}"
+                            class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
+                            Mis Propiedades
+                        </a>
                     @endif
                     <a href="#"
                         class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
@@ -56,41 +56,41 @@
                     @auth
                         <!-- Usuario: Hola + Botón Publicar -->
                         <span class="text-sm text-gray-200 hidden sm:inline">
-                            Hola, <a href="{{ route('perfil.index') }}" class="font-bold text-white hover:underline">{{ Auth::user()->nombre }}</a>
+                            Hola, <a href="{{ route('perfil.index') }}"
+                                class="font-bold text-white hover:underline">{{ Auth::user()->nombre }}</a>
                         </span>
 
-                        @if(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
+                        @if (Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
                             <div x-data="{ open: false }" class="relative">
-                                <button @click="open = !open" 
-                                        @click.away="open = false"
-                                        class="flex items-center gap-1 text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-2 border-[#669BBC] rounded px-3 py-1">
+                                <button @click="open = !open" @click.away="open = false"
+                                    class="flex items-center gap-1 text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-2 border-[#669BBC] rounded px-3 py-1">
                                     Gestiones
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7"></path>
                                     </svg>
                                 </button>
-                                
-                                <div x-show="open" 
-                                     x-transition:enter="transition ease-out duration-100"
-                                     x-transition:enter-start="transform opacity-0 scale-95"
-                                     x-transition:enter-end="transform opacity-100 scale-100"
-                                     x-transition:leave="transition ease-in duration-75"
-                                     x-transition:leave-start="transform opacity-100 scale-100"
-                                     x-transition:leave-end="transform opacity-0 scale-95"
-                                     class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                    <a href="{{ route('admin.usuarios.index') }}" 
-                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+
+                                <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="transform opacity-0 scale-95"
+                                    x-transition:enter-end="transform opacity-100 scale-100"
+                                    x-transition:leave="transition ease-in duration-75"
+                                    x-transition:leave-start="transform opacity-100 scale-100"
+                                    x-transition:leave-end="transform opacity-0 scale-95"
+                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                    <a href="{{ route('admin.usuarios.index') }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         Usuarios
                                     </a>
-                                    <a href="{{ route('inmuebles.index') }}" 
-                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <a href="{{ route('inmuebles.index') }}"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         Propiedades
                                     </a>
                                 </div>
                             </div>
                         @endif
 
-                        @if(Auth::user()->tieneRol('propietario'))
+                        @if (Auth::user() && !Auth::user()->es_admin && !Auth::user()->tieneRol('admin'))
                             <a href="{{ route('inmuebles.create') }}"
                                 class="inline-flex items-center justify-center rounded-full bg-[#C1121F] px-5 py-2 text-sm font-bold text-white shadow-md hover:bg-[#780000] transition-colors">
                                 Publicar
