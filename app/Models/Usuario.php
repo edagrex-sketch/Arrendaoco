@@ -18,7 +18,6 @@ class Usuario extends Authenticatable
         'nombre',
         'email',
         'password',
-        'telefono',
         'es_admin',
         'estatus',
     ];
@@ -39,5 +38,31 @@ class Usuario extends Authenticatable
     public function contratosComoInquilino()
     {
         return $this->hasMany(Contrato::class, 'inquilino_id');
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'role_usuario', 'usuario_id', 'role_id');
+    }
+
+    public function tieneRol($rolNombre)
+    {
+        return $this->roles()->where('nombre', $rolNombre)->exists();
+    }
+
+    public function asignarRol($rolNombre)
+    {
+        $rol = Role::where('nombre', $rolNombre)->first();
+        if ($rol) {
+            $this->roles()->syncWithoutDetaching([$rol->id]);
+        }
+    }
+
+    public function eliminarRol($rolNombre)
+    {
+        $rol = Role::where('nombre', $rolNombre)->first();
+        if ($rol) {
+            $this->roles()->detach($rol->id);
+        }
     }
 }

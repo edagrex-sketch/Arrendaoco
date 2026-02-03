@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Api\ContratoController;
 use App\Http\Controllers\InmuebleController;
+use App\Http\Controllers\Admin\UsuarioController;
+use App\Http\Controllers\PerfilController;
 
 // 1. Mostrar formulario
 Route::get('/registro', function () {
@@ -25,6 +27,9 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
         'password' => \Illuminate\Support\Facades\Hash::make($datos['password']),
         'estatus'  => 'activo',
     ]);
+    
+    // Asignar rol de inquilino por defecto
+    $usuario->asignarRol('inquilino');
     // Iniciar sesión y redirigir
     \Illuminate\Support\Facades\Auth::login($usuario);
     return redirect()->route('inicio');
@@ -102,7 +107,18 @@ Route::middleware('auth')->group(function () {
     Route::put('/inmuebles/{inmueble}', [InmuebleController::class, 'update'])->name('inmuebles.update');
     Route::delete('/inmuebles/{inmueble}', [InmuebleController::class, 'destroy'])->name('inmuebles.destroy');
 
-    // PDFs con sesión
+    // Perfil
+    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
+    Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+    Route::post('/perfil/publicar', [PerfilController::class, 'publicar'])->name('perfil.publicar');
+
+    // Admin Usuarios
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('usuarios/reporte', [UsuarioController::class, 'reporte'])->name('usuarios.reporte');
+        Route::resource('usuarios', UsuarioController::class);
+        Route::get('inmuebles/reporte', [InmuebleController::class, 'reporte'])->name('inmuebles.reporte');
+    });
+
     Route::get(
         '/contratos/{contrato}/estado-cuenta/pdf',
         [ContratoController::class, 'estadoCuentaPdf']

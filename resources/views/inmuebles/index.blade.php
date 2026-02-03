@@ -1,13 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'Mis Propiedades')
+@section('title', (Auth::user()->es_admin || Auth::user()->tieneRol('admin')) ? 'Gestión de Propiedades' : 'Mis Propiedades')
 
 @section('content')
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="flex justify-between items-end mb-10">
             <div>
-                <h1 class="text-4xl font-extrabold text-[#003049] tracking-tight">Mis Propiedades</h1>
-                <p class="text-muted-foreground mt-2 text-lg">Gestiona tus anuncios y publicaciones desde aquí.</p>
+                <h1 class="text-4xl font-extrabold text-[#003049] tracking-tight">
+                    {{ (Auth::user()->es_admin || Auth::user()->tieneRol('admin')) ? 'Gestión de Propiedades' : 'Mis Propiedades' }}
+                </h1>
+                <p class="text-muted-foreground mt-2 text-lg">
+                    {{ (Auth::user()->es_admin || Auth::user()->tieneRol('admin')) ? 'Administra todos los inmuebles del sistema.' : 'Gestiona tus anuncios y publicaciones desde aquí.' }}
+                </p>
             </div>
             <a href="{{ route('inmuebles.create') }}"
                 class="inline-flex items-center gap-2 bg-[#C1121F] text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-red-500/20 hover:bg-[#780000] hover:-translate-y-1 transition-all duration-300">

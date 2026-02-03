@@ -7,17 +7,35 @@ use App\Models\Inmueble;
 use Illuminate\Support\Facades\DB; // Necesario para transacciones
 use Illuminate\Support\Facades\Storage;
 
+use Barryvdh\DomPDF\Facade\Pdf;
+
 class InmuebleController extends Controller
 {
     public function index()
     {
-        $inmuebles = Inmueble::where('propietario_id', auth()->id())->get();
-        return view('inmuebles.index', compact('inmuebles'));
+        if (auth()->user()->es_admin || auth()->user()->tieneRol('admin')) {
+            $inmuebles = Inmueble::with('propietario')->get();
+            return view('admin.inmuebles.index', compact('inmuebles'));
+        } else {
+            $inmuebles = Inmueble::where('propietario_id', auth()->id())->get();
+            return view('inmuebles.index', compact('inmuebles'));
+        }
+    }
+
+    public function reporte()
+    {
+        if (!auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
+            abort(403);
+        }
+
+        $inmuebles = Inmueble::with('propietario')->get();
+        $pdf = Pdf::loadView('admin.inmuebles.reporte', compact('inmuebles'));
+        return $pdf->download('reporte_inmuebles.pdf');
     }
 
     public function home()
     {
-        $inmuebles = Inmueble::where('estatus', 'disponible')->latest()->paginate(9); // 9 es múltiplo de 3 para el grid
+        $inmuebles = Inmueble::where('estatus', 'disponible')->latest()->paginate(9);
         return view('inicio', compact('inmuebles'));
     }
 
@@ -74,7 +92,7 @@ class InmuebleController extends Controller
 
     public function edit(Inmueble $inmueble)
     {
-        if ($inmueble->propietario_id !== auth()->id()) {
+        if ($inmueble->propietario_id !== auth()->id() && !auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
             abort(403);
         }
 
@@ -142,7 +160,7 @@ class InmuebleController extends Controller
 
     public function update(Request $request, Inmueble $inmueble)
     {
-        if ($inmueble->propietario_id !== auth()->id()) {
+        if ($inmueble->propietario_id !== auth()->id() && !auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
             abort(403);
         }
 
@@ -182,7 +200,7 @@ class InmuebleController extends Controller
 
     public function destroy(Inmueble $inmueble)
     {
-        if ($inmueble->propietario_id !== auth()->id()) {
+        if ($inmueble->propietario_id !== auth()->id() && !auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
             abort(403);
         }
 
