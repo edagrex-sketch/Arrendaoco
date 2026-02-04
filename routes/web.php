@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\UsuarioController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ArrenditoController;
 
+use App\Http\Controllers\ResenaController;
+
 // 1. Mostrar formulario
 Route::get('/registro', function () {
     return view('auth.register');
@@ -125,6 +127,7 @@ Route::middleware('auth')->group(function () {
         Route::get('usuarios/reporte', [UsuarioController::class, 'reporte'])->name('usuarios.reporte');
         Route::resource('usuarios', UsuarioController::class);
         Route::get('inmuebles/reporte', [InmuebleController::class, 'reporte'])->name('inmuebles.reporte');
+        Route::get('resenas', [ResenaController::class, 'index'])->name('resenas.index');
     });
 
     Route::get(
@@ -145,6 +148,11 @@ Route::middleware('auth')->group(function () {
     // Arrendito Mascot Routes
     Route::post('/arrendito/actualizar', [ArrenditoController::class, 'updateName'])->name('arrendito.update');
     Route::get('/arrendito/nombre', [ArrenditoController::class, 'getName'])->name('arrendito.name');
+
+    // Reseñas Routes
+    Route::post('/inmuebles/{inmueble}/resenas', [ResenaController::class, 'store'])->name('resenas.store');
+    Route::put('/resenas/{resena}', [ResenaController::class, 'update'])->name('resenas.update');
+    Route::delete('/resenas/{resena}', [ResenaController::class, 'destroy'])->name('resenas.destroy');
 });
 
 // 1. Mostrar formulario de "Olvidé mi contraseña"
