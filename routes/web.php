@@ -92,7 +92,7 @@ Route::post('/logout', function (Request $request) {
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect()->route('login');
+    return redirect()->route('welcome');
 })->name('logout');
 
 /*
@@ -120,11 +120,17 @@ Route::middleware('auth')->group(function () {
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
     Route::post('/perfil/publicar', [PerfilController::class, 'publicar'])->name('perfil.publicar');
 
+    // Reseñas
+    Route::post('/inmuebles/{inmueble}/resenas', [App\Http\Controllers\ResenaController::class, 'store'])->name('resenas.store');
+    Route::put('/resenas/{resena}', [App\Http\Controllers\ResenaController::class, 'update'])->name('resenas.update');
+    Route::delete('/resenas/{resena}', [App\Http\Controllers\ResenaController::class, 'destroy'])->name('resenas.destroy');
+
     // Admin Usuarios
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('usuarios/reporte', [UsuarioController::class, 'reporte'])->name('usuarios.reporte');
         Route::resource('usuarios', UsuarioController::class);
         Route::get('inmuebles/reporte', [InmuebleController::class, 'reporte'])->name('inmuebles.reporte');
+        Route::get('resenas', [App\Http\Controllers\ResenaController::class, 'index'])->name('resenas.index');
     });
 
     Route::get(
