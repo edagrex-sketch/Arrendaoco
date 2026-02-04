@@ -1,8 +1,9 @@
 <?php
 
 namespace Database\Seeders;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
 use Illuminate\Database\Seeder;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,8 +15,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UsuarioSeeder::class,
-            InmuebleSeeder::class,
+            RoleSeeder::class,      // 1. Roles base
+            UsuarioSeeder::class,   // 2. Usuarios con roles
+            InmuebleSeeder::class,  // 3. Propiedades para los usuarios
+            ContratoSeeder::class,  // 4. Contratos y Pagos entre usuarios e inmuebles
+            ResenaSeeder::class,    // 5. Feedback y reseñas
         ]);
     }
 }

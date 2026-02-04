@@ -2,42 +2,65 @@
 
 namespace Database\Seeders;
 
-use App\Models\Usuario;
 use Illuminate\Database\Seeder;
+use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
 
 class UsuarioSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        // Admin
-        Usuario::create([
-            'nombre' => 'Administrador',
+        // 1. Administrador (Control total)
+        $admin = Usuario::create([
+            'nombre' => 'Admin ArrendaOco',
             'email' => 'admin@arrendaoco.com',
             'password' => Hash::make('Admin123!'),
-            'telefono' => null,
             'es_admin' => true,
             'estatus' => 'activo',
         ]);
+        $admin->asignarRol('admin');
 
-        // Propietario 1
-        Usuario::create([
-            'nombre' => 'Juan Pérez',
-            'email' => 'juan@arrendaoco.com',
+        // 2. Propietario con Inmuebles (Landlord)
+        $propietario = Usuario::create([
+            'nombre' => 'Carlos Arrendador',
+            'email' => 'propietario@test.com',
             'password' => Hash::make('Password123'),
-            'telefono' => '9991234567',
             'es_admin' => false,
             'estatus' => 'activo',
         ]);
+        $propietario->asignarRol('propietario');
 
-        // Propietario 2
-        Usuario::create([
-            'nombre' => 'María López',
-            'email' => 'maria@arrendaoco.com',
+        // 3. Inquilino con Contrato Activo (Tenant)
+        $inquilino = Usuario::create([
+            'nombre' => 'Ana Inquilina',
+            'email' => 'inquilino@test.com',
             'password' => Hash::make('Password123'),
-            'telefono' => '9999876543',
             'es_admin' => false,
             'estatus' => 'activo',
         ]);
+        $inquilino->asignarRol('inquilino');
+
+        // 4. Usuario Nuevo (Sin roles extra, para probar el botón de "¡Quiero Publicar!")
+        $nuevo = Usuario::create([
+            'nombre' => 'Usuario Nuevo',
+            'email' => 'nuevo@test.com',
+            'password' => Hash::make('Password123'),
+            'es_admin' => false,
+            'estatus' => 'activo',
+        ]);
+        $nuevo->asignarRol('inquilino'); // Por defecto todos son inquilinos/usuarios base
+
+        // 5. Usuario Adicional (Cualquier otro rol)
+        $otro = Usuario::create([
+            'nombre' => 'Pedro Garcia',
+            'email' => 'pedro@test.com',
+            'password' => Hash::make('Password123'),
+            'es_admin' => false,
+            'estatus' => 'activo',
+        ]);
+        $otro->asignarRol('propietario');
     }
 }
