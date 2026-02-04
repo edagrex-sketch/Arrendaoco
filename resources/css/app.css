@@ -142,3 +142,7 @@
 .delay-500 {
     animation-delay: 0.5s;
 }
+
+[x-cloak] {
+    display: none !important;
+}
