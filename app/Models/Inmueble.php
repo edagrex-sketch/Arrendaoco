@@ -35,7 +35,12 @@ class Inmueble extends Model
         return $this->belongsTo(Usuario::class, 'propietario_id');
     }
     public function contratos()
-{
-    return $this->hasMany(Contrato::class);
-}
+    {
+        return $this->hasMany(Contrato::class);
+    }
+
+    public function resenas()
+    {
+        return $this->hasMany(Resena::class)->orderBy('created_at', 'desc');
+    }
 }

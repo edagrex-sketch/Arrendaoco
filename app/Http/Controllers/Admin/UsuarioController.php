@@ -29,19 +29,14 @@ class UsuarioController extends Controller
             'nombre' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:usuarios',
             'password' => 'required|string|min:8|confirmed',
-            'roles' => 'array'
         ]);
 
-        $usuario = Usuario::create([
+        Usuario::create([
             'nombre' => $request->nombre,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'estatus' => $request->status ?? 'activo',
         ]);
-
-        if ($request->has('roles')) {
-            $usuario->roles()->sync($request->roles);
-        }
 
         return redirect()->route('admin.usuarios.index')->with('success', 'Usuario creado exitosamente');
     }
@@ -60,7 +55,6 @@ class UsuarioController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:usuarios,email,'.$id,
-            'roles' => 'array'
         ]);
 
         $usuario->update([
@@ -71,10 +65,6 @@ class UsuarioController extends Controller
 
         if ($request->filled('password')) {
             $usuario->update(['password' => Hash::make($request->password)]);
-        }
-
-        if ($request->has('roles')) {
-            $usuario->roles()->sync($request->roles);
         }
 
         return redirect()->route('admin.usuarios.index')->with('success', 'Usuario actualizado exitosamente');

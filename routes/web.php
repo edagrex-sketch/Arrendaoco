@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ContratoController;
 use App\Http\Controllers\InmuebleController;
 use App\Http\Controllers\Admin\UsuarioController;
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\ResenaController;
 
 // 1. Mostrar formulario
 Route::get('/registro', function () {
@@ -58,25 +59,37 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
-// Procesar login
-Route::post('/login', function (Request $request) {
+    // Procesar login
+    Route::post('/login', function (Request $request) {
 
-    $credentials = $request->validate([
-        'email'    => 'required|email',
-        'password' => 'required|string',
-    ]);
+        $credentials = $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ]);
 
-    if (!Auth::attempt($credentials)) {
-        return back()
-            ->withErrors(['email' => 'Credenciales incorrectas'])
-            ->onlyInput('email');
-    }
+        if (!Auth::attempt($credentials)) {
+            return back()
+                ->withErrors(['email' => 'Credenciales incorrectas'])
+                ->onlyInput('email');
+        }
 
-    // 🔐 Regenerar sesión (CLAVE para evitar 419)
-    $request->session()->regenerate();
+        // Verificar estatus del usuario
+        $usuario = Auth::user();
+        if ($usuario->estatus !== 'activo') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            
+            return redirect()->route('login')->withErrors([
+                'email' => 'Tu cuenta está desactivada. Por favor, contacta al administrador.'
+            ]);
+        }
 
-    return redirect()->route('inicio');
-});
+        // 🔐 Regenerar sesión (CLAVE para evitar 419)
+        $request->session()->regenerate();
+
+        return redirect()->route('inicio');
+    });
 
 // Logout
 Route::post('/logout', function (Request $request) {
@@ -107,6 +120,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/inmuebles/{inmueble}', [InmuebleController::class, 'update'])->name('inmuebles.update');
     Route::delete('/inmuebles/{inmueble}', [InmuebleController::class, 'destroy'])->name('inmuebles.destroy');
 
+    // Rutas de Reseñas
+    Route::post('/inmuebles/{inmueble}/resenas', [ResenaController::class, 'store'])->name('resenas.store');
+    Route::put('/resenas/{resena}', [ResenaController::class, 'update'])->name('resenas.update');
+    Route::delete('/resenas/{resena}', [ResenaController::class, 'destroy'])->name('resenas.destroy');
+
     // Perfil
     Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
@@ -117,6 +135,7 @@ Route::middleware('auth')->group(function () {
         Route::get('usuarios/reporte', [UsuarioController::class, 'reporte'])->name('usuarios.reporte');
         Route::resource('usuarios', UsuarioController::class);
         Route::get('inmuebles/reporte', [InmuebleController::class, 'reporte'])->name('inmuebles.reporte');
+        Route::get('resenas', [ResenaController::class, 'index'])->name('resenas.index');
     });
 
     Route::get(

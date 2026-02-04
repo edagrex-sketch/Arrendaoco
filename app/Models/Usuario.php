@@ -65,4 +65,9 @@ class Usuario extends Authenticatable
             $this->roles()->detach($rol->id);
         }
     }
+
+    public function resenas()
+    {
+        return $this->hasMany(Resena::class, 'usuario_id');
+    }
 }
