@@ -3,6 +3,24 @@
 @section('title', 'Resultados de Búsqueda')
 
 @section('content')
+    <style>
+        /* Estilos para campos bloqueados (Invitados) */
+        .input-locked {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+            opacity: 0.7;
+            position: relative;
+        }
+        
+        .lock-badge {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5D4037;
+        }
+    </style>
+
     {{-- 
        1. HERO SECTION & BUSCADOR INTELIGENTE (Consistente con Inicio)
     --}}
@@ -16,14 +34,14 @@
                 @if(request('ubicacion') || request('categoria') || request('rango_precio'))
                     Resultados para tus filtros seleccionados.
                 @else
-                    Mostrando todas las propiedades disponibles.
+                    Mostrando todas las propiedades disponibles en Ocosingo.
                 @endif
             </p>
 
             {{-- Formulario funcional que envía los filtros al controlador --}}
             <form action="{{ route('inmuebles.public_search') }}" method="GET" class="flex flex-col gap-4 md:flex-row items-end">
                 
-                {{-- Input: Ubicación --}}
+                {{-- Input: Ubicación (SIEMPRE DISPONIBLE) --}}
                 <div class="relative flex-1 w-full">
                     <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Ubicación</label>
                     <div class="relative">
@@ -36,49 +54,69 @@
                             name="ubicacion" 
                             value="{{ request('ubicacion') }}"
                             placeholder="Ej: Centro, Las Margaritas..."
-                            class="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            class="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         >
                     </div>
                 </div>
 
-                {{-- Select: Rango de Precio --}}
-                <div class="relative w-full md:w-48">
-                    <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Precio</label>
-                    <div class="relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <select 
-                            name="rango_precio" 
-                            class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        >
-                            <option value="">Cualquiera</option>
-                            <option value="0-2000" {{ request('rango_precio') == '0-2000' ? 'selected' : '' }}>$0 - $2,000</option>
-                            <option value="2000-4000" {{ request('rango_precio') == '2000-4000' ? 'selected' : '' }}>$2,000 - $4,000</option>
-                            <option value="4000-6000" {{ request('rango_precio') == '4000-6000' ? 'selected' : '' }}>$4,000 - $6,000</option>
-                            <option value="6000+" {{ request('rango_precio') == '6000+' ? 'selected' : '' }}>$6,000+</option>
-                        </select>
+                @auth
+                    {{-- Select: Rango de Precio --}}
+                    <div class="relative w-full md:w-48">
+                        <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Precio</label>
+                        <div class="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <select 
+                                name="rango_precio" 
+                                class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            >
+                                <option value="">Cualquiera</option>
+                                <option value="0-2000" {{ request('rango_precio') == '0-2000' ? 'selected' : '' }}>$0 - $2,000</option>
+                                <option value="2000-4000" {{ request('rango_precio') == '2000-4000' ? 'selected' : '' }}>$2,000 - $4,000</option>
+                                <option value="4000-6000" {{ request('rango_precio') == '4000-6000' ? 'selected' : '' }}>$4,000 - $6,000</option>
+                                <option value="6000+" {{ request('rango_precio') == '6000+' ? 'selected' : '' }}>$6,000+</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
 
-                {{-- Select: Categoría --}}
-                <div class="relative w-full md:w-48">
-                    <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Categoría</label>
-                    <div class="relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
-                        <select 
-                            name="categoria" 
-                            class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        >
-                            <option value="">Todas</option>
-                            <option value="casa" {{ request('categoria') == 'casa' ? 'selected' : '' }}>Casa</option>
-                            <option value="departamento" {{ request('categoria') == 'departamento' ? 'selected' : '' }}>Departamento</option>
-                            <option value="cuarto" {{ request('categoria') == 'cuarto' ? 'selected' : '' }}>Cuarto</option>
-                        </select>
+                    {{-- Select: Categoría --}}
+                    <div class="relative w-full md:w-48">
+                        <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Categoría</label>
+                        <div class="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            <select 
+                                name="categoria" 
+                                class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            >
+                                <option value="">Todas</option>
+                                <option value="casa" {{ request('categoria') == 'casa' ? 'selected' : '' }}>Casa</option>
+                                <option value="departamento" {{ request('categoria') == 'departamento' ? 'selected' : '' }}>Departamento</option>
+                                <option value="cuarto" {{ request('categoria') == 'cuarto' ? 'selected' : '' }}>Cuarto</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
+                @else
+                    {{-- ESTADO BLOQUEADO PARA INVITADOS --}}
+                    <div class="relative w-full md:w-96 flex gap-2">
+                        <div class="w-1/2">
+                            <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Precio</label>
+                            <div onclick="mostrarAlertaRegistro()" class="flex h-12 w-full items-center rounded-md border border-dashed border-[#5D4037]/30 bg-[#5D4037]/5 px-3 text-sm text-muted-foreground input-locked cursor-pointer transition hover:bg-[#5D4037]/10">
+                                <span>Bloqueado</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 lock-badge" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            </div>
+                        </div>
+                        <div class="w-1/2">
+                            <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Categoría</label>
+                            <div onclick="mostrarAlertaRegistro()" class="flex h-12 w-full items-center rounded-md border border-dashed border-[#5D4037]/30 bg-[#5D4037]/5 px-3 text-sm text-muted-foreground input-locked cursor-pointer transition hover:bg-[#5D4037]/10">
+                                <span>Bloqueado</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 lock-badge" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                @endauth
 
                 {{-- Botón Buscar --}}
                 <button type="submit" class="inline-flex h-12 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-2 w-full md:w-auto">
@@ -88,6 +126,14 @@
                     Buscar
                 </button>
             </form>
+            @guest
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-muted-foreground">
+                        ¿Quieres usar los filtros avanzados? 
+                        <a href="{{ route('login') }}" class="text-[#5D4037] font-bold hover:underline">Inicia Sesión</a>
+                    </p>
+                </div>
+            @endguest
         </div>
     </section>
 
@@ -112,10 +158,10 @@
     @else
         <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl font-bold text-foreground">
-                Estos son tus resultados
+                Resultados de búsqueda
             </h2>
             <span class="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full">
-                {{ $inmuebles->count() }} resultados
+                {{ $inmuebles->total() }} resultados
             </span>
         </div>
 
@@ -181,10 +227,17 @@
                         </div>
 
                         {{-- Botón Ver Detalles --}}
-                        <a href="{{ route('inmuebles.show', $inmueble) }}"
-                            class="mt-4 flex w-full items-center justify-center rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                            Ver Detalles
-                        </a>
+                        @auth
+                            <a href="{{ route('inmuebles.show', $inmueble) }}"
+                                class="mt-4 flex w-full items-center justify-center rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                                Ver Detalles
+                            </a>
+                        @else
+                            <button type="button" onclick="mostrarAlertaRegistro()"
+                                class="mt-4 flex w-full items-center justify-center rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-200 transition-all duration-300 cursor-pointer">
+                                Ver Detalles 🔒
+                            </button>
+                        @endauth
                     </div>
                 </div>
             @endforeach
@@ -194,5 +247,25 @@
             {{ $inmuebles->withQueryString()->links() }}
         </div>
     @endif
-</div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function mostrarAlertaRegistro() {
+            Swal.fire({
+                title: '¡Contenido Exclusivo!',
+                text: "Regístrate o inicia sesión para ver más detalles y usar los filtros.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#003049',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Iniciar Sesión',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{{ route('login') }}";
+                }
+            })
+        }
+    </script>
 @endsection

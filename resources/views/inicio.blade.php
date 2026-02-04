@@ -96,7 +96,7 @@
                 Propiedades Disponibles
             </h2>
             <span class="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full">
-                {{ \App\Models\Inmueble::count() }} resultados
+                {{ $inmuebles->total() }} resultados
             </span>
         </div>
 
@@ -233,5 +233,7 @@
             @endif
         });
     </script>
+
+    <x-arrendito />
 
 @endsection

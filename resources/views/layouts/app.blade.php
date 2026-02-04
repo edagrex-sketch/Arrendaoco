@@ -15,6 +15,9 @@
     {{-- VITE --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="icon" href="{{ asset('logo1.png') }}" type="image/x-icon">
+    {{-- Lottie Player - Cargado en el head para evitar errores de renderizado --}}
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
 
 </head>
 
@@ -26,7 +29,7 @@
         <nav class="bg-[#003049] border-b border-[#003049] sticky top-0 z-50 shadow-lg">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <!-- 1. Logo y Nombre -->
-                <a href="{{ route('inicio') }}"
+                <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
                     class="flex items-center gap-2 group hover:opacity-90 transition-opacity">
                     <!-- Cuadrado del logo en un azul más claro para resaltar -->
                     <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco" class="h-10 w-auto object-contain">
@@ -36,7 +39,7 @@
                 </a>
                 <!-- 2. Menú Central (Enlaces) -->
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="{{ route('inicio') }}"
+                    <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
                         class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
                         Inicio
                     </a>
@@ -134,7 +137,7 @@
                     
                     <!-- Columna 1: Marca -->
                     <div class="space-y-4">
-                        <a href="{{ route('inicio') }}" class="flex items-center gap-2 group">
+                        <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}" class="flex items-center gap-2 group">
                             <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco" class="h-12 w-auto object-contain bg-white/5 rounded-lg p-1">
                             <span class="text-2xl font-bold tracking-tight text-white">
                                 ArrendaOco

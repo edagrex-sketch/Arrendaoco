@@ -41,40 +41,44 @@ class InmuebleController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $query = Inmueble::query();
+        $query = Inmueble::where('estatus', 'disponible');
 
-        // Filtro por ubicación (nombre o dirección)
+        // Filtro por ubicación (título, dirección o ciudad)
         if ($request->filled('ubicacion')) {
             $query->where(function($q) use ($request) {
-                $q->where('direccion', 'like', '%' . $request->ubicacion . '%')
+                $q->where('titulo', 'like', '%' . $request->ubicacion . '%')
+                  ->orWhere('direccion', 'like', '%' . $request->ubicacion . '%')
                   ->orWhere('ciudad', 'like', '%' . $request->ubicacion . '%');
             });
         }
 
-        // Filtro por categoría (tipo: casa, departamento, cuarto)
-        if ($request->filled('categoria')) {
-            $query->where('tipo', $request->categoria);
-        }
+        // Solo permitir filtros avanzados si el usuario está autenticado
+        if (auth()->check()) {
+            // Filtro por categoría (tipo: casa, departamento, cuarto)
+            if ($request->filled('categoria')) {
+                $query->where('tipo', $request->categoria);
+            }
 
-        // Filtro por rango de precio
-        if ($request->filled('rango_precio')) {
-            switch ($request->rango_precio) {
-                case '0-2000':
-                    $query->whereBetween('renta_mensual', [0, 2000]);
-                    break;
-                case '2000-4000':
-                    $query->whereBetween('renta_mensual', [2000, 4000]);
-                    break;
-                case '4000-6000':
-                    $query->whereBetween('renta_mensual', [4000, 6000]);
-                    break;
-                case '6000+':
-                    $query->where('renta_mensual', '>=', 6000);
-                    break;
+            // Filtro por rango de precio
+            if ($request->filled('rango_precio')) {
+                switch ($request->rango_precio) {
+                    case '0-2000':
+                        $query->whereBetween('renta_mensual', [0, 2000]);
+                        break;
+                    case '2000-4000':
+                        $query->whereBetween('renta_mensual', [2000, 4000]);
+                        break;
+                    case '4000-6000':
+                        $query->whereBetween('renta_mensual', [4000, 6000]);
+                        break;
+                    case '6000+':
+                        $query->where('renta_mensual', '>=', 6000);
+                        break;
+                }
             }
         }
 
-        $inmuebles = $query->paginate(5);
+        $inmuebles = $query->paginate(12);
 
         return view('inmuebles.public_index', compact('inmuebles'));
     }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ContratoController;
 use App\Http\Controllers\InmuebleController;
 use App\Http\Controllers\Admin\UsuarioController;
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\ArrenditoController;
 
 // 1. Mostrar formulario
 Route::get('/registro', function () {
@@ -31,7 +32,9 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
     // Asignar rol de inquilino por defecto
     $usuario->asignarRol('inquilino');
     // Iniciar sesión y redirigir
+    // Iniciar sesión y redirigir
     \Illuminate\Support\Facades\Auth::login($usuario);
+    request()->session()->flash('login_success', true);
     return redirect()->route('inicio');
 })->name('registro.post');
 /*
@@ -42,8 +45,12 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
 
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    if (Auth::check()) {
+        return redirect()->route('inicio');
+    }
+    $inmuebles = \App\Models\Inmueble::where('estatus', 'disponible')->latest()->paginate(15);
+    return view('welcome', compact('inmuebles'));
+})->name('welcome');
 
 Route::get('/buscar', [InmuebleController::class, 'publicSearch'])->name('inmuebles.public_search');
 
@@ -74,6 +81,7 @@ Route::post('/login', function (Request $request) {
 
     // 🔐 Regenerar sesión (CLAVE para evitar 419)
     $request->session()->regenerate();
+    $request->session()->flash('login_success', true);
 
     return redirect()->route('inicio');
 });
@@ -133,6 +141,10 @@ Route::middleware('auth')->group(function () {
         '/estados-cuenta/{estadoCuenta}/descargar',
         [ContratoController::class, 'descargarEstadoCuenta']
     );
+
+    // Arrendito Mascot Routes
+    Route::post('/arrendito/actualizar', [ArrenditoController::class, 'updateName'])->name('arrendito.update');
+    Route::get('/arrendito/nombre', [ArrenditoController::class, 'getName'])->name('arrendito.name');
 });
 
 // 1. Mostrar formulario de "Olvidé mi contraseña"
