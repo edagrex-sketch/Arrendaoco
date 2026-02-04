@@ -3,6 +3,24 @@
 @section('title', 'Resultados de Búsqueda')
 
 @section('content')
+    <style>
+        /* Estilos para campos bloqueados (Invitados) */
+        .input-locked {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+            opacity: 0.7;
+            position: relative;
+        }
+        
+        .lock-badge {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5D4037;
+        }
+    </style>
+
     {{-- 
        1. HERO SECTION & BUSCADOR INTELIGENTE (Consistente con Inicio)
     --}}
@@ -16,7 +34,7 @@
                 @if (request('ubicacion') || request('categoria') || request('rango_precio'))
                     Resultados para tus filtros seleccionados.
                 @else
-                    Mostrando todas las propiedades disponibles.
+                    Mostrando todas las propiedades disponibles en Ocosingo.
                 @endif
             </p>
 
@@ -99,6 +117,14 @@
                     Buscar
                 </button>
             </form>
+            @guest
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-muted-foreground">
+                        ¿Quieres usar los filtros avanzados? 
+                        <a href="{{ route('login') }}" class="text-[#5D4037] font-bold hover:underline">Inicia Sesión</a>
+                    </p>
+                </div>
+            @endguest
         </div>
     </section>
 
