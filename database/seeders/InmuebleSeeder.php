@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Inmueble;
+use App\Models\Usuario;
 
 class InmuebleSeeder extends Seeder
 {
@@ -13,22 +13,71 @@ class InmuebleSeeder extends Seeder
      */
     public function run(): void
     {
-        // 7 Departamentos
-        Inmueble::factory()->count(7)->create([
+        $admin = Usuario::where('email', 'admin@arrendaoco.com')->first();
+        $propietario = Usuario::where('email', 'propietario@test.com')->first();
+        $otroPropietario = Usuario::where('email', 'pedro@test.com')->first();
+
+        // Propiedades de Carlos Arrendador (Landlord Principal)
+        Inmueble::create([
+            'titulo' => 'Departamento Céntrico Ocosingo',
+            'direccion' => 'Calle Central Norte #10',
+            'ciudad' => 'Ocosingo',
+            'estado' => 'Chiapas',
+            'codigo_postal' => '29950',
+            'descripcion' => 'Excelente departamento con todos los servicios incluidos cerca del parque central.',
+            'renta_mensual' => 3500,
+            'deposito' => 2000,
+            'habitaciones' => 2,
+            'banos' => 1,
+            'metros' => 65,
             'tipo' => 'Departamento',
+            'imagen' => null,
+            'propietario_id' => $propietario->id,
+            'estatus' => 'disponible',
         ]);
 
-        // 7 Cuartos
-        Inmueble::factory()->count(7)->create([
-            'tipo' => 'Cuarto',
-        ]);
-
-        // 6 Casas
-        Inmueble::factory()->count(6)->create([
+        Inmueble::create([
+            'titulo' => 'Casa Amplia San Jose',
+            'direccion' => 'Barrio San Jose, Av. Las Palmitas',
+            'ciudad' => 'Ocosingo',
+            'estado' => 'Chiapas',
+            'codigo_postal' => '29950',
+            'descripcion' => 'Casa familiar con amplio patio y estacionamiento para 2 vehículos.',
+            'renta_mensual' => 6000,
+            'deposito' => 6000,
+            'habitaciones' => 3,
+            'banos' => 2,
+            'metros' => 120,
             'tipo' => 'Casa',
+            'imagen' => null,
+            'propietario_id' => $propietario->id,
+            'estatus' => 'rentado', // Para probar que aparezca como rentado
         ]);
-        
-        // Mensaje de confirmación en consola (opcional)
-        $this->command->info('Se han creado 20 inmuebles de prueba con éxito.');
+
+        // Propiedades de Pedro Garcia
+        Inmueble::create([
+            'titulo' => 'Cuarto Económico Estudiantes',
+            'direccion' => 'Cerca de la UTC',
+            'ciudad' => 'Ocosingo',
+            'estado' => 'Chiapas',
+            'codigo_postal' => '29950',
+            'descripcion' => 'Cuarto individual con baño compartido e internet de alta velocidad.',
+            'renta_mensual' => 1500,
+            'deposito' => 500,
+            'habitaciones' => 1,
+            'banos' => 1,
+            'metros' => 15,
+            'tipo' => 'Cuarto',
+            'imagen' => null,
+            'propietario_id' => $otroPropietario->id,
+            'estatus' => 'disponible',
+        ]);
+
+        // Propiedades del Admin (Para tener volumen)
+        Inmueble::factory()->count(10)->create([
+            'propietario_id' => $admin->id,
+        ]);
+
+        $this->command->info('Inmuebles diversificados creados para pruebas.');
     }
 }
