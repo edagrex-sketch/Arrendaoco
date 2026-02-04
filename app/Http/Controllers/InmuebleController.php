@@ -36,7 +36,13 @@ class InmuebleController extends Controller
     public function home()
     {
         $inmuebles = Inmueble::where('estatus', 'disponible')->latest()->paginate(9);
-        return view('inicio', compact('inmuebles'));
+        
+        $favoritosIds = [];
+        if (auth()->check()) {
+            $favoritosIds = auth()->user()->favoritos()->pluck('inmueble_id')->toArray();
+        }
+
+        return view('inicio', compact('inmuebles', 'favoritosIds'));
     }
 
     public function publicSearch(Request $request)
@@ -80,7 +86,12 @@ class InmuebleController extends Controller
 
         $inmuebles = $query->paginate(12);
 
-        return view('inmuebles.public_index', compact('inmuebles'));
+        $favoritosIds = [];
+        if (auth()->check()) {
+            $favoritosIds = auth()->user()->favoritos()->pluck('inmueble_id')->toArray();
+        }
+
+        return view('inmuebles.public_index', compact('inmuebles', 'favoritosIds'));
     }
 
     public function create()

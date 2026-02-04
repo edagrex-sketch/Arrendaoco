@@ -11,7 +11,7 @@
             opacity: 0.7;
             position: relative;
         }
-        
+
         .lock-badge {
             position: absolute;
             right: 10px;
@@ -120,7 +120,7 @@
             @guest
                 <div class="mt-4 text-center">
                     <p class="text-sm text-muted-foreground">
-                        ¿Quieres usar los filtros avanzados? 
+                        ¿Quieres usar los filtros avanzados?
                         <a href="{{ route('login') }}" class="text-[#5D4037] font-bold hover:underline">Inicia Sesión</a>
                     </p>
                 </div>
@@ -191,6 +191,23 @@
                                     class="font-bold text-primary">${{ number_format($inmueble->renta_mensual ?? 0) }}</span>
                                 <span class="text-xs text-muted-foreground">/mes</span>
                             </div>
+
+                            {{-- Botón Favorito (RF-26 / RF-27) --}}
+                            @auth
+                                <form action="{{ route('favoritos.toggle', $inmueble) }}" method="POST"
+                                    class="absolute top-3 left-3 z-10">
+                                    @csrf
+                                    <button type="submit"
+                                        class="w-9 h-9 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/50 text-foreground transition-all hover:scale-110 {{ in_array($inmueble->id, $favoritosIds) ? 'text-red-500' : 'text-muted-foreground' }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            class="h-5 w-5 {{ in_array($inmueble->id, $favoritosIds) ? 'fill-current' : '' }}"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            @endauth
                         </div>
 
                         {{-- Contenido Tarjeta --}}

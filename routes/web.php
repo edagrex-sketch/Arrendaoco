@@ -8,8 +8,8 @@ use App\Http\Controllers\InmuebleController;
 use App\Http\Controllers\Admin\UsuarioController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ArrenditoController;
-
 use App\Http\Controllers\ResenaController;
+use App\Http\Controllers\FavoritoController;
 
 // 1. Mostrar formulario
 Route::get('/registro', function () {
@@ -153,6 +153,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/inmuebles/{inmueble}/resenas', [ResenaController::class, 'store'])->name('resenas.store');
     Route::put('/resenas/{resena}', [ResenaController::class, 'update'])->name('resenas.update');
     Route::delete('/resenas/{resena}', [ResenaController::class, 'destroy'])->name('resenas.destroy');
+
+    // Favoritos Routes
+    Route::get('/favoritos', [FavoritoController::class, 'index'])->name('favoritos.index');
+    Route::post('/favoritos/{inmueble}/toggle', [FavoritoController::class, 'toggle'])->name('favoritos.toggle');
+    Route::put('/favoritos/{inmueble}', [FavoritoController::class, 'update'])->name('favoritos.update');
 });
 
 // 1. Mostrar formulario de "Olvidé mi contraseña"

@@ -43,4 +43,9 @@ class Inmueble extends Model
     {
         return $this->hasMany(Resena::class)->orderBy('created_at', 'desc');
     }
+
+    public function favoritos()
+    {
+        return $this->hasMany(Favorito::class, 'inmueble_id');
+    }
 }

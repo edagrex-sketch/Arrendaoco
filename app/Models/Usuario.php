@@ -70,4 +70,16 @@ class Usuario extends Authenticatable
     {
         return $this->hasMany(Resena::class, 'usuario_id');
     }
+
+    public function favoritos()
+    {
+        return $this->hasMany(Favorito::class, 'usuario_id');
+    }
+
+    public function inmueblesFavoritos()
+    {
+        return $this->belongsToMany(Inmueble::class, 'favoritos', 'usuario_id', 'inmueble_id')
+                    ->withPivot('nota')
+                    ->withTimestamps();
+    }
 }

@@ -43,6 +43,12 @@
                         class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
                         Inicio
                     </a>
+                    @auth
+                        <a href="{{ route('favoritos.index') }}"
+                            class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
+                            Favoritos
+                        </a>
+                    @endauth
                     @if (Auth::check() && Auth::user()->tieneRol('propietario'))
                         <a href="{{ route('inmuebles.index') }}"
                             class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
@@ -141,8 +147,10 @@
 
                     <!-- Columna 1: Marca -->
                     <div class="space-y-4">
-                        <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}" class="flex items-center gap-2 group">
-                            <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco" class="h-12 w-auto object-contain bg-white/5 rounded-lg p-1">
+                        <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
+                            class="flex items-center gap-2 group">
+                            <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco"
+                                class="h-12 w-auto object-contain bg-white/5 rounded-lg p-1">
                             <span class="text-2xl font-bold tracking-tight text-white">
                                 ArrendaOco
                             </span>
