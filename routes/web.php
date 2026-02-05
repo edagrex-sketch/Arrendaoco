@@ -171,7 +171,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/perfil/publicar', [PerfilController::class, 'publicar'])->name('perfil.publicar');
 
     // Admin Usuarios
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
         Route::get('usuarios/reporte', [UsuarioController::class, 'reporte'])->name('usuarios.reporte');
         Route::resource('usuarios', UsuarioController::class);
         Route::get('inmuebles/reporte', [InmuebleController::class, 'reporte'])->name('inmuebles.reporte');
