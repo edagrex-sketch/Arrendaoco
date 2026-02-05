@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Api\ContratoController;
 use App\Http\Controllers\InmuebleController;
 use App\Http\Controllers\Admin\UsuarioController;
@@ -10,6 +11,41 @@ use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ArrenditoController;
 use App\Http\Controllers\ResenaController;
 use App\Http\Controllers\FavoritoController;
+use App\Http\Controllers\ArrenditoChatController;
+
+// Test Gemini API
+Route::get('/test-gemini', function () {
+    $apiKey = env('GEMINI_API_KEY');
+    
+    if (!$apiKey) {
+        return response()->json(['error' => 'No API key found']);
+    }
+    
+    try {
+        $response = Http::timeout(10)->withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}", [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => 'Say hello in one word']
+                    ]
+                ]
+            ]
+        ]);
+
+        return response()->json([
+            'status' => $response->status(),
+            'successful' => $response->successful(),
+            'body' => $response->json()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
 
 // 1. Mostrar formulario
 Route::get('/registro', function () {
@@ -152,7 +188,12 @@ Route::middleware('auth')->group(function () {
     // Arrendito Mascot Routes
     Route::post('/arrendito/actualizar', [ArrenditoController::class, 'updateName'])->name('arrendito.update');
     Route::get('/arrendito/nombre', [ArrenditoController::class, 'getName'])->name('arrendito.name');
+});
 
+// Chat route must be public for visitors
+Route::post('/arrendito/chat', [ArrenditoChatController::class, 'chat'])->name('arrendito.chat');
+
+Route::middleware('auth')->group(function () {
     // Reseñas Routes
     Route::post('/inmuebles/{inmueble}/resenas', [ResenaController::class, 'store'])->name('resenas.store');
     Route::put('/resenas/{resena}', [ResenaController::class, 'update'])->name('resenas.update');

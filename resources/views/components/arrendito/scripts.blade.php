@@ -1,173 +1,298 @@
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Migración forzada de nombre antiguo a nuevo
+        const oldName = localStorage.getItem('arrenditoName');
+        const currentName = localStorage.getItem('rocoName');
+
+        // Si existe el nombre antiguo, migrarlo
+        if (oldName) {
+            localStorage.setItem('rocoName', oldName);
+            localStorage.removeItem('arrenditoName');
+        }
+
+        // Si el nombre actual es "Arrendito", cambiarlo a "ROCO"
+        if (currentName === 'Arrendito') {
+            localStorage.setItem('rocoName', 'ROCO');
+        }
+
         // 1. Sincronización con Base de Datos o LocalStorage
         @auth
-            fetch("{{ route('arrendito.name') }}")
-                .then(response => response.json())
-                .then(data => {
-                    if (data.nombre) {
-                        localStorage.setItem('arrenditoName', data.nombre);
-                        updateMascotNameUI(data.nombre);
-                    }
-                })
-                .catch(err => console.error('Error al cargar nombre de Arrendito:', err));
-        @else
-            const savedName = localStorage.getItem('arrenditoName') || 'Arrendito';
-            updateMascotNameUI(savedName);
-        @endauth
+        fetch("{{ route('arrendito.name') }}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.nombre) {
+                    // Si el nombre de la BD es "Arrendito", usar "ROCO" en su lugar
+                    const finalName = data.nombre === 'Arrendito' ? 'ROCO' : data.nombre;
+                    localStorage.setItem('rocoName', finalName);
+                    updateMascotNameUI(finalName);
+                }
+            })
+            .catch(err => console.error('Error al cargar nombre de ROCO:', err));
+    @else
+        const savedName = localStorage.getItem('rocoName') || 'ROCO';
+        updateMascotNameUI(savedName);
+    @endauth
 
-        // 2. Lógica del Overlay (Carga)
-        const overlay = document.getElementById('lock-overlay');
-        if(overlay) {
-            @if(auth()->check())
-                @if(session('login_success'))
-                    setTimeout(() => { overlay.classList.add('overlay-hidden'); }, 4000);
-                @else
-                    overlay.style.display = 'none';
-                @endif
+    // 2. Lógica del Overlay (Carga)
+    const overlay = document.getElementById('lock-overlay');
+    if (overlay) {
+        @if (auth()->check())
+            @if (session('login_success'))
+                setTimeout(() => {
+                    overlay.classList.add('overlay-hidden');
+                }, 3000);
             @else
-                setTimeout(() => { overlay.classList.add('overlay-hidden'); }, 4000); 
+                overlay.style.display = 'none';
             @endif
+        @else
+            setTimeout(() => {
+                overlay.classList.add('overlay-hidden');
+            }, 3000);
+        @endif
+    }
+
+    // 3. Sistema de Mensajes Contextuales
+    setTimeout(() => {
+        const currentPath = window.location.pathname;
+        const mascotName = localStorage.getItem('rocoName') || 'ROCO';
+        let message = "";
+
+        if (currentPath === '/inicio') {
+            message = `¡Guau! Soy <b>${mascotName}</b>. ¿Buscamos una casa con jardín hoy? 🏡🐶`;
+        } else if (currentPath.includes('/inmuebles/')) {
+            message = "¡Qué lugar tan acogedor! 🐶 ¿Exploramos juntos este hogar?";
+        } else if (currentPath === '/favoritos') {
+            message = "¡Tus favoritos son geniales! Los guardo como mis huesos favoritos. 🦴❤️";
+        } else if (currentPath === '/perfil') {
+            message = "¡Hola amigo! Actualiza tus datos para conocerte mejor. 🐾";
+        } else {
+            message = `¡Guau! Soy <b>${mascotName}</b>, tu compañero leal. ¿En qué te ayudo?`;
         }
+        triggerMascotMessage(message);
+    }, 2000);
     });
 
-    /**
-     * Gamificación: Llave flotante que persigue el cursor al interactuar con bloqueos
-     */
-    function triggerGamification(element) {
-        const keyContainer = document.getElementById('floating-key-container');
-        const keyTooltip = document.getElementById('key-tooltip');
-        if(!keyContainer) return;
-
-        const elementRect = element.getBoundingClientRect();
-
-        keyContainer.style.opacity = '1';
-        keyContainer.style.top = (elementRect.top - 20) + 'px';
-        keyContainer.style.left = (elementRect.left + (elementRect.width / 2)) + 'px';
-        keyContainer.style.transform = "scale(1.2)";
-
-        if(keyTooltip) keyTooltip.style.opacity = '1';
-
-        setTimeout(() => {
-            mostrarAlertaRegistro();
-            setTimeout(() => {
-                keyContainer.style.opacity = '0';
-                if(keyTooltip) keyTooltip.style.opacity = '0';
-            }, 2000);
-        }, 600);
-    }
-
-    /**
-     * Alerta persuasiva para registro
-     */
-    function mostrarAlertaRegistro() {
-        Swal.fire({
-            title: '¡Desbloquea tu Hogar!',
-            text: "Esta llave abre todas las puertas. Regístrate para ver detalles y contactar.",
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonColor: '#3E2723',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Obtener Llave (Login)',
-            cancelButtonText: 'Solo mirar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = "{{ route('login') }}";
-            }
-        })
-    }
-
-    /**
-     * Actualiza la interfaz del globo de texto con el nombre actual
-     */
-    function updateMascotNameUI(name) {
-        const nameDisplay = document.getElementById('mascot-name-display');
+    function triggerMascotMessage(htmlContent) {
         const bubble = document.querySelector('.mascot-bubble');
-        
-        if (nameDisplay) {
-            nameDisplay.innerText = name;
-        }
-        
         if (bubble) {
-            bubble.innerHTML = `¡Aquí estoy, <span class="mascot-name-highlight">${name}</span> tu compañero en esta búsqueda! 😺 <br><span style="font-weight:400; color:#888; font-size:10px;">(Haz clic para renombrarme)</span>`;
+            bubble.style.opacity = '0';
+            setTimeout(() => {
+                const cleanContent = htmlContent.split('<br>')[0];
+                bubble.innerHTML =
+                    `${cleanContent} <br><span style="font-weight:400; color:#888; font-size:10px;">¡Haz clic para hablar!</span>`;
+                bubble.style.opacity = '1';
+            }, 300);
         }
     }
 
     /**
-     * Función para renombrar la mascota mediante un SweetAlert interactivo
+     * Alterna la visibilidad del menú interactivo
      */
-    function renameMascot() {
-        const currentName = localStorage.getItem('arrenditoName') || 'Arrendito';
+    function toggleMascotMenu() {
+        const menu = document.getElementById('mascot-menu');
+        const chat = document.getElementById('mascot-chat');
+        if (menu) menu.classList.toggle('hidden-menu');
+        if (chat && !chat.classList.contains('hidden-chat')) chat.classList.add('hidden-chat');
+    }
 
+    /**
+     * Alterna la visibilidad de la ventana de chat
+     */
+    function toggleMascotChat() {
+        const chat = document.getElementById('mascot-chat');
+        const menu = document.getElementById('mascot-menu');
+        if (chat) chat.classList.toggle('hidden-chat');
+        if (menu && !menu.classList.contains('hidden-menu')) menu.classList.add('hidden-menu');
+
+        if (chat && !chat.classList.contains('hidden-chat')) {
+            document.getElementById('chat-input').focus();
+        }
+    }
+
+    /**
+     * Envía un mensaje a la IA y procesa la respuesta
+     */
+    function sendMascotMessage() {
+        const input = document.getElementById('chat-input');
+        const container = document.getElementById('chat-messages');
+        const message = input.value.trim();
+
+        if (!message) return;
+
+        // Ocultar botones de respuesta rápida después del primer mensaje
+        const quickReplies = document.getElementById('quick-replies');
+        if (quickReplies) quickReplies.style.display = 'none';
+
+        // Añadir mensaje del usuario a la UI
+        const userMsgDiv = document.createElement('div');
+        userMsgDiv.className = 'msg-user';
+        userMsgDiv.textContent = message;
+        container.appendChild(userMsgDiv);
+
+        input.value = '';
+        updateCharCounter();
+        container.scrollTop = container.scrollHeight;
+
+        // Añadir indicador de "escribiendo..." mejorado
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'msg-ai typing';
+        loadingDiv.textContent = 'ROCO está pensando';
+        container.appendChild(loadingDiv);
+        container.scrollTop = container.scrollHeight;
+
+        // Enviar a la API
+        fetch("{{ route('arrendito.chat') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    message: message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                container.removeChild(loadingDiv);
+                const aiMsgDiv = document.createElement('div');
+                aiMsgDiv.className = 'msg-ai';
+
+                if (data.success) {
+                    aiMsgDiv.innerHTML = data.response;
+                } else {
+                    aiMsgDiv.innerHTML = "⚠️ " + data.response;
+                }
+
+                container.appendChild(aiMsgDiv);
+                container.scrollTop = container.scrollHeight;
+                rotatePlaceholder();
+            })
+            .catch(err => {
+                container.removeChild(loadingDiv);
+                console.error('Error detallado:', err);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'msg-ai';
+                errorDiv.innerHTML =
+                    '¡Guau! 🐾 Tuve un pequeño problema al procesar tu mensaje. ¿Podrías intentar de nuevo?';
+                container.appendChild(errorDiv);
+            });
+    }
+
+    /**
+     * Envía una respuesta rápida
+     */
+    function sendQuickReply(message) {
+        const input = document.getElementById('chat-input');
+        input.value = message;
+        sendMascotMessage();
+    }
+
+    /**
+     * Actualiza el contador de caracteres
+     */
+    function updateCharCounter() {
+        const input = document.getElementById('chat-input');
+        const counter = document.getElementById('char-counter');
+        if (input && counter) {
+            const length = input.value.length;
+            counter.textContent = `${length}/500`;
+            counter.style.color = length > 450 ? '#e74c3c' : '#999';
+        }
+    }
+
+    /**
+     * Maneja el evento de teclado en el chat
+     */
+    function handleChatKeyPress(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMascotMessage();
+        }
+        if (event.key === 'Escape') {
+            toggleMascotChat();
+        }
+    }
+
+    /**
+     * Rota el placeholder con sugerencias
+     */
+    const placeholders = [
+        "Pregúntame sobre inmuebles...",
+        "¿Buscas algo en particular?",
+        "¿Cuál es tu presupuesto?",
+        "¿Qué zona te interesa?",
+        "Cuéntame qué necesitas 🏠"
+    ];
+    let placeholderIndex = 0;
+
+    function rotatePlaceholder() {
+        const input = document.getElementById('chat-input');
+        if (input) {
+            placeholderIndex = (placeholderIndex + 1) % placeholders.length;
+            input.placeholder = placeholders[placeholderIndex];
+        }
+    }
+
+    // Rotar placeholder cada 5 segundos
+    setInterval(rotatePlaceholder, 5000);
+
+    function renameMascot() {
+        const currentName = localStorage.getItem('rocoName') || 'ROCO';
         Swal.fire({
-            title: '¡Ponle nombre a tu compañero!',
-            text: 'Este gatito te acompañará en tu búsqueda de hogar.',
+            title: '¡Ponle nombre a tu compañero Beagle!',
             input: 'text',
             inputValue: currentName,
-            inputPlaceholder: 'Ej: Pelusa, Michi, Bigotes...',
-            imageUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDN4eTM1bjN5eW15eW15eW15eW15eW15eW15eW15eW15eW15/MDJ9iboxlC6tJp1A9c/giphy.gif',
-            imageWidth: 200,
-            imageHeight: 150,
-            imageAlt: 'Gatito esperando nombre',
             showCancelButton: true,
-            confirmButtonColor: '#5D4037',
-            cancelButtonColor: '#d33',
-            confirmButtonText: '¡Guardar Nombre!',
-            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#4A90E2',
             inputValidator: (value) => {
-                if (!value) return '¡El gatito necesita un nombre!';
-                if (value.length > 15) return '¡Ese nombre es muy largo!';
+                if (!value) return '¡Tu perrito necesita un nombre!';
             }
         }).then((result) => {
-            if (result.isConfirmed) {
-                const newName = result.value;
-                localStorage.setItem('arrenditoName', newName);
-                updateMascotNameUI(newName);
-
-                // Guardar en Base de Datos si está autenticado
-                @auth
+                if (result.isConfirmed) {
+                    const newName = result.value;
+                    localStorage.setItem('rocoName', newName);
+                    updateMascotNameUI(newName);
+                    @auth
                     fetch("{{ route('arrendito.update') }}", {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
-                        body: JSON.stringify({ nombre: newName })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            console.log('Nombre de Arrendito sincronizado');
-                        }
-                    })
-                    .catch(err => console.error('Error al sincronizar nombre:', err));
+                        body: JSON.stringify({
+                            nombre: newName
+                        })
+                    });
                 @endauth
-                
-                Swal.fire({
-                    title: `¡Miau! 😻`,
-                    text: `Me encanta mi nuevo nombre: ${newName}`,
-                    icon: 'success',
-                    confirmButtonColor: '#5D4037',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
             }
         });
     }
 
-    /**
-     * Reacción visual del estambre al hacerle clic
-     */
-    function playWithYarn() {
-        const yarn = document.querySelector('.yarn-pro');
-        if(yarn) {
-            yarn.style.transform = "scale(1.4) rotate(360deg)";
-            yarn.style.transition = "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+    function updateMascotNameUI(name) {
+        const nameDisplay = document.getElementById('mascot-name-display');
+        const chatTitle = document.getElementById('chat-mascot-name');
+        if (nameDisplay) nameDisplay.innerText = name;
+        if (chatTitle) chatTitle.innerText = name + ' AI';
+    }
+
+    function startMiniGuide() {
+        toggleMascotMenu();
+        Swal.fire({
+            title: '🐶 Guía Rápida',
+            text: 'ROCO te ayuda a encontrar el lugar ideal. Puedes filtrar por precio, zona y tipo de propiedad. ¡Vamos a encontrar tu hogar perfecto!',
+            icon: 'info',
+            confirmButtonColor: '#4A90E2'
+        });
+    }
+
+    function playWithBone() {
+        const bone = document.querySelector('.yarn-pro');
+        if (bone) {
+            bone.style.transform = "scale(1.4) rotate(360deg)";
             setTimeout(() => {
-                yarn.style.transform = "";
+                bone.style.transform = "";
             }, 300);
         }
     }
