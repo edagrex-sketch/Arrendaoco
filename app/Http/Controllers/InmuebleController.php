@@ -128,6 +128,8 @@ class InmuebleController extends Controller
             'direccion' => 'required|string',
             'imagenes' => 'required|array|min:1|max:10',
             'imagenes.*' => 'image|max:10240',
+            'latitud' => 'nullable|numeric',
+            'longitud' => 'nullable|numeric',
         ];
 
         $request->validate($rules);
@@ -144,6 +146,8 @@ class InmuebleController extends Controller
             $inmueble->habitaciones = $request->habitaciones;
             $inmueble->banos = $request->banos;
             $inmueble->metros = $request->metros;
+            $inmueble->latitud = $request->latitud;
+            $inmueble->longitud = $request->longitud;
             $inmueble->propietario_id = auth()->id();
             $inmueble->ciudad = 'Ocosingo';
             $inmueble->estado = 'Chiapas';
@@ -196,6 +200,8 @@ class InmuebleController extends Controller
             'habitaciones' => $request->habitaciones,
             'banos' => $request->banos,
             'metros' => $request->metros,
+            'latitud' => $request->latitud,
+            'longitud' => $request->longitud,
         ]);
 
         if ($request->hasFile('imagenes')) {

@@ -17,6 +17,10 @@ class InmuebleSeeder extends Seeder
         $propietario = Usuario::where('email', 'propietario@test.com')->first();
         $otroPropietario = Usuario::where('email', 'pedro@test.com')->first();
 
+        if (!$propietario) $propietario = Usuario::first();
+        if (!$otroPropietario) $otroPropietario = Usuario::first();
+        if (!$admin) $admin = Usuario::first();
+
         // Propiedades de Carlos Arrendador (Landlord Principal)
         Inmueble::create([
             'titulo' => 'Departamento Céntrico Ocosingo',
@@ -31,6 +35,8 @@ class InmuebleSeeder extends Seeder
             'banos' => 1,
             'metros' => 65,
             'tipo' => 'Departamento',
+            'latitud' => 16.906852,
+            'longitud' => -92.094123,
             'imagen' => null,
             'propietario_id' => $propietario->id,
             'estatus' => 'disponible',
@@ -49,15 +55,17 @@ class InmuebleSeeder extends Seeder
             'banos' => 2,
             'metros' => 120,
             'tipo' => 'Casa',
+            'latitud' => 16.903012,
+            'longitud' => -92.088056,
             'imagen' => null,
             'propietario_id' => $propietario->id,
-            'estatus' => 'rentado', // Para probar que aparezca como rentado
+            'estatus' => 'disponible',
         ]);
 
         // Propiedades de Pedro Garcia
         Inmueble::create([
             'titulo' => 'Cuarto Económico Estudiantes',
-            'direccion' => 'Cerca de la UTC',
+            'direccion' => 'Av. Universidad Progresiva',
             'ciudad' => 'Ocosingo',
             'estado' => 'Chiapas',
             'codigo_postal' => '29950',
@@ -68,16 +76,18 @@ class InmuebleSeeder extends Seeder
             'banos' => 1,
             'metros' => 15,
             'tipo' => 'Cuarto',
+            'latitud' => 16.892045,
+            'longitud' => -92.110012,
             'imagen' => null,
             'propietario_id' => $otroPropietario->id,
             'estatus' => 'disponible',
         ]);
 
-        // Propiedades del Admin (Para tener volumen)
+        // Propiedades del Admin (Para tener volumen) - Usarán las coords aleatorias del Factory
         Inmueble::factory()->count(10)->create([
             'propietario_id' => $admin->id,
         ]);
 
-        $this->command->info('Inmuebles diversificados creados para pruebas.');
+        $this->command->info('Inmuebles diversificados con ubicaciones reales en Ocosingo creados.');
     }
 }

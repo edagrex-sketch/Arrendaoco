@@ -27,6 +27,11 @@
     </div>
 </div>
 
+{{-- BOTÓN DE MAXIMIZAR ASISTENTE (Oculto por defecto) --}}
+<button id="maximize-assistant-btn" onclick="toggleMascotVisibility()" class="assistant-toggle-btn hidden">
+    🐶 <span>Llamar a ROCO</span>
+</button>
+
 {{-- Contenedor Principal de Arrendito --}}
 <div id="mascot-wrapper">
 
@@ -137,6 +142,14 @@
 
     {{-- Escena de la Mascarota --}}
     <div class="mascot-scene">
+        {{-- Botón de minimizar mascota --}}
+        <button onclick="toggleMascotVisibility()" class="minimize-assistant-btn" title="Ocultar asistente">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        </button>
+
         {{-- Click directo abre el chat --}}
         <div onclick="toggleMascotChat()" style="width:100%; height:100%; cursor: pointer; position: relative;"
             title="¡Haz clic para chatear conmigo!">
@@ -144,29 +157,14 @@
                 background="transparent" speed="1" loop autoplay renderer="svg">
             </lottie-player>
 
-            {{-- Tooltip flotante --}}
-            <div class="chat-tooltip" id="chat-tooltip">
+            {{-- Tooltip flotante - AHORA CLICABLE --}}
+            <div class="chat-tooltip" id="chat-tooltip" onclick="toggleMascotChat(); event.stopPropagation();"
+                style="cursor: pointer;">
                 💬 ¡Chatea conmigo!
             </div>
         </div>
 
         {{-- Hueso de Juguete --}}
         <div class="yarn-pro" onclick="playWithBone(); event.stopPropagation();" title="¡Juega conmigo!"></div>
-    </div>
-
-    {{-- Menú de opciones (accesible con botón en el chat) --}}
-    <div id="mascot-menu" class="hidden-menu">
-        <div class="menu-option" onclick="window.location.href='/favoritos'">
-            <span class="menu-icon">❤️</span>
-            <span class="menu-text">Ver mis <b>Favoritos</b></span>
-        </div>
-        <div class="menu-option" onclick="window.location.href='/inicio#como-rentar'">
-            <span class="menu-icon">💡</span>
-            <span class="menu-text">¿Cómo <b>rentar</b>?</span>
-        </div>
-        <div class="menu-option" onclick="renameMascot()">
-            <span class="menu-icon">✏️</span>
-            <span class="menu-text">Cambiar mi <b>nombre</b></span>
-        </div>
     </div>
 </div>

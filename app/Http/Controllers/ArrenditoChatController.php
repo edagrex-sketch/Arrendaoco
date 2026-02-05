@@ -15,27 +15,53 @@ class ArrenditoChatController extends Controller
         $userMessage = $request->message;
         $apiKey = env('GEMINI_API_KEY');
 
-        // Contexto de inmuebles
-        $inmuebles = Inmueble::where('estatus', 'disponible')->limit(5)->get(['titulo', 'renta_mensual', 'direccion']);
+        // Inteligencia de búsqueda básica (Detección de UTS)
+        $query = Inmueble::where('estatus', 'disponible');
+        
+        $isUTS = str_contains(strtolower($userMessage), 'uts') || str_contains(strtolower($userMessage), 'universidad');
+        
+        if ($isUTS) {
+            $query->where(function($q) {
+                $q->where('direccion', 'LIKE', '%UTS%')
+                  ->orWhere('direccion', 'LIKE', '%Universidad%')
+                  ->orWhere('titulo', 'LIKE', '%UTS%')
+                  ->orWhere('titulo', 'LIKE', '%Universidad%');
+            });
+        }
+
+        $inmuebles = $query->limit(5)->get(['id', 'titulo', 'renta_mensual', 'direccion']);
+        
+        // Si no encontró nada específico, traer los últimos 5 generales
+        if ($inmuebles->isEmpty()) {
+            $inmuebles = Inmueble::where('estatus', 'disponible')->latest()->limit(5)->get(['id', 'titulo', 'renta_mensual', 'direccion']);
+        }
+
         $contexto = "";
         foreach ($inmuebles as $i) {
-            $contexto .= "🏠 <b>{$i->titulo}</b><br>💰 \${$i->renta_mensual}<br>📍 {$i->direccion}<br><br>";
+            $url = route('inmuebles.show', $i->id);
+            $contexto .= "🏠 <b>{$i->titulo}</b><br>💰 \${$i->renta_mensual}<br>📍 {$i->direccion}<br>🔗 BOTÓN_URL: {$url}<br><br>";
         }
 
         $prompt = "Eres ROCO, el entusiasta asistente Beagle de Arrendaoco en Ocosingo, Chiapas. 
         Tu misión es ser amigable, servicial y experto en rentas.
         
+        CONTEXTO GEOGRÁFICO DE OCOSINGO:
+        - La UTS (Universidad Tecnológica de la Selva) es el punto más importante para estudiantes. Está a las afueras, por la zona de la carretera a Altamirano. No la confundas con la UNICACH o la Normal.
+        - El Centro es donde está el parque y el mercado.
+        
         INFORMACIÓN DE CONTACTO:
-        Si alguien quiere contactar al administrador o tiene dudas legales, indícales que escriban al correo electrónico: <b>arrendaoco@gmail.com</b>. Por el momento no contamos con número telefónico.
+        Si alguien quiere contactar al administrador, indícales que escriban a: <b>arrendaoco@gmail.com</b>.
 
-        INMUEBLES DISPONIBLES ACTUALMENTE:
+        INMUEBLES QUE 'OLFATEASTE' PARA ESTA PREGUNTA:
         {$contexto}
 
-        REGLAS DE RESPUESTA:
+        REGLAS CRÍTICAS DE RESPUESTA:
         1. Responde SIEMPRE en HTML usando <b> para resaltar nombres o montos y <br> para separar ideas.
-        2. Sé breve (máximo 2 párrafos).
-        3. Usa emojis de perro (🐶, 🦴, 🏠) de forma natural.
-        4. Si preguntan por inmuebles, usa la lista de arriba. Si no hay inmuebles en la lista, diles que 'estás olfateando nuevas oportunidades' y que vuelvan pronto.
+        2. Si el usuario pregunta por la UTS, enfócate en las propiedades que digan 'UTS' o 'Universidad'. Si en la lista no hay ninguna cerca de la UTS, sé honesto y dile que 'estás siguiendo el rastro' pero que de momento no tienes nada ahí.
+        3. PROHIBIDO: No menciones nunca IDs o códigos técnicos.
+        4. BOTONES: Si mencionas una propiedad, DEBES poner el botón de 'Ver Detalles' usando la BOTÓN_URL que te di arriba:
+           <a href='BOTÓN_URL' style='display:inline-block; margin-top:10px; padding:8px 15px; background:#003049; color:white; border-radius:10px; text-decoration:none; font-weight:bold; font-size:12px;'>🏠 Ver Detalles de la Casa</a>
+        5. Sé breve y usa emojis de perro (🐶, 🦴, 🏠).
 
         Usuario dice: {$userMessage}";
 
