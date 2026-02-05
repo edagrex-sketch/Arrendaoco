@@ -28,10 +28,12 @@ class InmuebleFactory extends Factory
             'descripcion' => $this->faker->paragraph(),
             'estatus' => 'disponible', // Equivalente a disponible: true
             'propietario_id' => 1, // User ID por defecto 1
-            'ciudad' => 'Ocosingo', // Default values for required fields not specified but needed
+            'ciudad' => 'Ocosingo',
             'estado' => 'Chiapas',
             'codigo_postal' => '29950',
-            'deposito' => $this->faker->numberBetween(1000, 5000), // Adding reasonable default
+            'deposito' => $this->faker->numberBetween(1000, 5000),
+            'latitud' => $this->faker->latitude(16.89, 16.92),
+            'longitud' => $this->faker->longitude(-92.11, -92.08),
         ];
     }
 }

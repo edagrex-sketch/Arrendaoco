@@ -79,13 +79,41 @@
                 {{-- PASO 2 --}}
                 <div x-show="step === 2" x-ref="step2" x-transition style="display: none;">
                     <h2 class="text-xl font-bold mb-4 flex items-center gap-2">✨ Características y Ubicación</h2>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium mb-1">Dirección Completa <span
                                 class="text-red-500">*</span></label>
-                        <input type="text" name="direccion" value="{{ old('direccion') }}"
-                            placeholder="Calle, Número, Colonia..." required
-                            class="w-full rounded-lg border-input bg-background/50 border py-3 px-4 mb-4">
+                        <div class="flex gap-2">
+                            <input type="text" name="direccion" id="direccion-input" value="{{ old('direccion') }}"
+                                placeholder="Calle, Número, Colonia..." required
+                                class="flex-1 rounded-lg border-input bg-background/50 border py-3 px-4">
+                            <button type="button" onclick="buscarDireccion()"
+                                class="bg-primary/10 text-primary border border-primary/20 px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-all text-sm font-bold flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                Buscar en mapa
+                            </button>
+                        </div>
                     </div>
+
+                    {{-- 🗺️ Selector de Mapa --}}
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2">Marca el punto en el mapa <span
+                                class="text-xs text-muted-foreground font-normal">(Seleccionado automáticamente al buscar
+                                dirección)</span></label>
+                        <div id="map-picker"
+                            class="w-full h-[300px] rounded-xl border border-border bg-slate-50 z-10 shadow-inner"></div>
+                        <input type="hidden" name="latitud" id="lat-input" value="{{ old('latitud') }}">
+                        <input type="hidden" name="longitud" id="lng-input" value="{{ old('longitud') }}">
+                    </div>
+
+                    {{-- Leaflet Library --}}
+                    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
                     <div class="grid grid-cols-3 gap-4 mb-4">
                         <div>
                             <label class="block text-xs font-medium mb-1 uppercase text-muted-foreground">Habitaciones <span
@@ -149,7 +177,7 @@
                                 {{-- Imagen --}}
                                 <img :src="img" class="object-cover w-full h-full rounded-lg">
 
-                                {{-- Botón Eliminar: Forzado con STYLE y alta visibilidad --}}
+                                {{-- Botón Eliminar --}}
                                 <button type="button" @click="removeFile(index)"
                                     style="position: absolute; top: -12px; right: -12px; background-color: #EF4444; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 9999; border: 3px solid white; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.15);"
                                     title="Eliminar foto">
@@ -162,12 +190,6 @@
                             </div>
                         </template>
                     </div>
-
-                    <div class="bg-primary/5 p-4 mt-6 rounded-lg flex items-start gap-3 border border-primary/10">
-                        <div class="text-primary text-2xl">💡</div>
-                        <p class="text-sm text-primary/80">Puedes eliminar las fotos que no te gusten antes de publicar.
-                        </p>
-                    </div>
                 </div>
 
                 <div class="pt-6 border-t border-border flex justify-between items-center mt-6">
@@ -175,11 +197,10 @@
                         class="text-muted-foreground hover:text-foreground font-medium px-4 py-2 transition-colors">←
                         Atrás</button>
                     <div x-show="step === 1"></div>
-                    <button type="button" @click="next()" x-show="step < 3"
+                    <button type="button" @click="nextStep()" x-show="step < 3"
                         class="bg-primary text-primary-foreground font-bold py-2 px-6 rounded-xl hover:bg-primary/90 transition-all shadow-md shadow-primary/20">Siguiente
                         Paso →</button>
 
-                    {{-- Botón Finalizar: ESTILO INLINE para garantizar visibilidad --}}
                     <button type="submit" x-show="step === 3"
                         style="background-color: #16a34a; color: white; padding: 12px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.4); display: flex; align-items: center; gap: 8px;">
                         <span>✨</span> ¡Publicar Ahora!
@@ -189,51 +210,104 @@
         </div>
     </div>
 
-    {{-- Script Alpine Avanzado --}}
+    {{-- Script de Localización y Mapa --}}
     <script>
+        var mapPicker, markerPicker;
+
+        function initMapPicker() {
+            if (mapPicker) return;
+            setTimeout(() => {
+                mapPicker = L.map('map-picker').setView([16.9068, -92.0941], 14);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(mapPicker);
+
+                mapPicker.on('click', function(e) {
+                    actualizarPin(e.latlng.lat, e.latlng.lng);
+                });
+
+                mapPicker.invalidateSize();
+            }, 50);
+        }
+
+        function actualizarPin(lat, lng, zoom = null) {
+            if (markerPicker) {
+                markerPicker.setLatLng([lat, lng]);
+            } else {
+                markerPicker = L.marker([lat, lng]).addTo(mapPicker);
+            }
+            document.getElementById('lat-input').value = lat;
+            document.getElementById('lng-input').value = lng;
+
+            if (zoom) {
+                mapPicker.setView([lat, lng], zoom);
+            }
+        }
+
+        async function buscarDireccion() {
+            const direccionRaw = document.getElementById('direccion-input').value;
+            if (!direccionRaw) return;
+
+            // Añadimos contexto para mejorar la precisión en Ocosingo
+            const query = encodeURIComponent(direccionRaw + ", Ocosingo, Chiapas, México");
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = "🔍 Buscando...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`);
+                const data = await response.json();
+
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    actualizarPin(lat, lon, 17); // Zoom más cercano al encontrar dirección
+                } else {
+                    alert("No pudimos encontrar esa calle exacta. ¿Podrías marcar el punto manualmente en el mapa? 🐾");
+                }
+            } catch (error) {
+                console.error("Error en geocodificación:", error);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('wizardForm', () => ({
                 step: 1,
-                files: [], // Array de objetos File reales
-                previews: [], // Array de URLs para mostrar
+                files: [],
+                previews: [],
 
                 handleFileSelect(event) {
                     const newFiles = Array.from(event.target.files);
-
-                    // Acumulamos los nuevos archivos
                     this.files = this.files.concat(newFiles);
-
-                    // Generamos previews
                     newFiles.forEach(file => {
                         const reader = new FileReader();
                         reader.onload = (e) => this.previews.push(e.target.result);
                         reader.readAsDataURL(file);
                     });
-
-                    // IMPORTANTE: Sincronizamos con el input para que se envíen
                     this.updateInputFiles();
                 },
 
                 removeFile(index) {
-                    // Borramos de los arrays
                     this.files.splice(index, 1);
                     this.previews.splice(index, 1);
-
-                    // Sincronizamos de nuevo
                     this.updateInputFiles();
                 },
 
                 updateInputFiles() {
                     const dataTransfer = new DataTransfer();
                     this.files.forEach(file => dataTransfer.items.add(file));
-
-                    // Asignamos la nueva lista de archivos al input original
                     document.getElementById('fileInput').files = dataTransfer.files;
                 },
 
-                next() {
+                nextStep() {
                     let currentDiv = this.$refs['step' + this.step];
-                    // Validamos inputs normales
                     let inputs = currentDiv.querySelectorAll(
                         'input:required, select:required, textarea:required');
 
@@ -246,7 +320,12 @@
                         }
                     }
 
-                    if (esValido) this.step++;
+                    if (esValido) {
+                        this.step++;
+                        if (this.step === 2) {
+                            initMapPicker();
+                        }
+                    }
                 }
             }))
         });

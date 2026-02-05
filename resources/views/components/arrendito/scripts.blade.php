@@ -23,7 +23,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.nombre) {
-                    // Si el nombre de la BD es "Arrendito", usar "ROCO" en su lugar
                     const finalName = data.nombre === 'Arrendito' ? 'ROCO' : data.nombre;
                     localStorage.setItem('rocoName', finalName);
                     updateMascotNameUI(finalName);
@@ -53,7 +52,16 @@
         @endif
     }
 
-    // 3. Sistema de Mensajes Contextuales
+    // 3. Restaurar estado de visibilidad de ROCO
+    const rocoHidden = localStorage.getItem('rocoHidden') === 'true';
+    if (rocoHidden) {
+        const wrapper = document.getElementById('mascot-wrapper');
+        const btn = document.getElementById('maximize-assistant-btn');
+        if (wrapper) wrapper.classList.add('hidden');
+        if (btn) btn.classList.remove('hidden');
+    }
+
+    // 4. Sistema de Mensajes Contextuales
     setTimeout(() => {
         const currentPath = window.location.pathname;
         const mascotName = localStorage.getItem('rocoName') || 'ROCO';
@@ -87,9 +95,6 @@
         }
     }
 
-    /**
-     * Alterna la visibilidad del menú interactivo
-     */
     function toggleMascotMenu() {
         const menu = document.getElementById('mascot-menu');
         const chat = document.getElementById('mascot-chat');
@@ -97,9 +102,6 @@
         if (chat && !chat.classList.contains('hidden-chat')) chat.classList.add('hidden-chat');
     }
 
-    /**
-     * Alterna la visibilidad de la ventana de chat
-     */
     function toggleMascotChat() {
         const chat = document.getElementById('mascot-chat');
         const menu = document.getElementById('mascot-menu');
@@ -112,8 +114,21 @@
     }
 
     /**
-     * Envía un mensaje a la IA y procesa la respuesta
+     * Alterna la visibilidad total del asistente (Minimizar/Maximizar)
      */
+    function toggleMascotVisibility() {
+        const wrapper = document.getElementById('mascot-wrapper');
+        const btn = document.getElementById('maximize-assistant-btn');
+        const isHidden = wrapper.classList.toggle('hidden');
+
+        if (btn) {
+            if (isHidden) btn.classList.remove('hidden');
+            else btn.classList.add('hidden');
+        }
+
+        localStorage.setItem('rocoHidden', isHidden);
+    }
+
     function sendMascotMessage() {
         const input = document.getElementById('chat-input');
         const container = document.getElementById('chat-messages');
@@ -121,11 +136,9 @@
 
         if (!message) return;
 
-        // Ocultar botones de respuesta rápida después del primer mensaje
         const quickReplies = document.getElementById('quick-replies');
         if (quickReplies) quickReplies.style.display = 'none';
 
-        // Añadir mensaje del usuario a la UI
         const userMsgDiv = document.createElement('div');
         userMsgDiv.className = 'msg-user';
         userMsgDiv.textContent = message;
@@ -135,14 +148,12 @@
         updateCharCounter();
         container.scrollTop = container.scrollHeight;
 
-        // Añadir indicador de "escribiendo..." mejorado
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'msg-ai typing';
         loadingDiv.textContent = 'ROCO está pensando';
         container.appendChild(loadingDiv);
         container.scrollTop = container.scrollHeight;
 
-        // Enviar a la API
         fetch("{{ route('arrendito.chat') }}", {
                 method: 'POST',
                 headers: {
@@ -180,18 +191,12 @@
             });
     }
 
-    /**
-     * Envía una respuesta rápida
-     */
     function sendQuickReply(message) {
         const input = document.getElementById('chat-input');
         input.value = message;
         sendMascotMessage();
     }
 
-    /**
-     * Actualiza el contador de caracteres
-     */
     function updateCharCounter() {
         const input = document.getElementById('chat-input');
         const counter = document.getElementById('char-counter');
@@ -202,9 +207,6 @@
         }
     }
 
-    /**
-     * Maneja el evento de teclado en el chat
-     */
     function handleChatKeyPress(event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
@@ -215,9 +217,6 @@
         }
     }
 
-    /**
-     * Rota el placeholder con sugerencias
-     */
     const placeholders = [
         "Pregúntame sobre inmuebles...",
         "¿Buscas algo en particular?",
@@ -235,7 +234,6 @@
         }
     }
 
-    // Rotar placeholder cada 5 segundos
     setInterval(rotatePlaceholder, 5000);
 
     function renameMascot() {
