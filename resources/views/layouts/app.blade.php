@@ -55,7 +55,7 @@
                             Mis Propiedades
                         </a>
                     @endif
-                    <a href="#"
+                    <a href="{{ route('nosotros') }}"
                         class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
                         Nosotros
                     </a>
@@ -177,8 +177,8 @@
                                     <span>Ocosingo, Chiapas.<br></span>
                                 </li>
                                 <li class="flex items-center gap-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#669BBC]"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#669BBC]" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
@@ -197,7 +197,7 @@
                         <div class="text-left md:text-right">
                             <h3 class="text-lg font-bold mb-6 text-[#FDF0D5]">Síguenos</h3>
                             <div class="flex gap-4 md:justify-end">
-                                <a href="https://www.facebook.com/TU_PAGINA" target="_blank"
+                                <a href="https://www.facebook.com/people/ArrendaOco/61587302949402/" target="_blank"
                                     class="bg-white/10 hover:bg-[#669BBC] p-3 rounded-lg transition-all duration-300 hover:-translate-y-1">
                                     <span class="sr-only">Facebook</span>
                                     <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -211,8 +211,7 @@
                                     <!-- Nuevo Icono: Estilo minimalista (Outline) -->
                                     <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor" stroke-width="2">
-                                        <rect x="2" y="2" width="20" height="20" rx="5"
-                                            ry="5"></rect>
+                                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                                         <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"></path>
                                         <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                                     </svg>
@@ -269,30 +268,30 @@
                     @foreach ($errors->all() as $error)
                         '<li>{{ $error }}</li>' +
                     @endforeach
-                '</ul>',
+                    '</ul>',
                 icon: 'warning',
                 confirmButtonColor: '#003049',
                 borderRadius: '1.5rem',
             });
         @endif
 
-        function confirmLogout() {
-            Swal.fire({
-                title: '¿Cerrar sesión?',
-                text: "¿Desea salir de su cuenta?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#003049',
-                cancelButtonColor: '#C1121F',
-                confirmButtonText: 'Sí, salir',
-                cancelButtonText: 'Cancelar',
-                borderRadius: '1.5rem',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('logout-form').submit();
-                }
-            })
-        }
+            function confirmLogout() {
+                Swal.fire({
+                    title: '¿Cerrar sesión?',
+                    text: "¿Desea salir de su cuenta?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#003049',
+                    cancelButtonColor: '#C1121F',
+                    confirmButtonText: 'Sí, salir',
+                    cancelButtonText: 'Cancelar',
+                    borderRadius: '1.5rem',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('logout-form').submit();
+                    }
+                })
+            }
 
         function confirmDelete(id) {
             Swal.fire({

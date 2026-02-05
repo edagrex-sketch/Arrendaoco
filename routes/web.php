@@ -19,18 +19,18 @@ Route::get('/registro', function () {
 Route::post('/registro', function (\Illuminate\Http\Request $request) {
     // Validar datos
     $datos = $request->validate([
-        'nombre'   => 'required|string|max:255',
-        'email'    => 'required|email|unique:usuarios,email',
+        'nombre' => 'required|string|max:255',
+        'email' => 'required|email|unique:usuarios,email',
         'password' => 'required|string|min:8|confirmed',
     ]);
     // Crear usuario en base de datos
     $usuario = \App\Models\Usuario::create([
-        'nombre'   => $datos['nombre'],
-        'email'    => $datos['email'],
+        'nombre' => $datos['nombre'],
+        'email' => $datos['email'],
         'password' => \Illuminate\Support\Facades\Hash::make($datos['password']),
-        'estatus'  => 'activo',
+        'estatus' => 'activo',
     ]);
-    
+
     // Asignar rol de inquilino por defecto
     $usuario->asignarRol('inquilino');
     // Iniciar sesión y redirigir
@@ -45,6 +45,10 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
 |--------------------------------------------------------------------------
 */
 
+
+Route::get('/nosotros', function () {
+    return view('nosotros');
+})->name('nosotros');
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -71,7 +75,7 @@ Route::get('/login', function () {
 Route::post('/login', function (Request $request) {
 
     $credentials = $request->validate([
-        'email'    => 'required|email',
+        'email' => 'required|email',
         'password' => 'required|string',
     ]);
 
