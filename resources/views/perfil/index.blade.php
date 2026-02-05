@@ -9,9 +9,14 @@
             <!-- Sidebar Perfil -->
             <div class="md:col-span-1">
                 <div class="bg-white rounded-lg shadow-lg p-6 text-center">
-                    <div
-                        class="w-32 h-32 bg-[#003049] rounded-full mx-auto flex items-center justify-center text-4xl text-white font-bold mb-4">
-                        {{ substr($usuario->nombre, 0, 1) }}
+                    <div class="w-32 h-32 rounded-full mx-auto flex items-center justify-center mb-4 overflow-hidden border-4 border-gray-100 shadow-sm relative group">
+                        @if($usuario->foto_perfil)
+                            <img src="{{ asset('storage/' . $usuario->foto_perfil) }}" alt="Foto de perfil" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full bg-[#003049] flex items-center justify-center text-4xl text-white font-bold">
+                                {{ substr($usuario->nombre, 0, 1) }}
+                            </div>
+                        @endif
                     </div>
                     <h2 class="text-xl font-bold text-[#003049]">{{ $usuario->nombre }}</h2>
                     <p class="text-gray-500 mb-4">{{ $usuario->email }}</p>
@@ -61,11 +66,25 @@
                         <h3 class="text-2xl font-bold text-[#003049]">Editar Información Personal</h3>
                     </div>
 
-                    <form action="{{ route('perfil.update') }}" method="POST">
+                    <form action="{{ route('perfil.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
                         <div class="space-y-6">
+                            <!-- Input Foto de Perfil -->
+                            <div>
+                                <label for="foto_perfil" class="block text-sm font-bold text-gray-700 mb-2 px-1">Foto de Perfil</label>
+                                <div class="relative flex items-center">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <input type="file" name="foto_perfil" id="foto_perfil" accept="image/*"
+                                        class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-[#003049]/10 focus:border-[#003049] transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#003049]/10 file:text-[#003049] hover:file:bg-[#003049]/20">
+                                </div>
+                            </div>
+
                             <!-- Input Nombre -->
                             <div>
                                 <label for="nombre" class="block text-sm font-bold text-gray-700 mb-2 px-1">Nombre

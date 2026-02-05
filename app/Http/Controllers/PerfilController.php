@@ -24,12 +24,23 @@ class PerfilController extends Controller
             'nombre' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:usuarios,email,'.$usuario->id,
             'password' => 'nullable|string|min:8|confirmed',
+            'foto_perfil' => 'nullable|image|max:2048', // Max 2MB
         ]);
 
         $usuario->update([
             'nombre' => $request->nombre,
             'email' => $request->email,
         ]);
+
+        if ($request->hasFile('foto_perfil')) {
+            // Eliminar foto anterior si existe
+            if ($usuario->foto_perfil) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($usuario->foto_perfil);
+            }
+
+            $path = $request->file('foto_perfil')->store('perfil', 'public');
+            $usuario->update(['foto_perfil' => $path]);
+        }
 
         if ($request->filled('password')) {
             $usuario->update(['password' => Hash::make($request->password)]);

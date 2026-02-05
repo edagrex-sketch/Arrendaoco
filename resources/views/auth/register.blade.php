@@ -23,7 +23,7 @@
                     <p class="text-gray-500">Únete a nosotros completando tus datos.</p>
                 </div>
 
-                <form method="POST" action="{{ route('registro.post') }}" class="space-y-4">
+                <form method="POST" action="{{ route('registro.post') }}" class="space-y-4" enctype="multipart/form-data">
                     @csrf
                     
                     <!-- Mensajes de error generales -->
@@ -42,6 +42,12 @@
                         <input type="text" name="nombre" value="{{ old('nombre') }}" 
                             class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#003049] focus:border-transparent outline-none transition-all duration-200" 
                             required placeholder="Tu nombre">
+                    </div>
+
+                    <div class="space-y-1 animate-fade-in-up delay-150">
+                        <label class="block text-sm font-semibold text-[#003049]">Foto de Perfil <span class="text-gray-400 font-normal">(Opcional)</span></label>
+                        <input type="file" name="foto_perfil" accept="image/*"
+                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#003049] focus:border-transparent outline-none transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#003049]/10 file:text-[#003049] hover:file:bg-[#003049]/20">
                     </div>
 
                     <div class="space-y-1 animate-fade-in-up delay-200">

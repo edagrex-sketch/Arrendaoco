@@ -58,13 +58,21 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
         'nombre' => 'required|string|max:255',
         'email' => 'required|email|unique:usuarios,email',
         'password' => 'required|string|min:8|confirmed',
+        'foto_perfil' => 'nullable|image|max:2048', // Validación para la imagen
     ]);
+
+    $path = null;
+    if ($request->hasFile('foto_perfil')) {
+        $path = $request->file('foto_perfil')->store('perfil', 'public');
+    }
+
     // Crear usuario en base de datos
     $usuario = \App\Models\Usuario::create([
         'nombre' => $datos['nombre'],
         'email' => $datos['email'],
         'password' => \Illuminate\Support\Facades\Hash::make($datos['password']),
         'estatus' => 'activo',
+        'foto_perfil' => $path,
     ]);
 
     // Asignar rol de inquilino por defecto

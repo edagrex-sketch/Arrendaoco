@@ -20,6 +20,7 @@ class Usuario extends Authenticatable
         'password',
         'es_admin',
         'estatus',
+        'foto_perfil',
     ];
     protected $hidden = [
         'password',

@@ -64,9 +64,13 @@
                 <div class="flex items-center gap-4">
                     @auth
                         <!-- Usuario: Hola + Botón Publicar -->
-                        <span class="text-sm text-gray-200 hidden sm:inline">
-                            Hola, <a href="{{ route('perfil.index') }}"
-                                class="font-bold text-white hover:underline">{{ Auth::user()->nombre }}</a>
+                        <span class="text-sm text-gray-200 hidden sm:inline flex items-center gap-2">
+                            <a href="{{ route('perfil.index') }}" class="flex items-center gap-2 font-bold text-white hover:underline">
+                                @if (Auth::user()->foto_perfil)
+                                    <img src="{{ asset('storage/' . Auth::user()->foto_perfil) }}" alt="Perfil" class="h-8 w-8 rounded-full object-cover border-2 border-white/20">
+                                @endif
+                                {{ Auth::user()->nombre }}
+                            </a>
                         </span>
 
                         @if (Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
