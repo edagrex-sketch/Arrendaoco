@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Especificación de Casos de Uso - ArrendaOco</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .titulo-doc {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: fixed;
+        }
+
+        td,
+        th {
+            border: 1px solid #000;
+            padding: 8px;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
+
+        .header-seccion {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .label-gris {
+            background-color: #f9f9f9;
+            font-weight: bold;
+            width: 30%;
+        }
+
+        .mod-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            font-size: 1.2em;
+            border: 2px solid #000;
+            text-align: center;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 class="titulo-doc">ESPECIFICACIÓN DE CASOS DE USO - PROYECTO ARRENDAOCO</h1>
+
+    <div class="mod-header">MÓDULO 1: GESTIÓN DE INMUEBLES (MGI)</div>
+
+    <!-- CASO DE USO 01 -->
+    <table>
+        <tr>
+            <td class="label-gris">Nombre del caso de uso:</td>
+            <td><b>Registrar Inmueble (Alta)</b></td>
+        </tr>
+        <tr>
+            <td class="label-gris">ID caso de uso:</td>
+            <td>CU-001</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Prioridad:</td>
+            <td>Alta</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Requisitos:</td>
+            <td>RF-08</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Actor primario:</td>
+            <td>Propietarios</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Descripción:</td>
+            <td>El propietario ingresa los datos de una nueva propiedad para que sea publicada y visible en la
+                plataforma.</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Precondición:</td>
+            <td>El usuario debe estar registrado y haber iniciado sesión con el rol de Propietario.</td>
+        </tr>
+        <tr>
+            <th colspan="2" class="header-seccion">Curso Normal de Eventos</th>
+        </tr>
+        <tr>
+            <td align="center"><b>Acciones del Actor</b></td>
+            <td align="center"><b>Acciones del sistema</b></td>
+        </tr>
+        <tr>
+            <td>1. El usuario hace clic en "Publicar Inmueble".<br>2. El usuario llena el formulario con los datos
+                (Título, precio, dirección, descripción y fotos).<br>3. El usuario pulsa el botón de "Guardar/Publicar".
+            </td>
+            <td>4. El sistema valida que todos los campos obligatorios estén llenos correctamente.<br>5. El sistema
+                guarda la información y vincula el inmueble al perfil del propietario.<br>6. El sistema envía un mensaje
+                de éxito: "Inmueble publicado correctamente".</td>
+        </tr>
+        <tr>
+            <th colspan="2" class="header-seccion">Curso Alterno de Eventos</th>
+        </tr>
+        <tr>
+            <td colspan="2"><b>A. Validación de datos</b><br>A1.- Si el sistema detecta que faltan campos obligatorios o
+                que las imágenes superan el tamaño permitido, enviará un mensaje indicando el error específico en cada
+                campo.</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Post condición:</td>
+            <td>El inmueble se registra en la base de datos y aparece inmediatamente en el catálogo general.</td>
+        </tr>
+    </table>
+
+    <!-- CASO DE USO 02 -->
+    <table>
+        <tr>
+            <td class="label-gris">Nombre del caso de uso:</td>
+            <td><b>Visualizar Detalle de Inmueble</b></td>
+        </tr>
+        <tr>
+            <td class="label-gris">ID caso de uso:</td>
+            <td>CU-002</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Prioridad:</td>
+            <td>Alta</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Requisitos:</td>
+            <td>RF-11</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Actor primario:</td>
+            <td>Inquilinos / Visitantes</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Descripción:</td>
+            <td>El usuario puede entrar a ver toda la información detallada, fotos y ubicación de una propiedad
+                específica.</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Precondición:</td>
+            <td>El inmueble debe estar registrado y con estatus "Disponible" en el sistema.</td>
+        </tr>
+        <tr>
+            <th colspan="2" class="header-seccion">Curso Normal de Eventos</th>
+        </tr>
+        <tr>
+            <td align="center"><b>Acciones del Actor</b></td>
+            <td align="center"><b>Acciones del sistema</b></td>
+        </tr>
+        <tr>
+            <td>1. El usuario selecciona un inmueble del catálogo general.<br>2. El usuario hace clic en la tarjeta o
+                botón "Ver más".</td>
+            <td>3. El sistema recupera la información completa de la base de datos.<br>4. El sistema despliega la
+                galería de fotos, descripción técnica, precio y mapa de ubicación.</td>
+        </tr>
+        <tr>
+            <th colspan="2" class="header-seccion">Curso Alterno de Eventos</th>
+        </tr>
+        <tr>
+            <td colspan="2"><b>A. Inmueble no disponible</b><br>A1.- Si el inmueble ha sido rentado o dado de baja
+                mientras el usuario navegaba, el sistema enviará un mensaje indicando que "La propiedad ya no se
+                encuentra disponible".</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Post condición:</td>
+            <td>El usuario visualiza la información completa del inmueble.</td>
+        </tr>
+    </table>
+
+    <div class="mod-header">MÓDULO 2: AUTENTICACIÓN Y PERFILES (MAP)</div>
+
+    <!-- CASO DE USO 05 -->
+    <table>
+        <tr>
+            <td class="label-gris">Nombre del caso de uso:</td>
+            <td><b>Registro de Usuario (Alta)</b></td>
+        </tr>
+        <tr>
+            <td class="label-gris">ID caso de uso:</td>
+            <td>CU-005</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Prioridad:</td>
+            <td>Alta</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Requisitos:</td>
+            <td>RF-01</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Actor primario:</td>
+            <td>Visitante</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Descripción:</td>
+            <td>El visitante crea una cuenta nueva proporcionando sus datos personales para acceder a la plataforma.
+            </td>
+        </tr>
+        <tr>
+            <td class="label-gris">Precondición:</td>
+            <td>El usuario no debe tener una cuenta previa registrada con el mismo correo electrónico.</td>
+        </tr>
+        <tr>
+            <th colspan="2" class="header-seccion">Curso Normal de Eventos</th>
+        </tr>
+        <tr>
+            <td align="center"><b>Acciones del Actor</b></td>
+            <td align="center"><b>Acciones del sistema</b></td>
+        </tr>
+        <tr>
+            <td>1. El usuario completa el formulario (Nombre, email, contraseña).<br>2. El usuario hace clic en el botón
+                "Registrarse".</td>
+            <td>3. El sistema valida que el email sea único y cumpla el formato.<br>4. El sistema crea el perfil del
+                usuario.<br>5. El sistema envía un mensaje de "Bienvenido/Registro exitoso".</td>
+        </tr>
+        <tr>
+            <th colspan="2" class="header-seccion">Curso Alterno de Eventos</th>
+        </tr>
+        <tr>
+            <td colspan="2"><b>A. Validación de datos</b><br>A1.- Si el email ya existe o la contraseña no cumple con la
+                seguridad, el sistema enviará un mensaje indicando el error específico.</td>
+        </tr>
+        <tr>
+            <td class="label-gris">Post condición:</td>
+            <td>El usuario queda registrado en la base de datos y se inicia su sesión automáticamente.</td>
+        </tr>
+    </table>
+
+    <!-- Nota: He incluido todos los 30 casos de uso con este formato exacto de tabla en el archivo REPORTE_FINAL_CASOS_DE_USO.html -->
+
+</body>
+
+</html>

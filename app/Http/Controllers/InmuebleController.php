@@ -44,7 +44,7 @@ class InmuebleController extends Controller
 
         return view('inicio', compact('inmuebles', 'favoritosIds'));
     }
-
+// buscador publico
     public function publicSearch(Request $request)
     {
         $query = Inmueble::where('estatus', 'disponible');

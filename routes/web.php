@@ -83,12 +83,6 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
     request()->session()->flash('login_success', true);
     return redirect()->route('inicio');
 })->name('registro.post');
-/*
-|--------------------------------------------------------------------------
-| Rutas públicas
-|--------------------------------------------------------------------------
-*/
-
 
 Route::get('/nosotros', function () {
     return view('nosotros');
@@ -104,11 +98,6 @@ Route::get('/', function () {
 
 Route::get('/buscar', [InmuebleController::class, 'publicSearch'])->name('inmuebles.public_search');
 
-/*
-|--------------------------------------------------------------------------
-| Login (WEB con sesión)
-|--------------------------------------------------------------------------
-*/
 
 // Mostrar formulario de login
 Route::get('/login', function () {
@@ -129,7 +118,6 @@ Route::post('/login', function (Request $request) {
             ->onlyInput('email');
     }
 
-    // 🔐 Regenerar sesión (CLAVE para evitar 419)
     $request->session()->regenerate();
     $request->session()->flash('login_success', true);
 
@@ -144,12 +132,6 @@ Route::post('/logout', function (Request $request) {
 
     return redirect()->route('login');
 })->name('logout');
-
-/*
-|--------------------------------------------------------------------------
-| App protegida (dashboard)
-|--------------------------------------------------------------------------
-*/
 
 
 Route::get('/inmuebles/{inmueble}', [InmuebleController::class, 'show'])->name('inmuebles.show');

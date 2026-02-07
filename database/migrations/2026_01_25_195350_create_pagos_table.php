@@ -14,8 +14,8 @@ return new class extends Migration {
                 ->constrained('contratos')
                 ->cascadeOnDelete();
 
-            $table->unsignedTinyInteger('mes');   // 1–12
-            $table->unsignedSmallInteger('anio'); // 2026, 2027, etc.
+            $table->unsignedTinyInteger('mes');
+            $table->unsignedSmallInteger('anio'); 
 
             $table->decimal('monto', 10, 2);
 
@@ -29,7 +29,6 @@ return new class extends Migration {
 
             $table->timestamps();
 
-            // 🔒 Evita pagos duplicados por mes
             $table->unique(['contrato_id', 'mes', 'anio']);
         });
     }
