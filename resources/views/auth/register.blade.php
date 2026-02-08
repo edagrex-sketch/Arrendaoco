@@ -1,18 +1,18 @@
 @extends('layouts.app')
 @section('title', 'Registro')
 @section('content')
-    <div class="min-h-screen flex items-center justify-center bg-[#F5F1E8] p-4 text-left">
+    <div class="flex items-center justify-center p-4 text-left">
         <!-- Card Container -->
-        <div class="w-full max-w-5xl flex bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div class="w-full max-w-5xl flex flex-col lg:flex-row bg-white rounded-3xl shadow-2xl overflow-hidden min-h-[700px]">
 
-            <!-- Left Side - Image -->
-        <div class="hidden lg:flex w-1/2 overflow-hidden relative">
-            <div class="absolute inset-0 bg-cover bg-center animate-scale-in" style="background-image: url('{{ asset('imagen2.png') }}');"></div>
-            <div class="absolute inset-0 bg-[#003049]/40 backdrop-brightness-75 flex flex-col items-center justify-center z-10 p-8 text-center">
-                <h2 class="text-4xl font-bold text-white mb-4 drop-shadow-lg animate-fade-in-up delay-200">Únete a ArrendaOco</h2>
-                <p class="text-white/90 text-lg font-medium drop-shadow-md animate-fade-in-up delay-300 max-w-xs">Comienza tu búsqueda hoy mismo.</p>
+            <!-- Side Image / Top Banner on Mobile -->
+            <div class="w-full lg:w-1/2 h-48 lg:h-auto overflow-hidden relative">
+                <div class="absolute inset-0 bg-cover bg-center animate-scale-in" style="background-image: url('{{ asset('imagen2.png') }}');"></div>
+                <div class="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-[#003049]/80 via-[#003049]/40 to-transparent flex flex-col items-center justify-center z-10 p-6 lg:p-12 text-center lg:text-left">
+                    <h2 class="text-2xl lg:text-4xl font-bold text-white mb-2 lg:mb-4 drop-shadow-lg animate-fade-in-up delay-200">Únete a ArrendaOco</h2>
+                    <p class="text-white/80 text-sm lg:text-lg font-medium drop-shadow-md animate-fade-in-up delay-300 max-w-xs">Comienza tu búsqueda hoy mismo.</p>
+                </div>
             </div>
-        </div>
         
         <!-- Right Side - Form -->
         <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12">

@@ -20,7 +20,7 @@ class InmuebleFactory extends Factory
             'titulo' => $this->faker->sentence(4), // Oración corta atractiva
             'direccion' => $this->faker->address(),
             'renta_mensual' => $this->faker->numberBetween(1500, 9000),
-            'tipo' => $this->faker->randomElement(['Casa', 'Departamento', 'Cuarto', 'Local Comercial']),
+            'tipo' => $this->faker->randomElement(['Casa', 'Departamento', 'Cuarto']),
             'habitaciones' => $this->faker->numberBetween(1, 5),
             'banos' => $this->faker->numberBetween(1, 3),
             'metros' => $this->faker->numberBetween(40, 250),

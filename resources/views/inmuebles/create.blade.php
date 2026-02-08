@@ -58,7 +58,6 @@
                                     <option value="Casa" {{ old('tipo') == 'Casa' ? 'selected' : '' }}>Casa</option>
                                     <option value="Departamento" {{ old('tipo') == 'Departamento' ? 'selected' : '' }}>
                                         Departamento</option>
-                                    <option value="Local" {{ old('tipo') == 'Local' ? 'selected' : '' }}>Local</option>
                                     <option value="Cuarto" {{ old('tipo') == 'Cuarto' ? 'selected' : '' }}>Cuarto</option>
                                 </select>
                             </div>

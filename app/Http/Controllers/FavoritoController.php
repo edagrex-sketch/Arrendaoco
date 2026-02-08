@@ -42,7 +42,7 @@ class FavoritoController extends Controller
             $agregado = true;
         }
 
-        if (request()->ajax()) {
+        if (request()->ajax() || request()->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'mensaje' => $mensaje,

@@ -51,10 +51,12 @@
                 <div class="item-icon">💬</div>
                 <div class="item-text"><b>Hablar</b> con IA</div>
             </button>
+            @unless(Auth::check() && (Auth::user()->tieneRol('admin') || Auth::user()->es_admin))
             <a href="{{ route('favoritos.index') }}" class="menu-item">
                 <div class="item-icon">❤️</div>
                 <div class="item-text">Ver mis <b>Favoritos</b></div>
             </a>
+            @endunless
             <button onclick="startMiniGuide()" class="menu-item">
                 <div class="item-icon">💡</div>
                 <div class="item-text">¿Cómo <b>rentar</b>?</div>

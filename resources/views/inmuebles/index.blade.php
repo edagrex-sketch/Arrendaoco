@@ -118,6 +118,10 @@
                     </div>
                 @endforeach
             </div>
+            {{-- Paginación --}}
+            <div class="mt-12">
+                {{ $inmuebles->links() }}
+            </div>
         @endif
     </div>
 
