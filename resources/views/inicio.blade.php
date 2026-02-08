@@ -13,7 +13,7 @@
                 Encuentra tu próximo hogar en Ocosingo
             </h2>
             <form action="{{ route('inmuebles.public_search') }}" method="GET"
-                class="flex flex-col gap-4 md:flex-row items-end">
+                class="flex flex-col gap-4 lg:flex-row items-end">
                 <div class="relative flex-1 w-full">
                     <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Ubicación</label>
                     <div class="relative">
@@ -30,22 +30,52 @@
                             class="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                     </div>
                 </div>
-                <div class="relative w-full md:w-48">
+
+                {{-- Select: Categoría --}}
+                <div class="relative w-full lg:w-44">
+                    <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Categoría</label>
+                    <div class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        <select name="categoria"
+                            class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                            <option value="">Todas</option>
+                            <option value="Casa" {{ request('categoria') == 'Casa' ? 'selected' : '' }}>Casa</option>
+                            <option value="Departamento" {{ request('categoria') == 'Departamento' ? 'selected' : '' }}>
+                                Departamento</option>
+                            <option value="Cuarto" {{ request('categoria') == 'Cuarto' ? 'selected' : '' }}>Cuarto</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="relative w-full lg:w-44">
                     <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Precio</label>
-                    <select name="rango_precio"
-                        class="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                        <option value="">Cualquiera</option>
-                        <option value="0-2000" {{ request('rango_precio') == '0-2000' ? 'selected' : '' }}>$0 - $2,000
-                        </option>
-                        <option value="2000-4000" {{ request('rango_precio') == '2000-4000' ? 'selected' : '' }}>$2,000 -
-                            $4,000</option>
-                        <option value="4000-6000" {{ request('rango_precio') == '4000-6000' ? 'selected' : '' }}>$4,000 -
-                            $6,000</option>
-                        <option value="6000+" {{ request('rango_precio') == '6000+' ? 'selected' : '' }}>$6,000+</option>
-                    </select>
+                    <div class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <select name="rango_precio"
+                            class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                            <option value="">Cualquiera</option>
+                            <option value="0-2000" {{ request('rango_precio') == '0-2000' ? 'selected' : '' }}>$0 - $2,000
+                            </option>
+                            <option value="2000-4000" {{ request('rango_precio') == '2000-4000' ? 'selected' : '' }}>$2,000 -
+                                $4,000</option>
+                            <option value="4000-6000" {{ request('rango_precio') == '4000-6000' ? 'selected' : '' }}>$4,000 -
+                                $6,000</option>
+                            <option value="6000+" {{ request('rango_precio') == '6000+' ? 'selected' : '' }}>$6,000+</option>
+                        </select>
+                    </div>
                 </div>
                 <button type="submit"
-                    class="inline-flex h-12 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 gap-2 w-full md:w-auto">
+                    class="inline-flex h-12 items-center justify-center rounded-md bg-[#003049] px-8 text-sm font-semibold text-white transition-all hover:bg-[#003049]/90 hover:scale-[1.02] shadow-md gap-2 w-full lg:w-auto">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -275,81 +305,105 @@
         </script>
 
         {{-- Grid de Tarjetas --}}
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
             @forelse ($inmuebles as $inmueble)
-                <div
-                    class="group relative overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all hover:shadow-lg hover:-translate-y-1">
-                    <div class="relative h-52 w-full overflow-hidden bg-muted">
+                <div class="group bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+                    {{-- Imagen --}}
+                    <div class="relative h-56 overflow-hidden">
                         @if ($inmueble->imagen)
                             <img src="{{ $inmueble->imagen }}" alt="{{ $inmueble->titulo }}"
-                                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         @else
-                            <div
-                                class="absolute inset-0 flex items-center justify-center text-muted-foreground bg-secondary/30 text-xs">
-                                Sin imagen</div>
+                            <div class="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300">
+                                <span class="text-xs font-bold uppercase tracking-widest">Sin imagen</span>
+                            </div>
                         @endif
-                        <div
-                            class="absolute top-3 right-3 bg-background/90 backdrop-blur-md px-3 py-1 rounded-full border border-border/50 text-sm font-bold text-primary shadow-sm">
-                            ${{ number_format($inmueble->renta_mensual ?? 0) }}<span
-                                class="text-[10px] text-muted-foreground">/mes</span>
+
+                        {{-- Badge de Precio --}}
+                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-slate-100">
+                            <span class="font-bold text-[#003049]">${{ number_format($inmueble->renta_mensual ?? 0) }}</span>
+                            <span class="text-[10px] text-slate-500">/ mes</span>
                         </div>
+
+                        {{-- Botón Favorito --}}
+                        @auth
+                            @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
+                            <div class="absolute top-4 left-4 z-10" x-data="{ 
+                                isFavorited: {{ in_array($inmueble->id, $favoritosIds) ? 'true' : 'false' }},
+                                loading: false,
+                                toggle() {
+                                    if (this.loading) return;
+                                    this.loading = true;
+                                    fetch('{{ route('favoritos.toggle', $inmueble) }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Accept': 'application/json',
+                                            'X-Requested-With': 'XMLHttpRequest'
+                                        }
+                                    })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if(data.success) {
+                                            this.isFavorited = data.agregado;
+                                        }
+                                    })
+                                    .finally(() => this.loading = false);
+                                }
+                            }">
+                                <button @click.prevent="toggle()" 
+                                    class="h-9 w-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white transition-all hover:bg-white hover:text-red-500"
+                                    :class="isFavorited ? 'bg-white !text-red-500 shadow-sm' : ''">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :fill="isFavorited ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            @endunless
+                        @endauth
                     </div>
 
-                    <div class="p-5">
-                        <h3 class="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors mb-1">
+                    {{-- Contenido --}}
+                    <div class="p-6">
+                        <h3 class="font-bold text-lg text-[#003049] line-clamp-1 mb-1">
                             {{ $inmueble->titulo }}</h3>
-                        <p class="text-xs text-muted-foreground mb-4 flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <p class="text-sm text-slate-400 flex items-center gap-1.5 mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             {{ $inmueble->direccion }}
                         </p>
 
-                        {{-- Características --}}
-                        <div class="flex gap-4 mt-2 border-t border-border pt-4">
-                            <div class="flex items-center gap-1.5" title="Habitaciones">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M7 13v-2h10v2h3v6h-2v-2H6v2H4v-6h3zm0-8h10a2 2 0 012 2v4H5V7a2 2 0 012-2zm2 2v2h2V7H9zm4 0v2h2V7h-2z" />
+                        <div class="flex items-center gap-4 py-4 border-t border-slate-100 mb-6">
+                            <div class="flex items-center gap-1.5 text-slate-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 11V9a3 3 0 013-3h10a3 3 0 013 3v2M4 11H2a1 1 0 00-1 1v3a2 2 0 002 2h1M20 11h2a1 1 0 011 1v3a2 2 0 01-2 2h-1M4 11h16v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM8 17v2M16 17v2" />
                                 </svg>
-                                <span class="text-sm font-bold text-foreground">{{ $inmueble->habitaciones }} <span
-                                        class="text-[10px] text-muted-foreground font-medium uppercase">Hab</span></span>
+                                <span class="text-sm font-bold">{{ $inmueble->habitaciones }} <span class="text-[10px] uppercase font-medium text-slate-400">Hab</span></span>
                             </div>
-                            <div class="flex items-center gap-1.5" title="Baños">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M4 11V8a1 1 0 011-1h1V4a2 2 0 012-2h8a2 2 0 012 2v3h1a1 1 0 011 1v3h-1v5a4 4 0 01-4 4H9a4 4 0 01-4-4v-5H4zm11-7H9v3h6V4zM7 11h10v3a2 2 0 01-2 2H9a2 2 0 01-2-2v-3z" />
+                            <div class="flex items-center gap-1.5 text-slate-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18v3a4 4 0 01-4 4H7a4 4 0 01-4-4v-3zM3 12h18M21 12v-1a2 2 0 00-2-2h-3M7 12V7a3 3 0 013-3h2M12 2v4M14 3l-2 2M10 3l2 2M6 19v2M18 19v2" />
                                 </svg>
-                                <span class="text-sm font-bold text-foreground">{{ $inmueble->banos }} <span
-                                        class="text-[10px] text-muted-foreground font-medium uppercase">Baño</span></span>
+                                <span class="text-sm font-bold">{{ $inmueble->banos }} <span class="text-[10px] uppercase font-medium text-slate-400">Baño</span></span>
                             </div>
-                            <div class="flex items-center gap-1.5" title="Metros">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                            <div class="flex items-center gap-1.5 text-slate-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                 </svg>
-                                <span class="text-sm font-bold text-foreground">{{ $inmueble->metros }} <span
-                                        class="text-[10px] text-muted-foreground font-medium uppercase">m²</span></span>
+                                <span class="text-sm font-bold">{{ number_format($inmueble->metros, 0) }} <span class="text-[10px] uppercase font-medium text-slate-400">m²</span></span>
                             </div>
                         </div>
 
-                        <div class="mt-8">
-                            <a href="{{ route('inmuebles.show', $inmueble) }}"
-                                class="flex w-full items-center justify-center rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-bold text-primary hover:bg-primary hover:text-white transition-all duration-300">
-                                Ver Detalles
-                            </a>
-                        </div>
+                        <a href="{{ route('inmuebles.show', $inmueble) }}"
+                            class="flex w-full py-3 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-[#003049] transition-all hover:bg-slate-200">
+                            Ver Detalles
+                        </a>
                     </div>
                 </div>
             @empty
-                <div class="col-span-full py-16 text-center text-muted-foreground">No hay propiedades disponibles.</div>
+                <div class="col-span-full py-16 text-center text-slate-400 font-medium uppercase tracking-widest opacity-50">No hay propiedades disponibles.</div>
             @endforelse
         </div>
     </section>

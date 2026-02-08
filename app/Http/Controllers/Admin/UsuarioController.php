@@ -11,9 +11,19 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class UsuarioController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $usuarios = Usuario::with('roles')->get();
+        $query = Usuario::with('roles');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nombre', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%");
+            });
+        }
+
+        $usuarios = $query->paginate(10)->withQueryString();
         return view('admin.usuarios.index', compact('usuarios'));
     }
 

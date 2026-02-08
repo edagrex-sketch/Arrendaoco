@@ -33,8 +33,6 @@
                             <option value="Casa" {{ $inmueble->tipo == 'Casa' ? 'selected' : '' }}>Casa</option>
                             <option value="Departamento" {{ $inmueble->tipo == 'Departamento' ? 'selected' : '' }}>
                                 Departamento</option>
-                            <option value="Local" {{ $inmueble->tipo == 'Local' ? 'selected' : '' }}>Local Comercial
-                            </option>
                             <option value="Cuarto" {{ $inmueble->tipo == 'Cuarto' ? 'selected' : '' }}>Cuarto</option>
                         </select>
                     </div>

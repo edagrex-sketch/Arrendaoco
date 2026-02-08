@@ -128,153 +128,133 @@
         </div>
     </section>
 
-    <section class="container mx-auto px-4 mb-16">
-
+    <section class="max-w-7xl mx-auto px-4 mb-20">
         @if ($inmuebles->isEmpty())
-            <div class="bg-white rounded-3xl p-20 text-center border-2 border-dashed border-slate-200">
-                <div
-                    class="bg-[#FDF0D5] w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 text-[#003049]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <div class="bg-white rounded-[3rem] p-20 text-center border border-slate-100 shadow-xl shadow-[#003049]/5 max-w-4xl mx-auto">
+                <div class="bg-slate-50 w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-8 text-[#003049] shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-[#003049] mb-2">No se encontraron resultados</h3>
-                <p class="text-muted-foreground text-lg mb-8">Intenta ajustar tus filtros de búsqueda para encontrar lo que
-                    buscas.</p>
+                <h3 class="text-3xl font-black text-[#003049] mb-4">No se encontraron resultados</h3>
+                <p class="text-slate-500 text-lg mb-10 max-w-md mx-auto">Intenta ajustar tus filtros de ubicación, precio o categoría para encontrar la propiedad ideal.</p>
                 <a href="{{ route('inmuebles.public_search') }}"
-                    class="text-[#C1121F] font-bold hover:underline flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                            clip-rule="evenodd" />
+                    class="inline-flex items-center justify-center px-10 py-4 bg-[#003049] text-white font-black rounded-full hover:scale-105 transition-all shadow-xl shadow-[#003049]/20 group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 group-hover:rotate-180 transition-transform duration-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
                     </svg>
-                    Seguir buscando
+                    Restablecer búsqueda
                 </a>
             </div>
         @else
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-2xl font-bold text-foreground">
-                    Estos son tus resultados
-                </h2>
-                <span class="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full">
-                    {{ $inmuebles->count() }} resultados
-                </span>
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 border-b border-slate-100 pb-8">
+                <div class="space-y-2">
+                    <span class="text-[10px] font-black text-[#64748B] uppercase tracking-[0.3em]">Resultados de búsqueda</span>
+                    <h2 class="text-4xl font-black text-[#003049] tracking-tight">
+                        Estos son tus resultados
+                    </h2>
+                </div>
+                <div class="bg-white px-6 py-2 rounded-full border border-slate-100 shadow-sm flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-sm font-black text-[#003049]">
+                        {{ $inmuebles->total() }} <span class="text-slate-400 font-bold uppercase text-[10px] ml-1">Propiedades</span>
+                    </span>
+                </div>
             </div>
 
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach ($inmuebles as $inmueble)
-                    <div
-                        class="group relative overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all hover:shadow-lg hover:-translate-y-1">
+                    <div class="group bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1">
                         {{-- Imagen --}}
-                        <div class="relative h-52 w-full overflow-hidden bg-muted">
+                        <div class="relative h-56 overflow-hidden">
                             @if ($inmueble->imagen)
                                 <img src="{{ $inmueble->imagen }}" alt="{{ $inmueble->titulo }}"
-                                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                             @else
-                                <div
-                                    class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground bg-secondary/30">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2 opacity-50"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    <span class="text-xs font-medium">Sin imagen</span>
+                                <div class="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300">
+                                    <span class="text-xs font-bold uppercase tracking-widest">Sin imagen</span>
                                 </div>
                             @endif
 
                             {{-- Badge de Precio --}}
-                            <div
-                                class="absolute top-3 right-3 bg-background/90 backdrop-blur-md px-3 py-1 rounded-full border border-border/50 shadow-sm">
-                                <span
-                                    class="font-bold text-primary">${{ number_format($inmueble->renta_mensual ?? 0) }}</span>
-                                <span class="text-xs text-muted-foreground">/mes</span>
+                            <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-slate-100">
+                                <span class="font-bold text-[#003049]">${{ number_format($inmueble->renta_mensual ?? 0) }}</span>
+                                <span class="text-[10px] text-slate-500">/ mes</span>
                             </div>
 
-                            {{-- Botón Favorito (RF-26 / RF-27) --}}
+                            {{-- Botón Favorito --}}
                             @auth
-                                <form action="{{ route('favoritos.toggle', $inmueble) }}" method="POST"
-                                    class="absolute top-3 left-3 z-10">
-                                    @csrf
-                                    <button type="submit"
-                                        class="w-9 h-9 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/50 text-foreground transition-all hover:scale-110 {{ in_array($inmueble->id, $favoritosIds) ? 'text-red-500' : 'text-muted-foreground' }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            class="h-5 w-5 {{ in_array($inmueble->id, $favoritosIds) ? 'fill-current' : '' }}"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
+                                <div class="absolute top-4 left-4 z-10" x-data="{ 
+                                    isFavorited: {{ in_array($inmueble->id, $favoritosIds) ? 'true' : 'false' }},
+                                    loading: false,
+                                    toggle() {
+                                        if (this.loading) return;
+                                        this.loading = true;
+                                        fetch('{{ route('favoritos.toggle', $inmueble) }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                'Accept': 'application/json',
+                                                'X-Requested-With': 'XMLHttpRequest'
+                                            }
+                                        })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            if(data.success) {
+                                                this.isFavorited = data.agregado;
+                                            }
+                                        })
+                                        .finally(() => this.loading = false);
+                                    }
+                                }">
+                                    <button @click.prevent="toggle()" 
+                                        class="h-9 w-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white transition-all hover:bg-white hover:text-red-500"
+                                        :class="isFavorited ? 'bg-white !text-red-500 shadow-sm' : ''">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :fill="isFavorited ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                         </svg>
                                     </button>
-                                </form>
+                                </div>
+                                @endunless
                             @endauth
                         </div>
 
-                        {{-- Contenido Tarjeta --}}
-                        <div class="p-5">
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <h3
-                                        class="font-semibold text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors">
-                                        {{ $inmueble->titulo ?? 'Inmueble' }}
-                                    </h3>
-                                    <div class="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        <span
-                                            class="line-clamp-1">{{ $inmueble->direccion ?? 'Ocosingo, Chiapas' }}</span>
-                                    </div>
-                                    @php $promedio = $inmueble->resenas->avg('puntuacion') ?? 0; @endphp
-                                    @if ($promedio > 0)
-                                        <div class="flex items-center gap-1 mt-1">
-                                            <svg class="w-3.5 h-3.5 text-yellow-500" fill="currentColor"
-                                                viewBox="0 0 20 20">
-                                                <path
-                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                            </svg>
-                                            <span
-                                                class="text-xs font-bold text-slate-700">{{ number_format($promedio, 1) }}</span>
-                                            <span
-                                                class="text-[10px] text-muted-foreground">({{ $inmueble->resenas->count() }})</span>
-                                        </div>
-                                    @endif
+                        {{-- Contenido --}}
+                        <div class="p-6">
+                            <h3 class="font-bold text-lg text-[#003049] line-clamp-1 mb-1">
+                                {{ $inmueble->titulo }}</h3>
+                            <p class="text-sm text-slate-400 flex items-center gap-1.5 mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                {{ $inmueble->direccion }}
+                            </p>
+
+                            <div class="flex items-center gap-4 py-4 border-t border-slate-100 mb-6">
+                                <div class="flex items-center gap-1.5 text-slate-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 11V9a3 3 0 013-3h10a3 3 0 013 3v2M4 11H2a1 1 0 00-1 1v3a2 2 0 002 2h1M20 11h2a1 1 0 011 1v3a2 2 0 01-2 2h-1M4 11h16v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM8 17v2M16 17v2" />
+                                    </svg>
+                                    <span class="text-sm font-bold">{{ $inmueble->habitaciones }} <span class="text-[10px] uppercase font-medium text-slate-400">Hab</span></span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-slate-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18v3a4 4 0 01-4 4H7a4 4 0 01-4-4v-3zM3 12h18M21 12v-1a2 2 0 00-2-2h-3M7 12V7a3 3 0 013-3h2M12 2v4M14 3l-2 2M10 3l2 2M6 19v2M18 19v2" />
+                                    </svg>
+                                    <span class="text-sm font-bold">{{ $inmueble->banos }} <span class="text-[10px] uppercase font-medium text-slate-400">Baño</span></span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-slate-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                    </svg>
+                                    <span class="text-sm font-bold">{{ number_format($inmueble->metros, 0) }} <span class="text-[10px] uppercase font-medium text-slate-400">m²</span></span>
                                 </div>
                             </div>
 
-                            {{-- Características --}}
-                            <div class="flex gap-4 mt-4 text-sm text-muted-foreground border-t border-border pt-4">
-                                <div class="flex items-center gap-1.5" title="Habitaciones">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 12h.01M12 12h.01M19 12h.01M6 21v-3a2 2 0 012-2h8a2 2 0 012 2v3" />
-                                    </svg>
-                                    <span>{{ $inmueble->habitaciones ?? 2 }}</span>
-                                </div>
-                                <div class="flex items-center gap-1.5" title="Baños">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
-                                    </svg>
-                                    <span>{{ $inmueble->banos ?? 1 }}</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 ml-auto">
-                                    <span
-                                        class="bg-secondary px-2 py-0.5 rounded text-xs font-medium text-secondary-foreground">
-                                        {{ ucfirst($inmueble->tipo ?? 'Casa') }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {{-- Botón Ver Detalles --}}
                             <a href="{{ route('inmuebles.show', $inmueble) }}"
-                                class="mt-4 flex w-full items-center justify-center rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                                class="flex w-full py-3 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-[#003049] transition-all hover:bg-slate-200">
                                 Ver Detalles
                             </a>
                         </div>

@@ -11,13 +11,39 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class InmuebleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->search;
+
         if (auth()->user()->es_admin || auth()->user()->tieneRol('admin')) {
-            $inmuebles = Inmueble::with('propietario')->get();
+            $query = Inmueble::with('propietario');
+
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('titulo', 'like', "%$search%")
+                      ->orWhere('direccion', 'like', "%$search%")
+                      ->orWhere('tipo', 'like', "%$search%")
+                      ->orWhereHas('propietario', function($sq) use ($search) {
+                          $sq->where('nombre', 'like', "%$search%")
+                             ->orWhere('email', 'like', "%$search%");
+                      });
+                });
+            }
+
+            $inmuebles = $query->paginate(10)->withQueryString();
             return view('admin.inmuebles.index', compact('inmuebles'));
         } else {
-            $inmuebles = Inmueble::where('propietario_id', auth()->id())->get();
+            $query = Inmueble::where('propietario_id', auth()->id());
+            
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('titulo', 'like', "%$search%")
+                      ->orWhere('direccion', 'like', "%$search%")
+                      ->orWhere('tipo', 'like', "%$search%");
+                });
+            }
+
+            $inmuebles = $query->paginate(10)->withQueryString();
             return view('inmuebles.index', compact('inmuebles'));
         }
     }
@@ -101,6 +127,7 @@ class InmuebleController extends Controller
 
     public function show(Inmueble $inmueble)
     {
+        $inmueble->load(['propietario', 'resenas.usuario']);
         $imagenes = DB::table('imagenes_inmuebles')->where('inmueble_id', $inmueble->id)->get();
         return view('inmuebles.show', compact('inmueble', 'imagenes'));
     }
