@@ -5,15 +5,48 @@
 @section('content')
     <div class="max-w-5xl mx-auto px-4 py-8 lg:py-12">
         <div class="bg-white rounded-[3rem] shadow-2xl shadow-[#003049]/10 border border-slate-100 overflow-hidden">
-            {{-- Imagen Principal --}}
-            <div class="relative group aspect-[21/9] overflow-hidden bg-muted">
-                @if ($inmueble->imagen)
-                    <img src="{{ $inmueble->imagen }}" alt="{{ $inmueble->titulo }}"
-                        class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
-                @endif
-                <div class="absolute top-8 left-8 bg-white/95 backdrop-blur-md px-6 py-3 rounded-2xl shadow-2xl border border-white/20">
+            {{-- Imagen Principal con Carrusel Automático --}}
+            <div class="relative group aspect-[21/9] overflow-hidden bg-slate-200" 
+                 x-data="{ 
+                    active: 0, 
+                    images: [
+                        '{{ $inmueble->imagen }}',
+                        'https://images.unsplash.com/photo-1600585154340-be6199f7d009?q=80&w=2070&auto=format&fit=crop',
+                        'https://images.unsplash.com/photo-1600607687940-c524774d358e?q=80&w=2070&auto=format&fit=crop'
+                    ],
+                    init() {
+                        setInterval(() => {
+                            this.active = (this.active + 1) % this.images.length;
+                        }, 5000);
+                    }
+                 }">
+                <template x-for="(img, index) in images" :key="index">
+                    <img :src="img" 
+                         x-show="active === index"
+                         x-transition:enter="transition ease-out duration-1000"
+                         x-transition:enter-start="opacity-0 scale-110"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-1000"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         class="absolute inset-0 w-full h-full object-cover">
+                </template>
+                
+                {{-- Overlay de Gradiente --}}
+                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+
+                <div class="absolute top-8 left-8 bg-white/95 backdrop-blur-md px-6 py-3 rounded-2xl shadow-2xl border border-white/20 z-10 transition-transform group-hover:scale-105">
                     <span class="text-[#003049] font-black text-3xl">${{ number_format($inmueble->renta_mensual) }}</span>
                     <span class="text-muted-foreground text-sm font-bold uppercase tracking-widest ml-1">/ mes</span>
+                </div>
+
+                {{-- Indicadores del Carrusel --}}
+                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                    <template x-for="(img, index) in images" :key="index">
+                        <button @click="active = index" 
+                                class="h-1.5 rounded-full transition-all duration-500"
+                                :class="active === index ? 'w-8 bg-white' : 'w-2 bg-white/40'"></button>
+                    </template>
                 </div>
             </div>
 
@@ -99,238 +132,254 @@
                             </div>
                         </div>
 
-                        <div class="mt-8">
-                            <a href="mailto:{{ $inmueble->propietario->email }}"
-                                class="flex w-full items-center justify-center rounded-full bg-[#003049] py-5 text-white font-black shadow-2xl shadow-[#003049]/30 transition-all duration-500 hover:-translate-y-1.5 group/btn gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white transition-transform group-hover/btn:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                                <span class="uppercase tracking-[0.2em] text-sm leading-none">Contactar</span>
+                        <div class="mt-8 space-y-4">
+                            @if(Auth::id() === $inmueble->propietario_id)
+                                {{-- Botones de Gestión para el Dueño --}}
+                                <a href="{{ route('inmuebles.edit', $inmueble) }}"
+                                    class="flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#003049] to-[#004e7a] py-4 text-white font-bold shadow-xl shadow-[#003049]/20 transition-all duration-300 hover:-translate-y-1 hover:brightness-110 active:scale-95 group/btn gap-3">
+                                    <div class="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center transition-transform group-hover/btn:scale-110">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </div>
+                                    <span class="uppercase tracking-[0.15em] text-xs leading-none">Editar Propiedad</span>
+                                </a>
+
+                                <form id="delete-form-{{ $inmueble->id }}" action="{{ route('inmuebles.destroy', $inmueble) }}" method="POST" class="hidden">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                                <button type="button" onclick="confirmDelete({{ $inmueble->id }})"
+                                    class="flex w-full items-center justify-center rounded-2xl bg-white border-2 border-red-50 py-4 text-red-600 font-bold shadow-lg shadow-red-500/5 transition-all duration-300 hover:bg-red-50 hover:border-red-100/50 active:scale-95 group/del gap-3">
+                                    <div class="h-10 w-10 rounded-xl bg-red-50 flex items-center justify-center transition-colors group-hover/del:bg-red-100">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </div>
+                                    <span class="uppercase tracking-[0.15em] text-xs leading-none">Eliminar Publicación</span>
+                                </button>
+                            @else
+                                @auth
+                                    {{-- Botón de Contacto para Visitantes --}}
+                                    <a href="mailto:{{ $inmueble->propietario->email }}"
+                                        class="flex w-full items-center justify-center rounded-2xl bg-[#003049] py-5 text-white font-black shadow-2xl shadow-[#003049]/30 transition-all duration-500 hover:-translate-y-1.5 group/btn gap-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white transition-transform group-hover/btn:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                        <span class="uppercase tracking-[0.2em] text-sm leading-none">Contactar</span>
+                                    </a>
+                                @else
+                                    <div class="bg-[#003049]/5 border-2 border-dashed border-[#003049]/20 p-6 rounded-3xl text-center">
+                                        <p class="text-[#003049] font-bold text-sm mb-3">Para contactar al dueño debes iniciar sesión</p>
+                                        <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-xs font-black text-white bg-[#003049] px-6 py-3 rounded-xl hover:scale-105 transition-all uppercase tracking-widest">
+                                            🔑 Iniciar Sesión para Contactar
+                                        </a>
+                                    </div>
+                                @endauth
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+
+
+                {{-- Sección de Reseñas --}}
+                <div class="mt-16 pt-12 border-t border-slate-100/80">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                        <div>
+                            <h2 class="text-3xl font-black text-[#003049] tracking-tight">Experiencias y Reseñas</h2>
+                            <p class="text-slate-500 font-medium mt-1">Lo que otros dicen sobre esta propiedad.</p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-amber-50 px-5 py-3 rounded-2xl border border-amber-100 self-start md:self-auto">
+                            <span class="text-2xl font-black text-amber-600">{{ number_format($inmueble->resenas->avg('puntuacion') ?? 0, 1) }}</span>
+                            <div class="flex text-amber-400">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ $i <= ($inmueble->resenas->avg('puntuacion') ?? 0) ? '' : 'opacity-30' }}" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                @endfor
+                            </div>
+                            <span class="text-xs font-bold text-amber-700/60 uppercase tracking-widest pl-2 border-l border-amber-200">{{ $inmueble->resenas->count() }} Opiniones</span>
+                        </div>
+                    </div>
+
+                    {{-- Formulario de Nueva Reseña --}}
+                    @auth
+                        @if(Auth::id() !== $inmueble->propietario_id)
+                            <div class="mb-12 bg-[#003049]/5 rounded-[2.5rem] p-8 md:p-10 border border-[#003049]/10">
+                                <h3 class="text-xl font-black text-[#003049] mb-6 flex items-center gap-3">
+                                    <span class="flex h-10 w-10 items-center justify-center bg-[#003049] text-white rounded-xl shadow-lg">✍️</span>
+                                    Cuéntanos tu experiencia
+                                </h3>
+                                <form action="{{ route('resenas.store', $inmueble) }}" method="POST" class="space-y-6">
+                                    @csrf
+                                    <div class="flex flex-col gap-4">
+                                        <label class="text-xs font-black text-[#003049] uppercase tracking-[0.2em]">Tu Calificación</label>
+                                        <div class="flex gap-2" x-data="{ rating: 0, hover: 0 }">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <button type="button" 
+                                                    @click="rating = {{ $i }}" 
+                                                    @mouseenter="hover = {{ $i }}" 
+                                                    @mouseleave="hover = 0"
+                                                    class="transition-all duration-300 transform hover:scale-125 focus:outline-none">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" :class="(hover || rating) >= {{ $i }} ? 'text-amber-400' : 'text-slate-200'" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                </button>
+                                            @endfor
+                                            <input type="hidden" name="puntuacion" :value="rating" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-3">
+                                        <label class="text-xs font-black text-[#003049] uppercase tracking-[0.2em]">Comentario</label>
+                                        <textarea name="comentario" rows="4" required
+                                            placeholder="¿Qué te pareció la propiedad y la atención del dueño?"
+                                            class="w-full rounded-[1.5rem] border-slate-200 bg-white/50 backdrop-blur-sm p-5 focus:ring-4 focus:ring-[#003049]/10 focus:border-[#003049] transition-all outline-none text-slate-700"></textarea>
+                                    </div>
+
+                                    <button type="submit" 
+                                        class="w-full md:w-auto px-10 py-4 bg-[#003049] text-white font-black rounded-2xl shadow-xl shadow-[#003049]/20 hover:-translate-y-1 hover:brightness-110 transition-all uppercase tracking-widest text-xs">
+                                        Publicar Reseña
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            <div class="mb-12 bg-amber-50 rounded-[2.5rem] p-8 text-center border border-amber-100">
+                                <p class="text-amber-700 font-bold mb-1">👑 Estás viendo tu propia publicación</p>
+                                <p class="text-amber-600 text-xs">Los dueños no pueden calificar sus propias propiedades.</p>
+                            </div>
+                        @endif
+                    @else
+                        <div class="mb-12 bg-slate-100/50 rounded-[2.5rem] p-8 text-center border-2 border-dashed border-slate-200">
+                            <p class="text-[#003049] font-bold mb-4">¿Quieres compartir tu experiencia?</p>
+                            <a href="{{ route('login') }}" class="inline-block px-8 py-3 bg-[#003049] text-white font-black rounded-2xl shadow-lg hover:-translate-y-1 transition-all uppercase tracking-widest text-xs">
+                                Inicia sesión para calificar
                             </a>
                         </div>
-                    </div>
-                </div>
+                    @endauth
 
-                {{-- Radar de Servicios --}}
-                <div class="space-y-10 pt-8 border-t border-slate-100/80">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-3xl font-extrabold text-[#003049] flex items-center gap-4">
-                            <span class="text-3xl">📡</span> Radar de Servicios Cercanos
-                        </h3>
-                        <span class="text-xs bg-primary/10 text-primary px-4 py-1.5 rounded-full font-black tracking-widest uppercase">Escaneo en tiempo real</span>
-                    </div>
-                    <div id="nearby-services" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="flex items-center gap-4 text-muted-foreground italic text-sm py-6 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200 px-8">
-                            <div class="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                            Analizando entorno de la propiedad...
-                        </div>
-                    </div>
-                </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @forelse($inmueble->resenas as $resena)
+                            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="flex items-center gap-4 mb-6">
+                                    <div class="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500 font-black text-xl overflow-hidden shadow-inner">
+                                        @if($resena->usuario->foto_perfil)
+                                            <img src="{{ asset('storage/' . $resena->usuario->foto_perfil) }}" class="h-full w-full object-cover">
+                                        @else
+                                            {{ substr($resena->usuario->nombre, 0, 1) }}
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <span class="block font-black text-[#003049] leading-tight">{{ $resena->usuario->nombre }}</span>
+                                        <div class="flex text-amber-400 mt-0.5 scale-75 origin-left">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ $i <= $resena->puntuacion ? '' : 'opacity-30' }}" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                    <span class="ml-auto text-[10px] font-bold text-slate-300 uppercase tracking-widest">{{ $resena->created_at->diffForHumans() }}</span>
+                                </div>
+                                <div class="space-y-4">
+                                    <p class="text-slate-600 leading-relaxed italic text-sm">"{{ $resena->comentario }}"</p>
+                                    
+                                    @if(Auth::id() === $resena->usuario_id)
+                                        <div class="flex gap-6 pt-6 mt-2 border-t border-slate-50" x-data="{ editing: false, comentario: '{{ $resena->comentario }}', puntuacion: {{ $resena->puntuacion }} }">
+                                            <button @click="editing = !editing" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] hover:text-[#003049] transition-all group/edit">
+                                                <div class="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover/edit:bg-[#003049]/5 transition-colors">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                </div>
+                                                <span x-text="editing ? 'Cerrar' : 'Editar Reseña'"></span>
+                                            </button>
+                                            
+                                            <form id="delete-resena-{{ $resena->id }}" action="{{ route('resenas.destroy', $resena) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" onclick="confirmDeleteResena({{ $resena->id }})" 
+                                                    class="flex items-center gap-2 text-[10px] font-black text-red-200/80 uppercase tracking-[0.15em] hover:text-red-500 transition-all group/del">
+                                                    <div class="h-8 w-8 rounded-lg bg-red-50/30 flex items-center justify-center group-hover/del:bg-red-50 transition-colors">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </div>
+                                                    Eliminar
+                                                </button>
+                                            </form>
 
-                {{-- Ubicación Exacta --}}
-                <div class="space-y-10 pt-8 border-t border-slate-100/80">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <h3 class="text-3xl font-extrabold text-[#003049] flex items-center gap-4">
-                            <span class="text-3xl text-red-500">📍</span> Ubicación en Mapa
-                        </h3>
-                        <div class="bg-primary/5 border border-primary/10 px-6 py-2.5 rounded-2xl flex items-center gap-3">
-                            <span class="animate-pulse text-lg">💡</span>
-                            <span class="text-xs text-primary font-black uppercase tracking-widest">Haz clic en cualquier punto para medir tiempos de llegada</span>
-                        </div>
-                    </div>
-
-                    <div class="relative group/map rounded-[3rem] overflow-hidden ring-1 ring-slate-200 shadow-inner">
-                        <div id="map" class="w-full h-[550px] bg-slate-100 z-10"></div>
-
-                        {{-- Resultados de distancia flotantes --}}
-                        <div id="distance-result"
-                            class="hidden absolute bottom-10 right-10 w-96 bg-white/95 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-[#003049]/10 shadow-[0_32px_64px_-16px_rgba(0,48,73,0.3)] z-[1000] animate-in fade-in zoom-in-95 duration-500">
-                            <div class="flex items-center justify-between mb-8">
-                                <span class="text-[11px] font-black text-[#4F6D7A] uppercase tracking-[0.25em]">⏱️ Análisis de Tiempo</span>
-                                <button onclick="clearUserMarker()" class="p-2 rounded-xl hover:bg-red-50 text-red-400 transition-all hover:rotate-90">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            {{-- Mini Formulario de Edición --}}
+                                            <div x-show="editing" x-transition class="fixed inset-0 bg-[#003049]/40 backdrop-blur-sm z-[2000] flex items-center justify-center p-4">
+                                                <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl" @click.away="editing = false">
+                                                    <h4 class="text-xl font-black text-[#003049] mb-6">Actualizar Reseña</h4>
+                                                    <form action="{{ route('resenas.update', $resena) }}" method="POST" class="space-y-6">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <div class="flex flex-col gap-2">
+                                                            <label class="text-[10px] font-black text-[#003049] uppercase tracking-widest">Nueva Calificación</label>
+                                                            <div class="flex gap-1">
+                                                                <template x-for="i in 5">
+                                                                    <button type="button" @click="puntuacion = i" class="transition-transform hover:scale-125">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" :class="puntuacion >= i ? 'text-amber-400' : 'text-slate-200'" viewBox="0 0 20 20" fill="currentColor">
+                                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </template>
+                                                                <input type="hidden" name="puntuacion" :value="puntuacion">
+                                                            </div>
+                                                        </div>
+                                                        <textarea name="comentario" x-model="comentario" rows="4" class="w-full rounded-2xl border-slate-200 bg-slate-50 p-4 text-sm focus:ring-2 focus:ring-[#003049] outline-none"></textarea>
+                                                        <div class="flex gap-4">
+                                                            <button type="submit" class="flex-1 bg-[#003049] text-white font-black py-4 rounded-xl text-xs uppercase tracking-widest">Guardar Cambios</button>
+                                                            <button type="button" @click="editing = false" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl text-xs uppercase tracking-widest">Cerrar</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-span-full py-16 flex flex-col items-center justify-center text-center bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-200">
+                                <div class="h-20 w-20 bg-white rounded-3xl flex items-center justify-center text-slate-200 mb-4 shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                     </svg>
-                                </button>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="flex items-center gap-6 bg-[#F4F7F9] p-5 rounded-3xl border border-[#E5EDF2] transition-transform hover:scale-[1.02]">
-                                    <div class="h-14 w-14 bg-white rounded-2xl shadow-sm flex items-center justify-center text-3xl">🚶</div>
-                                    <div>
-                                        <span class="block text-[10px] font-black text-[#4F6D7A] uppercase tracking-widest mb-1">Caminando</span>
-                                        <span id="walk-time" class="block text-2xl font-black text-[#003049]">-- min</span>
-                                    </div>
                                 </div>
-                                <div class="flex items-center gap-6 bg-[#F4F7F9] p-5 rounded-3xl border border-[#E5EDF2] transition-transform hover:scale-[1.02]">
-                                    <div class="h-14 w-14 bg-white rounded-2xl shadow-sm flex items-center justify-center text-3xl">🚕</div>
-                                    <div>
-                                        <span class="block text-[10px] font-black text-[#4F6D7A] uppercase tracking-widest mb-1">En Taxi / Auto</span>
-                                        <span id="taxi-time" class="block text-2xl font-black text-[#003049]">-- min</span>
-                                    </div>
-                                </div>
+                                <h3 class="text-xl font-bold text-slate-400">Aún no hay reseñas</h3>
+                                <p class="text-slate-400 text-sm max-w-xs mt-2 font-medium">Sé el primero en rentar esta propiedad y compartir tu experiencia.</p>
                             </div>
-                        </div>
+                        @endforelse
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>        </div>
-    </div>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        var userMarker;
-        var map;
-
-        function clearUserMarker() {
-            if (userMarker && map) {
-                map.removeLayer(userMarker);
-                userMarker = null;
-                document.getElementById('distance-result').classList.add('hidden');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            var lat = {{ $inmueble->latitud ?? 16.9068 }};
-            var lng = {{ $inmueble->longitud ?? -92.0941 }};
-
-            map = L.map('map').setView([lat, lng], 16);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            L.marker([lat, lng]).addTo(map).bindPopup("<b>{{ $inmueble->titulo }}</b>");
-
-            // Lógica de cálculo de distancias
-            var userIcon = L.divIcon({
-                html: '📍',
-                className: 'user-marker-icon',
-                iconSize: [30, 30],
-                iconAnchor: [15, 30]
-            });
-
-            map.on('click', function(e) {
-                if (userMarker) {
-                    map.removeLayer(userMarker);
-                }
-
-                userMarker = L.marker(e.latlng, {
-                        icon: userIcon,
-                        draggable: true
-                    }).addTo(map)
-                    .bindPopup("<b>📍 Tu Referencia</b>").openPopup();
-
-                updateDistance(e.latlng);
-
-                userMarker.on('dragend', function(event) {
-                    updateDistance(event.target.getLatLng());
-                });
-            });
-
-            function updateDistance(userLoc) {
-                var propLoc = L.latLng(lat, lng);
-                var distance = userLoc.distanceTo(propLoc);
-
-                var walkTime = Math.round(distance / 70);
-                var taxiTime = Math.round(distance / 250) + 2;
-
-                document.getElementById('distance-result').classList.remove('hidden');
-                document.getElementById('walk-time').innerText = walkTime + ' min';
-                document.getElementById('taxi-time').innerText = taxiTime + ' min';
-            }
-
-            async function scanEnvironment() {
-                const query =
-                    `[out:json];(node["amenity"~"hospital|pharmacy|clinic|doctors|school|university|kindergarten|taxi|bus_station|bus_stop|market|supermarket|bank|atm"](around:1000,${lat},${lng}););out body;`;
-                const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-
-                try {
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    const container = document.getElementById('nearby-services');
-                    container.innerHTML = '';
-
-                    const categories = {
-                        'hospital': {
-                            icon: '🏥',
-                            label: 'Centro de Salud'
-                        },
-                        'pharmacy': {
-                            icon: '💊',
-                            label: 'Farmacia'
-                        },
-                        'clinic': {
-                            icon: '🏥',
-                            label: 'Clínica'
-                        },
-                        'school': {
-                            icon: '🎓',
-                            label: 'Escuela'
-                        },
-                        'university': {
-                            icon: '🎓',
-                            label: 'Universidad'
-                        },
-                        'taxi': {
-                            icon: '🚕',
-                            label: 'Sitio de Taxis'
-                        },
-                        'bus_station': {
-                            icon: '🚌',
-                            label: 'Terminal de Autobuses'
-                        },
-                        'bus_stop': {
-                            icon: '🚐',
-                            label: 'Parada de Colectivo'
-                        },
-                        'supermarket': {
-                            icon: '🛒',
-                            label: 'Tienda/Super'
-                        },
-                        'bank': {
-                            icon: '🏦',
-                            label: 'Banco'
-                        },
-                        'atm': {
-                            icon: '🏧',
-                            label: 'Cajero Automático'
-                        }
-                    };
-
-                    if (data.elements.length === 0) {
-                        container.innerHTML =
-                            '<p class="col-span-full text-muted-foreground text-sm italic">No se encontraron servicios registrados cerca de esta ubicación en Ocosingo.</p>';
-                        return;
+                {{-- Leaflet y Scripts de Mapa (SUSPENDIDO) --}}
+                {{-- 
+                <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                <script> ... </script>
+                --}}
+                <script>
+                    function confirmDeleteResena(id) {
+                        Swal.fire({
+                            title: '¿Eliminar reseña?',
+                            text: "Esta acción no se puede deshacer.",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#003049',
+                            cancelButtonColor: '#ff4444',
+                            confirmButtonText: 'Sí, eliminar',
+                            cancelButtonText: 'Cancelar',
+                            borderRadius: '1.5rem',
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                document.getElementById('delete-resena-' + id).submit();
+                            }
+                        })
                     }
-
-                    data.elements.slice(0, 8).forEach(el => {
-                        const type = el.tags.amenity;
-                        const info = categories[type] || {
-                            icon: '📍',
-                            label: 'Servicio'
-                        };
-                        let name = el.tags.name;
-
-                        if (!name || name.toLowerCase() === type.toLowerCase()) {
-                            name = info.label;
-                        }
-
-                        const div = document.createElement('div');
-                        div.className =
-                            "flex items-center gap-3 p-4 bg-white rounded-2xl border border-primary/5 shadow-sm";
-                        div.innerHTML = `
-                            <span class="text-2xl">${info.icon}</span>
-                            <div>
-                                <span class="block text-[9px] font-black text-primary uppercase tracking-widest">${info.label}</span>
-                                <span class="block text-sm text-[#003049] font-bold leading-tight">${name}</span>
-                            </div>
-                        `;
-                        container.appendChild(div);
-                    });
-                } catch (e) {
-                    container.innerHTML = '<p class="text-xs text-red-100">Error al escanear mapa.</p>';
-                }
-            }
-            scanEnvironment();
-        });
-    </script>
-    <x-arrendito />
+                </script>
+    {{-- <x-arrendito /> --}}
 @endsection

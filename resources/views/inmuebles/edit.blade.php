@@ -23,7 +23,7 @@
                         class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] focus:border-transparent outline-none transition-all">
                 </div>
 
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {{-- Tipo --}}
                     <div>
                         <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Tipo de
@@ -53,14 +53,17 @@
                         <input type="text" name="direccion" id="direccion-input" value="{{ $inmueble->direccion }}"
                             required
                             class="flex-1 px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
+                        {{-- 
                         <button type="button" onclick="buscarDireccion()"
                             class="bg-[#003049] text-white px-6 py-3 rounded-xl hover:bg-[#003049]/90 transition-all font-bold flex items-center gap-2">
                             🔍 Buscar en mapa
                         </button>
+                        --}}
                     </div>
                 </div>
 
-                {{-- 🗺️ Selector de Mapa --}}
+                {{-- 🗺️ Selector de Mapa (SUSPENDIDO) --}}
+                {{-- 
                 <div>
                     <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Ubicación en el
                         mapa</label>
@@ -70,8 +73,10 @@
                     <input type="hidden" name="latitud" id="lat-input" value="{{ $inmueble->latitud }}">
                     <input type="hidden" name="longitud" id="longitud-input" value="{{ $inmueble->longitud }}">
                 </div>
+                --}}
 
-                {{-- Leaflet --}}
+                {{-- Leaflet y Scripts de Mapa (SUSPENDIDO) --}}
+                {{-- 
                 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
                 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
                 <script>
@@ -135,6 +140,7 @@
                         }
                     }
                 </script>
+                --}}
 
                 <div class="grid grid-cols-3 gap-6">
                     <div>
