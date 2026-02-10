@@ -16,23 +16,23 @@ use App\Http\Controllers\ArrenditoChatController;
 // Test Gemini API
 Route::get('/test-gemini', function () {
     $apiKey = env('GEMINI_API_KEY');
-    
+
     if (!$apiKey) {
         return response()->json(['error' => 'No API key found']);
     }
-    
+
     try {
         $response = Http::timeout(10)->withHeaders([
             'Content-Type' => 'application/json',
         ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}", [
-            'contents' => [
-                [
-                    'parts' => [
-                        ['text' => 'Say hello in one word']
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => 'Say hello in one word']
+                            ]
+                        ]
                     ]
-                ]
-            ]
-        ]);
+                ]);
 
         return response()->json([
             'status' => $response->status(),
@@ -87,6 +87,14 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
 Route::get('/nosotros', function () {
     return view('nosotros');
 })->name('nosotros');
+
+Route::get('/terminos', function () {
+    return view('terminos');
+})->name('terminos');
+
+Route::get('/privacidad', function () {
+    return view('privacidad');
+})->name('privacidad');
 
 Route::get('/', function () {
     if (Auth::check()) {

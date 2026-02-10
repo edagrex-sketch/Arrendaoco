@@ -26,7 +26,8 @@
     <div class="min-h-screen flex flex-col">
 
         <!-- Barra de Navegación -->
-        <nav class="bg-[#003049] border-b border-[#003049] sticky top-0 z-50 shadow-lg" x-data="{ mobileMenuOpen: false }">
+        <nav class="bg-[#003049] border-b border-[#003049] sticky top-0 z-50 shadow-lg"
+            x-data="{ mobileMenuOpen: false }">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <!-- 1. Logo y Nombre -->
                 <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
@@ -45,10 +46,10 @@
                     </a>
                     @auth
                         @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
-                        <a href="{{ route('favoritos.index') }}"
-                            class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
-                            Favoritos
-                        </a>
+                            <a href="{{ route('favoritos.index') }}"
+                                class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
+                                Favoritos
+                            </a>
                         @endunless
                     @endauth
                     @if (Auth::check() && Auth::user()->tieneRol('propietario'))
@@ -69,9 +70,11 @@
                         @auth
                             <!-- Usuario: Hola + Botón Publicar -->
                             <span class="text-sm text-gray-200 hidden sm:inline flex items-center gap-2">
-                                <a href="{{ route('perfil.index') }}" class="flex items-center gap-2 font-bold text-white hover:underline">
+                                <a href="{{ route('perfil.index') }}"
+                                    class="flex items-center gap-2 font-bold text-white hover:underline">
                                     @if (Auth::user()->foto_perfil)
-                                        <img src="{{ asset('storage/' . Auth::user()->foto_perfil) }}" alt="Perfil" class="h-8 w-8 rounded-full object-cover border-2 border-white/20">
+                                        <img src="{{ asset('storage/' . Auth::user()->foto_perfil) }}" alt="Perfil"
+                                            class="h-8 w-8 rounded-full object-cover border-2 border-white/20">
                                     @endif
                                     {{ Auth::user()->nombre }}
                                 </a>
@@ -141,13 +144,17 @@
 
                     {{-- Hamburger Button --}}
                     <div class="flex md:hidden">
-                        <button @click="mobileMenuOpen = !mobileMenuOpen" 
+                        <button @click="mobileMenuOpen = !mobileMenuOpen"
                             class="text-white hover:text-[#669BBC] transition-colors p-2 rounded-lg focus:outline-none">
-                            <svg x-show="!mobileMenuOpen" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                            <svg x-show="!mobileMenuOpen" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16m-7 6h7" />
                             </svg>
-                            <svg x-show="mobileMenuOpen" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" x-cloak>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            <svg x-show="mobileMenuOpen" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" x-cloak>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
@@ -155,36 +162,32 @@
             </div>
 
             <!-- Menú Móvil (Dropdown) -->
-            <div x-show="mobileMenuOpen" 
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 -translate-y-4"
-                x-transition:enter-end="opacity-100 translate-y-0"
+            <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
                 x-transition:leave="transition ease-in duration-150"
-                x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 -translate-y-4"
+                x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-4"
                 class="md:hidden bg-[#002538] border-t border-white/5 shadow-2xl overflow-hidden"
-                @click.away="mobileMenuOpen = false"
-                x-cloak>
+                @click.away="mobileMenuOpen = false" x-cloak>
                 <div class="px-4 pt-4 pb-8 space-y-2">
-                    <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}" 
+                    <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
                         class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
                         Inicio
                     </a>
                     @auth
                         @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
-                        <a href="{{ route('favoritos.index') }}" 
-                            class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
-                            Favoritos
-                        </a>
+                            <a href="{{ route('favoritos.index') }}"
+                                class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
+                                Favoritos
+                            </a>
                         @endunless
                     @endauth
                     @if (Auth::check() && Auth::user()->tieneRol('propietario'))
-                        <a href="{{ route('inmuebles.index') }}" 
+                        <a href="{{ route('inmuebles.index') }}"
                             class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
                             Mis Propiedades
                         </a>
                     @endif
-                    <a href="{{ route('nosotros') }}" 
+                    <a href="{{ route('nosotros') }}"
                         class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
                         Nosotros
                     </a>
@@ -193,43 +196,49 @@
                         @auth
                             <div class="flex items-center gap-3 px-4 py-2">
                                 @if (Auth::user()->foto_perfil)
-                                    <img src="{{ asset('storage/' . Auth::user()->foto_perfil) }}" alt="Perfil" class="h-12 w-12 rounded-full border-2 border-[#669BBC]">
+                                    <img src="{{ asset('storage/' . Auth::user()->foto_perfil) }}" alt="Perfil"
+                                        class="h-12 w-12 rounded-full border-2 border-[#669BBC]">
                                 @else
-                                    <div class="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center text-xl">👤</div>
+                                    <div class="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center text-xl">👤
+                                    </div>
                                 @endif
                                 <div>
                                     <div class="text-white font-bold">{{ Auth::user()->nombre }}</div>
                                     <div class="text-gray-400 text-xs">{{ Auth::user()->email }}</div>
                                 </div>
                             </div>
-                            
+
                             @if (Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
                                 <div class="bg-white/5 rounded-2xl p-2 space-y-1">
-                                    <div class="px-4 py-2 text-[10px] font-black text-[#669BBC] uppercase tracking-widest">Administración</div>
-                                    <a href="{{ route('admin.usuarios.index') }}" class="block px-4 py-3 text-sm font-bold text-white hover:bg-white/5 rounded-xl">Usuarios</a>
-                                    <a href="{{ route('inmuebles.index') }}" class="block px-4 py-3 text-sm font-bold text-white hover:bg-white/5 rounded-xl">Propiedades</a>
-                                    <a href="{{ route('admin.resenas.index') }}" class="block px-4 py-3 text-sm font-bold text-white hover:bg-white/5 rounded-xl">Reseñas</a>
+                                    <div class="px-4 py-2 text-[10px] font-black text-[#669BBC] uppercase tracking-widest">
+                                        Administración</div>
+                                    <a href="{{ route('admin.usuarios.index') }}"
+                                        class="block px-4 py-3 text-sm font-bold text-white hover:bg-white/5 rounded-xl">Usuarios</a>
+                                    <a href="{{ route('inmuebles.index') }}"
+                                        class="block px-4 py-3 text-sm font-bold text-white hover:bg-white/5 rounded-xl">Propiedades</a>
+                                    <a href="{{ route('admin.resenas.index') }}"
+                                        class="block px-4 py-3 text-sm font-bold text-white hover:bg-white/5 rounded-xl">Reseñas</a>
                                 </div>
                             @endif
 
                             @if (Auth::user()->tieneRol('propietario'))
-                                <a href="{{ route('inmuebles.create') }}" 
+                                <a href="{{ route('inmuebles.create') }}"
                                     class="flex w-full items-center justify-center px-4 py-4 bg-[#C1121F] text-white font-black rounded-2xl shadow-lg">
                                     Publicar Propiedad
                                 </a>
                             @endif
 
-                            <button type="button" onclick="confirmLogout()" 
+                            <button type="button" onclick="confirmLogout()"
                                 class="flex w-full items-center justify-center px-4 py-4 bg-white/5 text-gray-300 font-bold rounded-2xl hover:text-white transition-all">
                                 Cerrar Sesión
                             </button>
                         @else
                             <div class="grid grid-cols-2 gap-3">
-                                <a href="{{ route('login') }}" 
+                                <a href="{{ route('login') }}"
                                     class="flex items-center justify-center px-4 py-4 bg-white/5 text-white font-bold rounded-2xl border border-white/10">
                                     Entrar
                                 </a>
-                                <a href="{{ route('registro') }}" 
+                                <a href="{{ route('registro') }}"
                                     class="flex items-center justify-center px-4 py-4 bg-[#FDF0D5] text-[#003049] font-black rounded-2xl shadow-xl">
                                     Registrarse
                                 </a>
@@ -337,8 +346,10 @@
                         derechos reservados.
                     </p>
                     <div class="flex gap-6 text-xs text-gray-400">
-                        <a href="#" class="hover:text-white transition-colors">Términos de servicio</a>
-                        <a href="#" class="hover:text-white transition-colors">Política de privacidad</a>
+                        <a href="{{ route('terminos') }}" class="hover:text-white transition-colors">Términos de
+                            servicio</a>
+                        <a href="{{ route('privacidad') }}" class="hover:text-white transition-colors">Política de
+                            privacidad</a>
                     </div>
                 </div>
             </div>
