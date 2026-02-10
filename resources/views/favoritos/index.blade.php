@@ -109,8 +109,8 @@
                             {{-- Botón Quitar Favorito --}}
                             <div class="absolute top-4 right-4 z-10">
                                 <button @click.prevent="remove()"
-                                    class="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-red-500 shadow-lg hover:bg-white hover:scale-110 transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 fill-current"
+                                    class="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-red-500 shadow-lg hover:scale-110 active:scale-95 transition-all group/fav">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 fill-current transition-all duration-300"
                                         viewBox="0 0 24 24">
                                         <path
                                             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -148,33 +148,13 @@
                                     </div>
                                 </div>
 
-                                {{-- Sección de Notas --}}
-                                <div class="mt-4 p-4 rounded-2xl bg-secondary/50 border border-border/50">
-                                    <form action="{{ route('favoritos.update', $inmueble) }}" method="POST">
-                                        @csrf
-                                        @method('PUT')
-                                        <label
-                                            class="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-2 block">Mis
-                                            Notas</label>
-                                        <textarea name="nota" rows="2"
-                                            class="w-full bg-transparent border-none p-0 text-sm focus:ring-0 placeholder:italic"
-                                            placeholder="Escribe aquí algún recordatorio...">{{ $inmueble->pivot->getOriginal('pivot_nota') ?? $inmueble->pivot->nota }}</textarea>
-                                        <button type="submit"
-                                            class="text-[10px] text-primary font-bold mt-2 hover:underline">GUARDAR
-                                            NOTA</button>
-                                    </form>
-                                </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4 mt-8">
+                            <div class="mt-8">
                                 <a href="{{ route('inmuebles.show', $inmueble) }}"
-                                    class="flex items-center justify-center py-3 px-4 rounded-xl bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all">
+                                    class="flex items-center justify-center py-3.5 px-4 rounded-2xl bg-primary text-white font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all uppercase tracking-widest text-xs">
                                     Ver Detalles
                                 </a>
-                                <button
-                                    class="flex items-center justify-center py-3 px-4 rounded-xl border border-primary/20 bg-primary/5 text-primary font-bold hover:bg-primary/10 transition-all">
-                                    Compartir
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -187,5 +167,5 @@
         @endif
     </div>
 
-    <x-arrendito />
+    {{-- <x-arrendito /> --}}
 @endsection

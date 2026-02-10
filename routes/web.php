@@ -58,7 +58,17 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
         'nombre' => 'required|string|max:255',
         'email' => 'required|email|unique:usuarios,email',
         'password' => 'required|string|min:8|confirmed',
-        'foto_perfil' => 'nullable|image|max:2048', // Validación para la imagen
+        'foto_perfil' => 'nullable|image|max:2048',
+    ], [
+        'nombre.required' => 'El nombre es obligatorio.',
+        'email.required' => 'El correo electrónico es obligatorio.',
+        'email.email' => 'Ingresa un correo válido.',
+        'email.unique' => 'Este correo ya está registrado.',
+        'password.required' => 'La contraseña es obligatoria.',
+        'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+        'password.confirmed' => 'Las contraseñas no coinciden.',
+        'foto_perfil.image' => 'El archivo debe ser una imagen.',
+        'foto_perfil.max' => 'La imagen no debe pesar más de 2MB.',
     ]);
 
     $path = null;
@@ -118,6 +128,10 @@ Route::post('/login', function (Request $request) {
     $credentials = $request->validate([
         'email' => 'required|email',
         'password' => 'required|string',
+    ], [
+        'email.required' => 'El correo electrónico es obligatorio.',
+        'email.email' => 'Ingresa un correo electrónico válido.',
+        'password.required' => 'La contraseña es obligatoria.',
     ]);
 
     if (!Auth::attempt($credentials)) {
@@ -142,10 +156,9 @@ Route::post('/logout', function (Request $request) {
 })->name('logout');
 
 
-Route::get('/inmuebles/{inmueble}', [InmuebleController::class, 'show'])->name('inmuebles.show');
-
 Route::middleware('auth')->group(function () {
     Route::get('/inicio', [InmuebleController::class, 'home'])->name('inicio');
+    Route::get('/inmuebles/{inmueble}', [InmuebleController::class, 'show'])->name('inmuebles.show');
 
     // Rutas de Inmuebles
     Route::get('/mis-propiedades', [InmuebleController::class, 'index'])->name('inmuebles.index');

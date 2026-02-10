@@ -42,11 +42,10 @@
                                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
                         <select name="categoria"
-                            class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                            class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-sm">
                             <option value="">Todas</option>
                             <option value="Casa" {{ request('categoria') == 'Casa' ? 'selected' : '' }}>Casa</option>
-                            <option value="Departamento" {{ request('categoria') == 'Departamento' ? 'selected' : '' }}>
-                                Departamento</option>
+                            <option value="Departamento" {{ request('categoria') == 'Departamento' ? 'selected' : '' }}>Departamento</option>
                             <option value="Cuarto" {{ request('categoria') == 'Cuarto' ? 'selected' : '' }}>Cuarto</option>
                         </select>
                     </div>
@@ -62,14 +61,11 @@
                                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <select name="rango_precio"
-                            class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                            class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-sm">
                             <option value="">Cualquiera</option>
-                            <option value="0-2000" {{ request('rango_precio') == '0-2000' ? 'selected' : '' }}>$0 - $2,000
-                            </option>
-                            <option value="2000-4000" {{ request('rango_precio') == '2000-4000' ? 'selected' : '' }}>$2,000 -
-                                $4,000</option>
-                            <option value="4000-6000" {{ request('rango_precio') == '4000-6000' ? 'selected' : '' }}>$4,000 -
-                                $6,000</option>
+                            <option value="0-2000" {{ request('rango_precio') == '0-2000' ? 'selected' : '' }}>$0 - $2,000</option>
+                            <option value="2000-4000" {{ request('rango_precio') == '2000-4000' ? 'selected' : '' }}>$2,000 - $4,000</option>
+                            <option value="4000-6000" {{ request('rango_precio') == '4000-6000' ? 'selected' : '' }}>$4,000 - $6,000</option>
                             <option value="6000+" {{ request('rango_precio') == '6000+' ? 'selected' : '' }}>$6,000+</option>
                         </select>
                     </div>
@@ -84,225 +80,36 @@
                     Buscar
                 </button>
             </form>
+            @guest
+                <div class="mt-4 text-center">
+                    <p class="text-xs text-muted-foreground">¿Quieres usar los filtros avanzados? 
+                        <a href="{{ route('login') }}" class="font-bold text-[#003049] hover:underline transition-all">Inicia Sesión</a>
+                    </p>
+                </div>
+            @endguest
         </div>
     </section>
 
     {{-- 
-        2. MAPA DE EXPLORACIÓN (CON OPCIÓN DE MINIMIZAR)
+        2. MAPA DE EXPLORACIÓN (SUSPENDIDO - COMENTADO)
     --}}
-    <section class="container mx-auto px-4 mb-16" x-data="{
-        mapVisible: false,
-        toggleMap() {
-            this.mapVisible = !this.mapVisible;
-            if (this.mapVisible) {
-                // Dar tiempo a la animación de Alpine para terminar
-                setTimeout(() => { window.dispatchEvent(new CustomEvent('refresh-map')); }, 400);
-            }
-        }
-    }">
+    {{-- 
+    <section class="container mx-auto px-4 mb-16" x-data="{ ... }">
+        ...
+    </section>
+    --}}
+
+    {{-- 3. SECCIÓN DE RESULTADOS --}}
+    <section class="container mx-auto px-4 mb-20 -mt-8">
         <div class="flex items-center justify-between mb-8">
-            <h2 class="text-2xl font-bold text-foreground">Propiedades Disponibles</h2>
+            <h2 class="text-2xl font-bold text-[#003049]">Propiedades Disponibles</h2>
             <div class="flex items-center gap-4">
-                <button @click="toggleMap()"
-                    class="text-sm font-bold flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-white hover:bg-slate-50 transition-all text-[#003049] shadow-sm">
-                    <span x-text="mapVisible ? '🙈 Minimizar Mapa' : '🗺️ Ver Mapa Completo'"></span>
-                </button>
-                <span class="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full">
+                <span class="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
                     {{ $inmuebles->total() }} resultados
+                    @guest <span>(Vista Invitado)</span> @endguest
                 </span>
             </div>
         </div>
-
-        <div class="mb-12" x-show="mapVisible" x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform -translate-y-4"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform -translate-y-4">
-
-            <div class="bg-card rounded-2xl border border-border overflow-hidden shadow-sm transition-all hover:shadow-md">
-                <div
-                    class="p-4 border-b border-border flex flex-col md:flex-row md:items-center justify-between bg-white gap-2">
-                    <div class="flex items-center gap-2 font-bold text-[#003049]">
-                        <span>📍</span> Explora por zona en Ocosingo
-                    </div>
-                    <div class="flex flex-col items-end">
-                        <span class="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Haz clic en los
-                            pines para ver detalles</span>
-                        <span
-                            class="text-[10px] text-primary font-bold uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full mt-1">✨
-                            Haz clic en cualquier parte del mapa para medir distancias</span>
-                    </div>
-                </div>
-
-                {{-- Contenedor con altura forzada para evitar colapso --}}
-                <div id="main-map" style="width: 100%; height: 450px; background: #f1f5f9;" class="z-0"></div>
-            </div>
-        </div>
-
-        {{-- LIBRERÍAS DE MAPA --}}
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var map;
-                var userMarker;
-                var leafletMarkers = []; // Guardaremos las instancias reales aquí
-
-                function createPopupContent(m, walkTime = null, taxiTime = null) {
-                    var distHtml = '';
-                    if (walkTime !== null) {
-                        distHtml = `
-                            <div style="font-size: 10px; color: #666; margin-top: 4px; border-top: 1px solid #eee; padding-top: 4px;">
-                                <div style="display:flex; justify-content:space-between;">
-                                    <span>🚶 ${walkTime} min</span>
-                                    <span>🚕 ${taxiTime} min</span>
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    return `
-                        <div style="width: 200px; font-family: 'Inter', sans-serif;">
-                            <div style="height: 100px; width: 100%; border-radius: 8px; overflow: hidden; margin-bottom: 8px; background: #eee;">
-                                <img src="${m.image}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/images/placeholder-casa.jpg'">
-                            </div>
-                            <b style="color: #003049; font-size: 14px; display: block; line-clamp: 1;">${m.title}</b>
-                            <span style="color: #C1121F; font-weight: bold; font-size: 13px;">${m.price}/mes</span>
-                            ${distHtml}
-                            <a href="${m.url}" style="display: block; margin-top: 10px; background: #003049; color: white; text-align: center; padding: 6px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold;">Ver Detalles</a>
-                        </div>
-                    `;
-                }
-
-                function initMap() {
-                    if (map) return;
-
-                    map = L.map('main-map').setView([16.9068, -92.0941], 14);
-
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    }).addTo(map);
-
-                    var userIcon = L.divIcon({
-                        html: '📍',
-                        className: 'user-marker-icon',
-                        iconSize: [30, 30],
-                        iconAnchor: [15, 30]
-                    });
-
-                    var markerData = [
-                        @foreach ($inmuebles as $i)
-                            @if ($i->latitud && $i->longitud)
-                                {
-                                    lat: {{ $i->latitud }},
-                                    lng: {{ $i->longitud }},
-                                    title: "{{ str_replace('"', '\"', $i->titulo) }}",
-                                    price: "${{ number_format($i->renta_mensual) }}",
-                                    image: "{{ $i->imagen ? $i->imagen : '/images/placeholder-casa.jpg' }}",
-                                    url: "{{ route('inmuebles.show', $i) }}"
-                                },
-                            @endif
-                        @endforeach
-                    ];
-
-                    markerData.forEach(function(m) {
-                        var marker = L.marker([m.lat, m.lng]).addTo(map);
-                        marker.bindPopup(createPopupContent(m));
-                        leafletMarkers.push({
-                            instance: marker,
-                            data: m
-                        });
-                    });
-
-                    map.on('click', function(e) {
-                        if (userMarker) {
-                            map.removeLayer(userMarker);
-                        }
-
-                        userMarker = L.marker(e.latlng, {
-                                icon: userIcon,
-                                draggable: true
-                            }).addTo(map)
-                            .bindPopup("<b>📍 Tu Referencia</b>").openPopup();
-
-                        updateDistances(e.latlng);
-
-                        userMarker.on('dragend', function(event) {
-                            updateDistances(event.target.getLatLng());
-                        });
-                    });
-
-                    function updateDistances(userLocation) {
-                        var distanceSummary = [];
-
-                        leafletMarkers.forEach(function(obj) {
-                            var m = obj.data;
-                            var propLoc = L.latLng(m.lat, m.lng);
-                            var distance = userLocation.distanceTo(propLoc);
-
-                            var walkTime = Math.round(distance / 70);
-                            var taxiTime = Math.round(distance / 250) + 2;
-
-                            // Actualizar popup individual
-                            obj.instance.setPopupContent(createPopupContent(m, walkTime, taxiTime));
-
-                            // Guardar para el resumen global
-                            distanceSummary.push({
-                                title: m.title,
-                                walk: walkTime,
-                                taxi: taxiTime,
-                                dist: distance
-                            });
-                        });
-
-                        if (userMarker) {
-                            // Ordenar por distancia (más cercana primero) y tomar las 3 mejores
-                            distanceSummary.sort((a, b) => a.dist - b.dist);
-                            var top3 = distanceSummary.slice(0, 3);
-
-                            var summaryHtml = `
-                                <div style="width:200px; font-family:'Inter', sans-serif;">
-                                    <b style="color:#003049; display:block; margin-bottom:5px;">📍 Tu Referencia</b>
-                                    <span style="font-size:10px; font-weight:bold; color:var(--ai-accent); display:block; border-bottom:1px solid #eee; padding-bottom:3px; margin-bottom:5px;">CASAS MÁS CERCANAS:</span>
-                                    <div style="display:flex; flex-direction:column; gap:6px;">
-                            `;
-
-                            top3.forEach(item => {
-                                summaryHtml += `
-                                    <div style="font-size:10px; line-height:1.2;">
-                                        <b style="display:block; color:#003049;">${item.title}</b>
-                                        <div style="display:flex; justify-content:space-between; color:#666;">
-                                            <span>🚶 ${item.walk} min</span>
-                                            <span>🚕 ${item.taxi} min</span>
-                                        </div>
-                                    </div>
-                                `;
-                            });
-
-                            summaryHtml += `</div></div>`;
-                            userMarker.setPopupContent(summaryHtml);
-                            userMarker.openPopup();
-                        }
-                    }
-
-                    setTimeout(() => {
-                        map.invalidateSize();
-                    }, 500);
-                }
-
-                initMap();
-
-                window.addEventListener('refresh-map', function() {
-                    if (map) {
-                        map.invalidateSize();
-                        map.setView([16.9068, -92.0941], 14);
-                    }
-                });
-            });
-        </script>
 
         {{-- Grid de Tarjetas --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
@@ -346,16 +153,31 @@
                                     .then(data => {
                                         if(data.success) {
                                             this.isFavorited = data.agregado;
+                                            
+                                            // Toast de confirmación premium
+                                             const Toast = Swal.mixin({
+                                                 toast: true,
+                                                 position: 'top-end',
+                                                 showConfirmButton: false,
+                                                 timer: 1500
+                                             });
+
+                                             Toast.fire({
+                                                 icon: 'success',
+                                                 title: data.agregado ? 'Agregado' : 'Eliminado'
+                                             });
                                         }
                                     })
                                     .finally(() => this.loading = false);
                                 }
                             }">
                                 <button @click.prevent="toggle()" 
-                                    class="h-9 w-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white transition-all hover:bg-white hover:text-red-500"
-                                    :class="isFavorited ? 'bg-white !text-red-500 shadow-sm' : ''">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :fill="isFavorited ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    class="h-10 w-10 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-lg transition-all hover:scale-110 active:scale-95 group/fav"
+                                    :class="isFavorited ? 'text-red-500' : 'text-slate-400'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-all duration-300" 
+                                         :class="isFavorited ? 'fill-current' : 'fill-none'" 
+                                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                     </svg>
                                 </button>
                             </div>
@@ -396,10 +218,24 @@
                             </div>
                         </div>
 
-                        <a href="{{ route('inmuebles.show', $inmueble) }}"
-                            class="flex w-full py-3 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-[#003049] transition-all hover:bg-slate-200">
-                            Ver Detalles
-                        </a>
+                        @auth
+                            @if(Auth::id() === $inmueble->propietario_id)
+                                <a href="{{ route('inmuebles.show', $inmueble) }}"
+                                    class="flex w-full py-4 items-center justify-center rounded-2xl bg-gradient-to-br from-[#003049] to-[#004e7a] text-sm font-black text-white transition-all hover:-translate-y-1 shadow-lg shadow-[#003049]/20 uppercase tracking-widest">
+                                    Gestionar Propiedad
+                                </a>
+                            @else
+                                <a href="{{ route('inmuebles.show', $inmueble) }}"
+                                    class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-100 text-sm font-black text-[#003049] transition-all hover:bg-slate-200 uppercase tracking-widest">
+                                    Ver Detalles
+                                </a>
+                            @endif
+                        @else
+                            <button onclick="window.location.href='{{ route('login') }}'"
+                                class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 text-xs font-black text-slate-400 transition-all hover:bg-slate-100 uppercase tracking-widest gap-2">
+                                🔒 Inicia Sesión para Ver
+                            </button>
+                        @endauth
                     </div>
                 </div>
             @empty
@@ -408,5 +244,5 @@
         </div>
     </section>
 
-    <x-arrendito />
+    {{-- <x-arrendito /> --}}
 @endsection

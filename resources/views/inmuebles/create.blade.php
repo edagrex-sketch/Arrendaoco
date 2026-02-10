@@ -49,7 +49,14 @@
                                 placeholder="Ej. Depa moderno cerca de la UTC" required
                                 class="w-full rounded-lg border-input bg-background/50 border py-3 px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Dirección <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="direccion" value="{{ old('direccion') }}"
+                                placeholder="Calle, Número, Colonia..." required
+                                class="w-full rounded-lg border-input bg-background/50 border py-3 px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium mb-1">Tipo <span
                                         class="text-red-500">*</span></label>
@@ -71,6 +78,17 @@
                                         class="w-full rounded-lg border-input bg-background/50 border py-3 pl-8 px-4">
                                 </div>
                             </div>
+                            {{-- 
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Depósito <span
+                                        class="text-xs text-muted-foreground font-normal">(Opcional)</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-500">$</span>
+                                    <input type="number" name="deposito" value="{{ old('deposito') }}" placeholder="0.00"
+                                        class="w-full rounded-lg border-input bg-background/50 border py-3 pl-8 px-4">
+                                </div>
+                            </div>
+                            --}}
                         </div>
                     </div>
                 </div>
@@ -79,6 +97,7 @@
                 <div x-show="step === 2" x-ref="step2" x-transition style="display: none;">
                     <h2 class="text-xl font-bold mb-4 flex items-center gap-2">✨ Características y Ubicación</h2>
 
+                    {{-- 
                     <div class="mb-4">
                         <label class="block text-sm font-medium mb-1">Dirección Completa <span
                                 class="text-red-500">*</span></label>
@@ -97,8 +116,10 @@
                             </button>
                         </div>
                     </div>
+                    --}}
 
-                    {{-- 🗺️ Selector de Mapa --}}
+                    {{-- 🗺️ Selector de Mapa (SUSPENDIDO) --}}
+                    {{-- 
                     <div class="mb-6">
                         <label class="block text-sm font-medium mb-2">Marca el punto en el mapa <span
                                 class="text-xs text-muted-foreground font-normal">(Seleccionado automáticamente al buscar
@@ -109,9 +130,9 @@
                         <input type="hidden" name="longitud" id="lng-input" value="{{ old('longitud') }}">
                     </div>
 
-                    {{-- Leaflet Library --}}
                     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
                     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                    --}}
 
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
@@ -232,7 +253,7 @@
                         Paso →</button>
 
                     <button type="submit" x-show="step === 3"
-                        style="background-color: #1f3a5f; color: white; padding: 12px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(31, 58, 95, 0.4); display: flex; align-items: center; gap: 8px;">
+                        style="background-color: #003049; color: white; padding: 12px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 48, 73, 0.3); display: flex; align-items: center; gap: 8px;"
                         <span>✨</span> ¡Publicar Ahora!
                     </button>
                 </div>

@@ -80,12 +80,19 @@
                         </div>
                      </div>
                 @endauth
-                <button type="submit" class="inline-flex h-12 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-2 w-full md:w-auto">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    Buscar
-                </button>
+                @auth
+                    <button type="submit" class="inline-flex h-12 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-2 w-full md:w-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Buscar
+                    </button>
+                @else
+                    <button type="button" onclick="window.location.href='{{ route('login') }}'"
+                        class="inline-flex h-12 items-center justify-center rounded-md bg-slate-50 px-8 text-sm font-bold text-slate-400 border border-dashed border-slate-200 gap-2 w-full md:w-auto cursor-pointer shadow-sm">
+                        🔒 Inicia Sesión para Buscar
+                    </button>
+                @endauth
             </form>
             @guest
                 <div class="mt-4 text-center">
@@ -153,9 +160,14 @@
                             </div>
                         </div>
                         @auth
-                            <a href="{{ route('inmuebles.show', $inmueble) }}" class="mt-4 flex w-full items-center justify-center rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">Ver Detalles</a>
+                            <a href="{{ route('inmuebles.show', $inmueble) }}" class="mt-4 flex w-full items-center justify-center rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                                Ver Detalles
+                            </a>
                         @else
-                            <button type="button" onclick="triggerGamification(this)" class="trigger-gamification mt-4 flex w-full items-center justify-center rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-200 transition-all duration-300 cursor-pointer">Ver Detalles 🔒</button>
+                            <button type="button" onclick="window.location.href='{{ route('login') }}'" 
+                                class="mt-4 flex w-full items-center justify-center rounded-lg bg-slate-50 border border-dashed border-slate-200 px-4 py-2.5 text-xs font-black text-slate-400 hover:bg-slate-100 transition-all duration-300 cursor-pointer uppercase tracking-widest gap-2">
+                                🔒 Sesión para Ver
+                            </button>
                         @endauth
                     </div>
                 </div>
@@ -190,12 +202,15 @@
             <div class="relative z-10">
                 <h2 class="mb-4 text-3xl font-bold text-primary-foreground">¿Tienes una propiedad en Ocosingo?</h2>
                 <p class="mb-8 text-lg text-primary-foreground/90 max-w-2xl mx-auto">Únete a ArrendaOco y conecta con inquilinos verificados de la universidad y la ciudad.</p>
-                <a href="{{ route('inmuebles.create') }}" class="inline-flex h-12 items-center justify-center rounded-md bg-background px-8 text-sm font-medium text-primary shadow transition-colors hover:bg-background/90">Publicar Inmueble Gratis</a>
+                <a href="{{ route('inmuebles.create') }}" 
+                   class="inline-flex h-12 items-center justify-center rounded-md bg-white px-8 text-sm font-black text-[#003049] shadow-xl hover:scale-105 transition-all uppercase tracking-widest">
+                   🚀 Publicar Inmueble Gratis
+                </a>
             </div>
         </div>
     </section>
 
-    <x-arrendito />
+    {{-- <x-arrendito /> --}}
 
     {{-- Script de Alertas y Animación --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
