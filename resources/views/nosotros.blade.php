@@ -24,40 +24,45 @@
     {{-- Nuestra Misión --}}
     <section class="py-16 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div class="space-y-6">
-                <div
-                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FDF0D5]/30 text-[#003049] font-medium text-sm">
-                    <span class="w-2 h-2 rounded-full bg-[#003049]"></span>
-                    Nuestra Misión
-                </div>
-                <h2 class="text-3xl font-bold text-[#003049]">Simplificar la búsqueda de tu próximo espacio</h2>
-                <p class="text-gray-600 text-lg leading-relaxed">
-                    Sabemos lo difícil que puede ser encontrar un lugar seguro y adecuado en Ocosingo, especialmente para
-                    estudiantes foráneos. ArrendaOco nació con el propósito de centralizar la oferta inmobiliaria, brindando
-                    confianza tanto a propietarios como a inquilinos.
-                </p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="flex-shrink-0 w-10 h-10 rounded-full bg-[#E0F2FE] flex items-center justify-center text-[#0284C7]">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <span class="font-medium text-gray-700">Verificado</span>
+            <div class="relative">
+                <div class="absolute -inset-4 bg-[#669BBC]/20 rounded-2xl blur-lg transform -rotate-3"></div>
+                <div class="relative bg-white p-8 rounded-2xl shadow-xl border border-gray-100 space-y-6">
+                    <div
+                        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FDF0D5]/30 text-[#003049] font-medium text-sm">
+                        <span class="w-2 h-2 rounded-full bg-[#003049]"></span>
+                        Nuestra Misión
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="flex-shrink-0 w-10 h-10 rounded-full bg-[#E0F2FE] flex items-center justify-center text-[#0284C7]">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
+                    <h2 class="text-3xl font-bold text-[#003049]">Simplificar la búsqueda de tu próximo espacio</h2>
+                    <p class="text-gray-600 text-lg leading-relaxed">
+                        Sabemos lo difícil que puede ser encontrar un lugar seguro y adecuado en Ocosingo, especialmente
+                        para
+                        estudiantes foráneos. ArrendaOco nació con el propósito de centralizar la oferta inmobiliaria,
+                        brindando
+                        confianza tanto a propietarios como a inquilinos.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="flex-shrink-0 w-10 h-10 rounded-full bg-[#E0F2FE] flex items-center justify-center text-[#0284C7]">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <span class="font-medium text-gray-700">Verificado</span>
                         </div>
-                        <span class="font-medium text-gray-700">Rápido</span>
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="flex-shrink-0 w-10 h-10 rounded-full bg-[#E0F2FE] flex items-center justify-center text-[#0284C7]">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <span class="font-medium text-gray-700">Rápido</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -65,14 +70,14 @@
                 <div class="absolute -inset-4 bg-[#669BBC]/20 rounded-2xl blur-lg transform rotate-3"></div>
                 <div class="relative bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
                     <div
-                        class="aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg mb-6 flex items-center justify-center overflow-hidden">
-                        {{-- Placeholder visual si no hay imagen --}}
-                        <div class="text-[#003049]/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-32 w-32" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
+                        class="aspect-w-16 aspect-h-9 bg-gray-50 rounded-lg mb-6 flex items-center justify-center overflow-hidden p-8">
+                        <img src="{{ asset('dc5.png') }}" alt="Logo Equipo DC5" class="w-full h-full object-contain">
+                    </div>
+                    <div class="flex justify-center mb-4">
+                        <div
+                            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FDF0D5]/30 text-[#003049] font-medium text-sm">
+                            <span class="w-2 h-2 rounded-full bg-[#003049]"></span>
+                            Nuestra Visión
                         </div>
                     </div>
                     <blockquote class="text-center">
@@ -166,167 +171,86 @@
                     <div class="h-32 bg-gradient-to-r from-[#003049] to-[#669BBC]"></div>
                     <div class="px-6 pb-6 relative">
                         <div class="relative -mt-16 mb-4">
-                            <div
-                                class="w-32 h-32 mx-auto rounded-full border-4 border-white bg-gray-100 overflow-hidden shadow-md flex items-center justify-center">
-                                <img src="{{ asset('eduardo.png') }}" alt="Eduardo Aguilar Reyes"
-                                    class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                        <div class="text-center">
-                            <h3 class="text-xl font-bold text-[#003049] mb-1">Eduardo Aguilar Reyes</h3>
-                            <p class="text-[#669BBC] font-medium text-sm mb-4">Full Stack Developer</p>
-                            <p class="text-gray-500 text-sm italic mb-6">“Transformo ideas en software que impulsa sueños,
-                                negocios y nuevas posibilidades.”</p>
-
-                            <div class="flex justify-center gap-4">
-                                <a href="#"
-                                    class="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-[#003049] hover:text-white transition-colors">
-                                    <span class="sr-only">GitHub</span>
-                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd"
-                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                                <a href="#"
-                                    class="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-[#0077b5] hover:text-white transition-colors">
-                                    <span class="sr-only">LinkedIn</span>
-                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd"
-                                            d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                            </div>
+                                <div
+                                    class=" w-32 h-32 mx-auto rounded-full border-4 border-white bg-gray-100
+                            overflow-hidden shadow-md flex items-center justify-center">
+                            <img src="{{ asset('eduardo.png') }}" alt="Eduardo Aguilar Reyes"
+                                class="w-full h-full object-cover">
                         </div>
                     </div>
-                </div>
-                {{-- Miembro 2 --}}
-                <div
-                    class="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div class="h-32 bg-gradient-to-r from-[#003049] to-[#669BBC]"></div>
-                    <div class="px-6 pb-6 relative">
-                        <div class="relative -mt-16 mb-4">
-                            <div
-                                class="w-32 h-32 mx-auto rounded-full border-4 border-white bg-gray-100 overflow-hidden shadow-md flex items-center justify-center">
-                                <img src="{{ asset('neyser.png') }}" alt="Neyser Manuel Estrada Pérez"
-                                    class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                        <div class="text-center">
-                            <h3 class="text-xl font-bold text-[#003049] mb-1">Neyser Manuel Estrada Pérez</h3>
-                            <p class="text-[#669BBC] font-medium text-sm mb-4">Full Stack Developer</p>
-                            <p class="text-gray-500 text-sm italic mb-6">"Uso la tecnología para contar historias y resolver
-                                problemas reales. Programo con atención al detalle para crear experiencias que valgan la
-                                pena."</p>
-
-                            <div class="flex justify-center gap-4">
-                                <a href="#"
-                                    class="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-[#003049] hover:text-white transition-colors">
-                                    <span class="sr-only">GitHub</span>
-                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd"
-                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                                <a href="#"
-                                    class="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-[#0077b5] hover:text-white transition-colors">
-                                    <span class="sr-only">LinkedIn</span>
-                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd"
-                                            d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {{-- Miembro 3 --}}
-                <div
-                    class="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div class="h-32 bg-gradient-to-r from-[#003049] to-[#669BBC]"></div>
-                    <div class="px-6 pb-6 relative">
-                        <div class="relative -mt-16 mb-4">
-                            <div
-                                class="w-32 h-32 mx-auto rounded-full border-4 border-white bg-gray-100 overflow-hidden shadow-md flex items-center justify-center">
-                                <img src="{{ asset('hannia.png') }}" alt="Hannia Lysset Gutiérrez López"
-                                    class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                        <div class="text-center">
-                            <h3 class="text-xl font-bold text-[#003049] mb-1">Hannia Lysset Gutiérrez López</h3>
-                            <p class="text-[#669BBC] font-medium text-sm mb-4">Full Stack Developer</p>
-                            <p class="text-gray-500 text-sm italic mb-6">"Estudiante apasionada por convertir líneas de
-                                código en soluciones reales. Mi enfoque está en el desarrollo de software que simplifique la
-                                vida de las personas."</p>
-
-                            <div class="flex justify-center gap-4">
-                                <a href="#"
-                                    class="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-[#003049] hover:text-white transition-colors">
-                                    <span class="sr-only">GitHub</span>
-                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd"
-                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                                <a href="#"
-                                    class="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-[#0077b5] hover:text-white transition-colors">
-                                    <span class="sr-only">LinkedIn</span>
-                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd"
-                                            d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {{-- Miembro 4 --}}
-                <div
-                    class="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div class="h-32 bg-gradient-to-r from-[#003049] to-[#669BBC]"></div>
-                    <div class="px-6 pb-6 relative">
-                        <div class="relative -mt-16 mb-4">
-                            <div
-                                class="w-32 h-32 mx-auto rounded-full border-4 border-white bg-gray-100 overflow-hidden shadow-md flex items-center justify-center">
-                                <img src="{{ asset('fatima.png') }}" alt="Fárima Marroquin Rentería"
-                                    class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                        <div class="text-center">
-                            <h3 class="text-xl font-bold text-[#003049] mb-1">Fárima Marroquin Rentería</h3>
-                            <p class="text-[#669BBC] font-medium text-sm mb-4">Full Stack Developer</p>
-                            <p class="text-gray-500 text-sm italic mb-6">"Si existe un problema, existe una solución
-                                digital. Mi trabajo es construirla de la forma más elegante posible."</p>
-
-                            <div class="flex justify-center gap-4">
-                                <a href="#"
-                                    class="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-[#003049] hover:text-white transition-colors">
-                                    <span class="sr-only">GitHub</span>
-                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd"
-                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                                <a href="#"
-                                    class="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-[#0077b5] hover:text-white transition-colors">
-                                    <span class="sr-only">LinkedIn</span>
-                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd"
-                                            d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-[#003049] mb-1">Eduardo Aguilar Reyes</h3>
+                        <p class="text-[#669BBC] font-medium text-sm mb-4">Full Stack Developer</p>
+                        <p class="text-gray-500 text-sm italic mb-6">“Transformo ideas en software que impulsa sueños,
+                            negocios y nuevas posibilidades.”</p>
                     </div>
                 </div>
             </div>
+            {{-- Miembro 2 --}}
+            <div
+                class="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div class="h-32 bg-gradient-to-r from-[#003049] to-[#669BBC]"></div>
+                <div class="px-6 pb-6 relative">
+                    <div class="relative -mt-16 mb-4">
+                                <div
+                                    class=" w-32 h-32 mx-auto rounded-full border-4 border-white bg-gray-100
+                        overflow-hidden shadow-md flex items-center justify-center">
+                        <img src="{{ asset('neyser.png') }}" alt="Neyser Manuel Estrada Pérez"
+                            class="w-full h-full object-cover">
+                    </div>
+                </div>
+                <div class="text-center">
+                    <h3 class="text-xl font-bold text-[#003049] mb-1">Neyser Manuel Estrada Pérez</h3>
+                    <p class="text-[#669BBC] font-medium text-sm mb-4">Full Stack Developer</p>
+                    <p class="text-gray-500 text-sm italic mb-6">"Uso la tecnología para contar historias y resolver
+                        problemas reales. Programo con atención al detalle para crear experiencias que valgan la
+                        pena."</p>
+                </div>
+            </div>
+        </div>
+        {{-- Miembro 3 --}}
+        <div
+            class="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="h-32 bg-gradient-to-r from-[#003049] to-[#669BBC]"></div>
+            <div class="px-6 pb-6 relative">
+                <div class="relative -mt-16 mb-4">
+                                <div
+                                    class=" w-32 h-32 mx-auto rounded-full border-4 border-white bg-gray-100
+                    overflow-hidden shadow-md flex items-center justify-center">
+                    <img src="{{ asset('hannia.png') }}" alt="Hannia Lysset Gutiérrez López"
+                        class="w-full h-full object-cover">
+                </div>
+            </div>
+            <div class="text-center">
+                <h3 class="text-xl font-bold text-[#003049] mb-1">Hannia Lysset Gutiérrez López</h3>
+                <p class="text-[#669BBC] font-medium text-sm mb-4">Full Stack Developer</p>
+                <p class="text-gray-500 text-sm italic mb-6">"Mi enfoque está en el desarrollo de software que
+                    simplifique la
+                    vida de las personas."</p>
+            </div>
+        </div>
+        </div>
+        {{-- Miembro 4 --}}
+        <div
+            class="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="h-32 bg-gradient-to-r from-[#003049] to-[#669BBC]"></div>
+            <div class="px-6 pb-6 relative">
+                <div class="relative -mt-16 mb-4">
+                                <div
+                                    class=" w-32 h-32 mx-auto rounded-full border-4 border-white bg-gray-100
+                    overflow-hidden shadow-md flex items-center justify-center">
+                    <img src="{{ asset('fatima.png') }}" alt="Fárima Marroquin Rentería" class="w-full h-full object-cover">
+                </div>
+            </div>
+            <div class="text-center">
+                <h3 class="text-xl font-bold text-[#003049] mb-1">Fárima Marroquin Rentería</h3>
+                <p class="text-[#669BBC] font-medium text-sm mb-4">Full Stack Developer</p>
+                <p class="text-gray-500 text-sm italic mb-6">"Si existe un problema, existe una solución
+                    digital. Mi trabajo es construirla de la forma más elegante posible."</p>
+            </div>
+        </div>
+        </div>
+        </div>
         </div>
     </section>
 
@@ -344,12 +268,12 @@
                     usan ArrendaOco.</p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <a href="{{ route('welcome') }}"
-                        class="inline-flex items-center justify-center px-8 py-3 bg-[#669BBC] hover:bg-[#5582a0] text-white font-bold rounded-xl transition-colors">
+                            class="inline-flex items-center justify-center px-8 py-3 bg-[#669BBC] hover:bg-[#5582a0] text-white font-bold rounded-xl transition-colors">
                         Buscar Propiedades
                     </a>
                     @guest
                         <a href="{{ route('registro') }}"
-                            class="inline-flex items-center justify-center px-8 py-3 bg-white text-[#003049] hover:bg-gray-100 font-bold rounded-xl transition-colors">
+                                    class="inline-flex items-center justify-center px-8 py-3 bg-white text-[#003049] hover:bg-gray-100 font-bold rounded-xl transition-colors">
                             Registrarse
                         </a>
                     @endguest

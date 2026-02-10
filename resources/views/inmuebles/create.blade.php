@@ -134,7 +134,7 @@
                     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
                     --}}
 
-                    <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-xs font-medium mb-1 uppercase text-muted-foreground">Habitaciones <span
                                     class="text-red-500">*</span></label>
@@ -147,11 +147,42 @@
                             <input type="number" name="banos" value="{{ old('banos') }}" required
                                 class="w-full rounded-lg border-input bg-background/50 border py-2 px-3">
                         </div>
-                        <div>
-                            <label class="block text-xs font-medium mb-1 uppercase text-muted-foreground">m² <span
+                    </div>
+
+                    {{-- Calculadora de Área --}}
+                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-lg">📏</span>
+                            <label class="text-sm font-bold text-slate-700">Dimensiones (Opcional)</label>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label class="block text-xs text-muted-foreground mb-1">Largo (m)</label>
+                                <input type="number" x-model="largo" @input="calcularm2()" placeholder="0"
+                                    class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
+                            </div>
+                            <div class="flex items-center justify-center pb-2 text-muted-foreground">
+                                <span>×</span>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-muted-foreground mb-1">Ancho (m)</label>
+                                <input type="number" x-model="ancho" @input="calcularm2()" placeholder="0"
+                                    class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-blue-100">
+                            <label class="block text-xs font-bold mb-1 uppercase text-slate-600">Área Total (m²) <span
                                     class="text-red-500">*</span></label>
-                            <input type="number" name="metros" value="{{ old('metros') }}" required
-                                class="w-full rounded-lg border-input bg-background/50 border py-2 px-3">
+                            <div class="relative">
+                                <input type="number" name="metros" x-model="metros" required
+                                    class="w-full rounded-lg border-input bg-white border-2 border-blue-100 py-2 px-3 font-bold text-slate-800 focus:border-blue-400 focus:ring-0">
+                                <span class="absolute right-3 top-2.5 text-xs text-muted-foreground font-bold">M²</span>
+                            </div>
+                            <p class="text-xs text-blue-600 mt-2" x-show="largo && ancho">
+                                ✨ Cálculo automático: <span x-text="largo"></span>m x <span x-text="ancho"></span>m = <span x-text="metros"></span>m²
+                            </p>
                         </div>
                     </div>
                     <div>
@@ -222,7 +253,7 @@
                         Paso →</button>
 
                     <button type="submit" x-show="step === 3"
-                        style="background-color: #003049; color: white; padding: 12px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 48, 73, 0.3); display: flex; align-items: center; gap: 8px;">
+                        style="background-color: #003049; color: white; padding: 12px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 48, 73, 0.3); display: flex; align-items: center; gap: 8px;"
                         <span>✨</span> ¡Publicar Ahora!
                     </button>
                 </div>
@@ -245,6 +276,7 @@
 
                 mapPicker.on('click', function(e) {
                     actualizarPin(e.latlng.lat, e.latlng.lng);
+                    obtenerDireccionDesdeMapa(e.latlng.lat, e.latlng.lng);
                 });
 
                 mapPicker.invalidateSize();
@@ -297,11 +329,54 @@
             }
         }
 
+        async function obtenerDireccionDesdeMapa(lat, lng) {
+            const inputDireccion = document.getElementById('direccion-input');
+            const originalPlaceholder = inputDireccion.placeholder;
+            
+            inputDireccion.value = "📍 Buscando dirección exacta...";
+            // Efecto visual de carga
+            inputDireccion.classList.add('bg-blue-50', 'animate-pulse');
+
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+                );
+                const data = await response.json();
+
+                if (data && data.display_name) {
+                    // Limpiamos un poco la dirección para que no sea tan larga
+                    let address = data.display_name;
+                    inputDireccion.value = address;
+                    // Disparamos evento input para que si hubiera validación se active
+                    inputDireccion.dispatchEvent(new Event('input'));
+                } else {
+                    inputDireccion.value = "";
+                    inputDireccion.placeholder = "No se encontró dirección exacta, escríbela manual";
+                }
+            } catch (error) {
+                console.error("Error al obtener dirección:", error);
+                inputDireccion.value = "";
+                inputDireccion.placeholder = "Error de conexión, escríbela manual";
+            } finally {
+                inputDireccion.classList.remove('bg-blue-50', 'animate-pulse');
+            }
+        }
+
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('wizardForm', () => ({
                 step: 1,
                 files: [],
                 previews: [],
+                largo: '',
+                ancho: '',
+                metros: '{{ old('metros') }}',
+
+                calcularm2() {
+                    if (this.largo && this.ancho) {
+                        this.metros = (parseFloat(this.largo) * parseFloat(this.ancho)).toFixed(2);
+                    }
+                },
 
                 handleFileSelect(event) {
                     const newFiles = Array.from(event.target.files);

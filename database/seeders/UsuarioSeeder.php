@@ -16,7 +16,7 @@ class UsuarioSeeder extends Seeder
         // 1. Administrador (Control total)
         $admin = Usuario::create([
             'nombre' => 'Admin ArrendaOco',
-            'email' => 'admin@arrendaoco.com',
+            'email' => '',
             'password' => Hash::make('Admin123!'),
             'es_admin' => true,
             'estatus' => 'activo',
