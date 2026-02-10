@@ -31,7 +31,9 @@ class InmuebleFactory extends Factory
             'ciudad' => 'Ocosingo',
             'estado' => 'Chiapas',
             'codigo_postal' => '29950',
-            'deposito' => $this->faker->numberBetween(1000, 5000),
+            'deposito' => function (array $attributes) {
+                return $attributes['renta_mensual'];
+            },
             'latitud' => $this->faker->latitude(16.89, 16.92),
             'longitud' => $this->faker->longitude(-92.11, -92.08),
         ];

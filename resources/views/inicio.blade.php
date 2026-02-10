@@ -241,6 +241,9 @@
             @empty
                 <div class="col-span-full py-16 text-center text-slate-400 font-medium uppercase tracking-widest opacity-50">No hay propiedades disponibles.</div>
             @endforelse
+        {{-- Paginación --}}
+        <div class="mt-16 px-4 flex justify-center">
+            {{ $inmuebles->links() }}
         </div>
     </section>
 

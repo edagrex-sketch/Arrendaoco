@@ -119,7 +119,7 @@
                 @endforeach
             </div>
             {{-- Paginación --}}
-            <div class="mt-12">
+            <div class="mt-12 flex justify-center">
                 {{ $inmuebles->links() }}
             </div>
         @endif

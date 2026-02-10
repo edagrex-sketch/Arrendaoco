@@ -3,52 +3,115 @@
 @section('title', $inmueble->titulo)
 
 @section('content')
-    <div class="max-w-5xl mx-auto px-4 py-8 lg:py-12">
+    <div class="max-w-5xl mx-auto px-4 py-8 lg:py-12"
+         x-data="{ 
+            active: 0, 
+            showFullscreen: false,
+            images: [
+                '{{ $inmueble->imagen }}',
+                @foreach($imagenes as $img)
+                    @if($img->ruta_imagen !== $inmueble->imagen)
+                        '{{ $img->ruta_imagen }}',
+                    @endif
+                @endforeach
+            ],
+            next() { this.active = (this.active + 1) % this.images.length; },
+            prev() { this.active = (this.active - 1 + this.images.length) % this.images.length; },
+            init() {
+                setInterval(() => { if(!this.showFullscreen) this.next(); }, 5000);
+            }
+         }"
+         @keydown.right.window="if(showFullscreen) next()"
+         @keydown.left.window="if(showFullscreen) prev()"
+         @keydown.escape.window="showFullscreen = false">
+        
         <div class="bg-white rounded-[3rem] shadow-2xl shadow-[#003049]/10 border border-slate-100 overflow-hidden">
-            {{-- Imagen Principal con Carrusel Automático --}}
-            <div class="relative group aspect-[21/9] overflow-hidden bg-slate-200" 
-                 x-data="{ 
-                    active: 0, 
-                    images: [
-                        '{{ $inmueble->imagen }}',
-                        'https://images.unsplash.com/photo-1600585154340-be6199f7d009?q=80&w=2070&auto=format&fit=crop',
-                        'https://images.unsplash.com/photo-1600607687940-c524774d358e?q=80&w=2070&auto=format&fit=crop'
-                    ],
-                    init() {
-                        setInterval(() => {
-                            this.active = (this.active + 1) % this.images.length;
-                        }, 5000);
-                    }
-                 }">
+            {{-- Imagen Principal con Carrusel --}}
+            <div class="relative group aspect-[21/9] overflow-hidden bg-slate-200">
+                
+                {{-- Imágenes del Carrusel --}}
                 <template x-for="(img, index) in images" :key="index">
                     <img :src="img" 
                          x-show="active === index"
                          x-transition:enter="transition ease-out duration-1000"
-                         x-transition:enter-start="opacity-0 scale-110"
+                         x-transition:enter-start="opacity-0 scale-105"
                          x-transition:enter-end="opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-1000"
-                         x-transition:leave-start="opacity-100"
-                         x-transition:leave-end="opacity-0"
-                         class="absolute inset-0 w-full h-full object-cover">
+                         class="absolute inset-0 w-full h-full object-cover cursor-pointer"
+                         @click="showFullscreen = true">
                 </template>
                 
-                {{-- Overlay de Gradiente --}}
-                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                {{-- Overlay y Gradiente --}}
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none"></div>
 
-                <div class="absolute top-8 left-8 bg-white/95 backdrop-blur-md px-6 py-3 rounded-2xl shadow-2xl border border-white/20 z-10 transition-transform group-hover:scale-105">
-                    <span class="text-[#003049] font-black text-3xl">${{ number_format($inmueble->renta_mensual) }}</span>
-                    <span class="text-muted-foreground text-sm font-bold uppercase tracking-widest ml-1">/ mes</span>
+                {{-- Controles del Carrusel Principal --}}
+                <button @click="prev()" class="absolute left-4 top-1/2 -track-y-1/2 z-20 h-10 w-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md text-white border border-white/20 opacity-0 group-hover:opacity-100 transition-all hover:bg-white/30">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button @click="next()" class="absolute right-4 top-1/2 -track-y-1/2 z-20 h-10 w-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md text-white border border-white/20 opacity-0 group-hover:opacity-100 transition-all hover:bg-white/30">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19l7-7-7-7" /></svg>
+                </button>
+
+                {{-- Badge de Precio --}}
+                <div class="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-5 py-2 rounded-2xl shadow-xl z-20 border border-white/20">
+                    <span class="text-[#003049] font-black text-2xl">${{ number_format($inmueble->renta_mensual) }}</span>
+                    <span class="text-xs text-muted-foreground font-bold ml-1 uppercase">/ mes</span>
                 </div>
 
-                {{-- Indicadores del Carrusel --}}
-                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                {{-- Botón Expandir --}}
+                <button @click="showFullscreen = true" class="absolute bottom-6 left-6 z-20 h-10 w-10 flex items-center justify-center rounded-xl bg-white/10 backdrop-blur-md text-white border border-white/20 hover:bg-white/30 transition-all">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4" /></svg>
+                </button>
+
+                {{-- Indicadores --}}
+                <div class="absolute bottom-6 right-6 flex gap-1.5 z-20">
                     <template x-for="(img, index) in images" :key="index">
-                        <button @click="active = index" 
-                                class="h-1.5 rounded-full transition-all duration-500"
-                                :class="active === index ? 'w-8 bg-white' : 'w-2 bg-white/40'"></button>
+                        <div class="h-1 rounded-full transition-all duration-500" :class="active === index ? 'w-6 bg-white' : 'w-2 bg-white/30'"></div>
                     </template>
                 </div>
             </div>
+
+        {{-- MODAL FULLSCREEN 3.0 (FUERA DEL CARRUSEL PARA EVITAR CLIPPING) --}}
+        <div x-show="showFullscreen" 
+             x-transition:enter="transition opacity duration-300"
+             x-transition:leave="transition opacity duration-200"
+             class="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-2xl flex items-center justify-center overflow-hidden" 
+             style="display: none;"
+             x-cloak>
+            
+            {{-- Botón Cerrar Ultra-Premium --}}
+            <button @click="showFullscreen = false" class="absolute top-8 right-8 p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-all z-[100001] group">
+                <svg class="h-8 w-8 transition-transform group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+
+            {{-- Navegación Principal --}}
+            <div class="relative w-full h-full flex flex-col items-center justify-center select-none p-4 md:p-12">
+                {{-- Flechas Laterales Flotantes --}}
+                <button @click.stop="prev()" class="absolute left-6 md:left-12 p-5 text-white/40 hover:text-white transition-all bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full z-[100001]">
+                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                
+                <img :src="images[active]" 
+                     class="max-w-full max-h-[75vh] object-contain shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-2xl border border-white/10"
+                     x-transition:enter="transition transform duration-500"
+                     x-transition:enter-start="scale-95 opacity-0"
+                     x-transition:enter-end="scale-100 opacity-100">
+                
+                <button @click.stop="next()" class="absolute right-6 md:right-12 p-5 text-white/40 hover:text-white transition-all bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full z-[100001]">
+                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19l7-7-7-7" /></svg>
+                </button>
+
+                {{-- Tira de Miniaturas Estilizada --}}
+                <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-4xl flex gap-4 px-8 py-5 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 overflow-x-auto no-scrollbar scroll-smooth">
+                    <template x-for="(img, index) in images" :key="index">
+                        <button @click="active = index" 
+                                class="h-20 w-32 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300"
+                                :class="active === index ? 'border-white scale-110 shadow-2xl z-10' : 'border-transparent opacity-40 hover:opacity-100'">
+                            <img :src="img" class="h-full w-full object-cover">
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </div>
 
             <div class="p-8 lg:p-12 space-y-12">
                 {{-- Sección Superior: Título y Ubicación --}}
@@ -105,11 +168,11 @@
                                 <span class="text-4xl font-black text-[#003049] leading-none">{{ number_format($inmueble->metros, 0) }}m²</span>
                             </div>
                         </div>
-                        {{-- Depósito --}}
+                        {{-- Renta Mensual --}}
                         <div class="flex flex-col items-start">
-                            <span class="text-[11px] text-[#4F6D7A] font-black uppercase tracking-[0.25em] mb-4">Depósito</span>
+                            <span class="text-[11px] text-[#4F6D7A] font-black uppercase tracking-[0.25em] mb-4">Renta Mensual</span>
                             <div class="bg-[#F4F7F9] px-10 py-4 rounded-3xl border border-[#E5EDF2] shadow-sm">
-                                <span class="text-3xl font-black text-[#003049] tracking-tight">${{ number_format($inmueble->deposito ?? 0) }}</span>
+                                <span class="text-3xl font-black text-[#003049] tracking-tight">${{ number_format($inmueble->renta_mensual ?? 0) }}</span>
                             </div>
                         </div>
                     </div>
@@ -271,7 +334,12 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <span class="block font-black text-[#003049] leading-tight">{{ $resena->usuario->nombre }}</span>
+                                        <span class="block font-black text-[#003049] leading-tight">
+                                            {{ $resena->usuario->nombre }}
+                                            @if(Auth::id() === $resena->usuario_id)
+                                                <span class="ml-2 text-[8px] bg-[#003049] text-white px-2 py-0.5 rounded-full uppercase tracking-tighter">Tú</span>
+                                            @endif
+                                        </span>
                                         <div class="flex text-amber-400 mt-0.5 scale-75 origin-left">
                                             @for($i = 1; $i <= 5; $i++)
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ $i <= $resena->puntuacion ? '' : 'opacity-30' }}" viewBox="0 0 20 20" fill="currentColor">
@@ -285,61 +353,75 @@
                                 <div class="space-y-4">
                                     <p class="text-slate-600 leading-relaxed italic text-sm">"{{ $resena->comentario }}"</p>
                                     
-                                    @if(Auth::id() === $resena->usuario_id)
-                                        <div class="flex gap-6 pt-6 mt-2 border-t border-slate-50" x-data="{ editing: false, comentario: '{{ $resena->comentario }}', puntuacion: {{ $resena->puntuacion }} }">
-                                            <button @click="editing = !editing" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] hover:text-[#003049] transition-all group/edit">
-                                                <div class="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover/edit:bg-[#003049]/5 transition-colors">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                </div>
-                                                <span x-text="editing ? 'Cerrar' : 'Editar Reseña'"></span>
-                                            </button>
-                                            
-                                            <form id="delete-resena-{{ $resena->id }}" action="{{ route('resenas.destroy', $resena) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" onclick="confirmDeleteResena({{ $resena->id }})" 
-                                                    class="flex items-center gap-2 text-[10px] font-black text-red-200/80 uppercase tracking-[0.15em] hover:text-red-500 transition-all group/del">
-                                                    <div class="h-8 w-8 rounded-lg bg-red-50/30 flex items-center justify-center group-hover/del:bg-red-50 transition-colors">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    </div>
-                                                    Eliminar
-                                                </button>
-                                            </form>
+                                    @auth
+                                        @php
+                                            $esAutor = Auth::id() === $resena->usuario_id;
+                                            $esAdmin = Auth::user()->es_admin || Auth::user()->tieneRol('admin');
+                                        @endphp
+                                        
+                                        @if($esAutor || $esAdmin)
+                                            <div class="flex gap-6 pt-6 mt-2 border-t border-slate-50" x-data="{ editing: false, comentario: '{{ $resena->comentario }}', puntuacion: {{ $resena->puntuacion }} }">
+                                                
+                                                @if($esAutor)
+                                                    {{-- Botón Editar (Solo Autor) --}}
+                                                    <button @click="editing = !editing" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] hover:text-[#003049] transition-all group/edit">
+                                                        <div class="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover/edit:bg-[#003049]/5 transition-colors">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                        </div>
+                                                        <span x-text="editing ? 'Cerrar' : 'Editar'"></span>
+                                                    </button>
+                                                @endif
+                                                
+                                                {{-- Botón Eliminar (Autor o Admin) --}}
+                                                <form id="delete-resena-{{ $resena->id }}" action="{{ route('resenas.destroy', $resena) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="button" onclick="confirmDeleteResena({{ $resena->id }})" 
+                                                        class="flex items-center gap-2 text-[10px] font-black text-red-200/80 uppercase tracking-[0.15em] hover:text-red-500 transition-all group/del">
+                                                        <div class="h-8 w-8 rounded-lg bg-red-50/30 flex items-center justify-center group-hover/del:bg-red-50 transition-colors">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                        </div>
+                                                        Eliminar
+                                                    </button>
+                                                </form>
 
-                                            {{-- Mini Formulario de Edición --}}
-                                            <div x-show="editing" x-transition class="fixed inset-0 bg-[#003049]/40 backdrop-blur-sm z-[2000] flex items-center justify-center p-4">
-                                                <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl" @click.away="editing = false">
-                                                    <h4 class="text-xl font-black text-[#003049] mb-6">Actualizar Reseña</h4>
-                                                    <form action="{{ route('resenas.update', $resena) }}" method="POST" class="space-y-6">
-                                                        @csrf
-                                                        @method('PUT')
-                                                        <div class="flex flex-col gap-2">
-                                                            <label class="text-[10px] font-black text-[#003049] uppercase tracking-widest">Nueva Calificación</label>
-                                                            <div class="flex gap-1">
-                                                                <template x-for="i in 5">
-                                                                    <button type="button" @click="puntuacion = i" class="transition-transform hover:scale-125">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" :class="puntuacion >= i ? 'text-amber-400' : 'text-slate-200'" viewBox="0 0 20 20" fill="currentColor">
-                                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                                        </svg>
-                                                                    </button>
-                                                                </template>
-                                                                <input type="hidden" name="puntuacion" :value="puntuacion">
-                                                            </div>
+                                                @if($esAutor)
+                                                    {{-- Modal de Edición (Solo para el Autor) --}}
+                                                    <div x-show="editing" x-transition class="fixed inset-0 bg-[#003049]/40 backdrop-blur-sm z-[2000] flex items-center justify-center p-4" x-cloak>
+                                                        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl" @click.away="editing = false">
+                                                            <h4 class="text-xl font-black text-[#003049] mb-6">Actualizar Reseña</h4>
+                                                            <form action="{{ route('resenas.update', $resena) }}" method="POST" class="space-y-6">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <div class="flex flex-col gap-2">
+                                                                    <label class="text-[10px] font-black text-[#003049] uppercase tracking-widest">Nueva Calificación</label>
+                                                                    <div class="flex gap-1">
+                                                                        <template x-for="i in 5">
+                                                                            <button type="button" @click="puntuacion = i" class="transition-transform hover:scale-125">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" :class="puntuacion >= i ? 'text-amber-400' : 'text-slate-200'" viewBox="0 0 20 20" fill="currentColor">
+                                                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                                </svg>
+                                                                            </button>
+                                                                        </template>
+                                                                        <input type="hidden" name="puntuacion" :value="puntuacion">
+                                                                    </div>
+                                                                </div>
+                                                                <textarea name="comentario" x-model="comentario" rows="4" class="w-full rounded-2xl border-slate-200 bg-slate-50 p-4 text-sm focus:ring-2 focus:ring-[#003049] outline-none"></textarea>
+                                                                <div class="flex gap-4">
+                                                                    <button type="submit" class="flex-1 bg-[#003049] text-white font-black py-4 rounded-xl text-xs uppercase tracking-widest">Guardar</button>
+                                                                    <button type="button" @click="editing = false" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl text-xs uppercase tracking-widest">Cerrar</button>
+                                                                </div>
+                                                            </form>
                                                         </div>
-                                                        <textarea name="comentario" x-model="comentario" rows="4" class="w-full rounded-2xl border-slate-200 bg-slate-50 p-4 text-sm focus:ring-2 focus:ring-[#003049] outline-none"></textarea>
-                                                        <div class="flex gap-4">
-                                                            <button type="submit" class="flex-1 bg-[#003049] text-white font-black py-4 rounded-xl text-xs uppercase tracking-widest">Guardar Cambios</button>
-                                                            <button type="button" @click="editing = false" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl text-xs uppercase tracking-widest">Cerrar</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
+                                                    </div>
+                                                @endif
                                             </div>
-                                        </div>
-                                    @endif
+                                        @endif
+                                    @endauth
                                 </div>
                             </div>
                         @empty

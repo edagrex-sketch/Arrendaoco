@@ -58,7 +58,7 @@ class InmuebleController extends Controller
         $pdf = Pdf::loadView('admin.inmuebles.reporte', compact('inmuebles'));
         return $pdf->download('reporte_inmuebles.pdf');
     }
-
+//cargar las ultimas 9 casas disponibles
     public function home()
     {
         $inmuebles = Inmueble::where('estatus', 'disponible')->latest()->paginate(9);
@@ -170,6 +170,7 @@ class InmuebleController extends Controller
             $inmueble->direccion = $request->direccion;
             $inmueble->tipo = $request->tipo;
             $inmueble->renta_mensual = $request->precio;
+            $inmueble->deposito = $request->precio;
             $inmueble->habitaciones = $request->habitaciones;
             $inmueble->banos = $request->banos;
             $inmueble->metros = $request->metros;
@@ -222,6 +223,7 @@ class InmuebleController extends Controller
             'titulo' => $request->nombre,
             'tipo' => $request->tipo,
             'renta_mensual' => $request->precio,
+            'deposito' => $request->precio,
             'descripcion' => $request->descripcion,
             'direccion' => $request->direccion,
             'habitaciones' => $request->habitaciones,

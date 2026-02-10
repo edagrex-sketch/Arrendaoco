@@ -69,7 +69,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">Precio <span
+                                <label class="block text-sm font-medium mb-1">Renta Mensual <span
                                         class="text-red-500">*</span></label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-3 text-gray-500">$</span>
