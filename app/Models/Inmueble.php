@@ -28,6 +28,8 @@ class Inmueble extends Model
         'banos',
         'metros',
         'imagen',
+        'latitud',
+        'longitud',
     ];
 
     public function propietario()

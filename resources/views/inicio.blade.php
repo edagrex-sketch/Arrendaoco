@@ -91,13 +91,121 @@
     </section>
 
     {{-- 
-        2. MAPA DE EXPLORACIÓN (SUSPENDIDO - COMENTADO)
+        2. MAPA DE EXPLORACIÓN
     --}}
-    {{-- 
-    <section class="container mx-auto px-4 mb-16" x-data="{ ... }">
-        ...
+    <section class="container mx-auto px-4 mb-16" x-data="mapExploration()">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="h-10 w-10 rounded-xl bg-[#003049] flex items-center justify-center text-white shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black text-[#003049] tracking-tight">Explora el Mapa</h2>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Encuentra disponibilidad cerca de ti con vista satelital</p>
+            </div>
+        </div>
+        <div id="map-inicio" class="w-full h-[500px] rounded-[2.5rem] border border-slate-100 shadow-2xl overflow-hidden z-0"></div>
     </section>
-    --}}
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('mapExploration', () => ({
+                map: null,
+                userMarker: null,
+                userCircle: null,
+                init() {
+                    setTimeout(() => {
+                        // Capas Base
+                        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                            attribution: '&copy; OpenStreetMap contributors'
+                        });
+
+                        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                        });
+
+                        // Inicializar mapa
+                        this.map = L.map('map-inicio', {
+                            center: [16.9068, -92.0941],
+                            zoom: 15,
+                            layers: [osm]
+                        });
+
+                        const baseMaps = { 'Callejero': osm, 'Satélite': satellite };
+                        L.control.layers(baseMaps, null, { collapsed: false, position: 'topright' }).addTo(this.map);
+                        L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(this.map);
+
+                        // Botón de geolocalización
+                        const locateControl = L.Control.extend({
+                            options: { position: 'topleft' },
+                            onAdd: function(map) {
+                                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                                container.style.backgroundColor = 'white';
+                                container.style.width = '34px';
+                                container.style.height = '34px';
+                                container.style.display = 'flex';
+                                container.style.alignItems = 'center';
+                                container.style.justifyContent = 'center';
+                                container.style.cursor = 'pointer';
+                                container.innerHTML = `<svg xmlns='http://www.w3.org/2000/svg' style='width:20px; height:20px; color:#003049' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' /><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' /></svg>`;
+                                container.onclick = function() {
+                                    if (!window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                                        Swal.fire({
+                                            icon: 'warning',
+                                            title: 'Conexión no segura',
+                                            text: 'Para usar el GPS, el navegador exige HTTPS.',
+                                            footer: '<span class=\"text-xs text-slate-400\">Prueba usando localhost o instala un certificado SSL.</span>'
+                                        });
+                                        return;
+                                    }
+                                    map.locate({setView: true, maxZoom: 16});
+                                };
+                                return container;
+                            }
+                        });
+                        this.map.addControl(new locateControl());
+
+                        this.map.on('locationfound', (e) => {
+                            if (this.userMarker) this.map.removeLayer(this.userMarker);
+                            if (this.userCircle) this.map.removeLayer(this.userCircle);
+                            this.userMarker = L.marker(e.latlng).addTo(this.map).bindPopup('Estás aquí').openPopup();
+                            this.userCircle = L.circle(e.latlng, e.accuracy / 2).addTo(this.map);
+                        });
+
+                        this.map.on('locationerror', (e) => {
+                            let msg = 'No pudimos encontrar tu ubicación. Por favor, asegúrate de activar el GPS.';
+                            if (e.message.includes('Only secure origins are allowed')) {
+                                msg = 'El GPS está bloqueado por falta de HTTPS.';
+                            }
+                            Swal.fire({ icon: 'error', title: 'Error de GPS', text: msg });
+                        });
+
+                        // Marcadores dinámicos
+                        @foreach($inmueblesMapa as $in)
+                            @if($in->latitud && $in->longitud)
+                                L.marker([{{ $in->latitud }}, {{ $in->longitud }}])
+                                    .addTo(this.map)
+                                    .bindPopup(`
+                                        <div class='w-48 overflow-hidden font-sans'>
+                                            <div class='relative h-24 mb-2'>
+                                                <img src='{{ $in->imagen }}' class='w-full h-full object-cover rounded-md'>
+                                                <span class='absolute top-1 right-1 bg-[#003049] text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold'>${{ number_format($in->renta_mensual) }}</span>
+                                            </div>
+                                            <h4 class='font-black text-[#003049] text-xs line-clamp-1'>{{ $in->titulo }}</h4>
+                                            <p class='text-[10px] text-slate-500 mb-2'>{{ $in->categoria }} en Ocosingo</p>
+                                            <a href='{{ route('inmuebles.show', $in) }}' class='block w-full py-1.5 bg-[#003049] hover:bg-[#669BBC] text-white text-[10px] font-bold rounded text-center'>Ver propiedad</a>
+                                        </div>
+                                    `);
+                            @endif
+                        @endforeach
+                    }, 500);
+                }
+            }));
+        });
+    </script>
 
     {{-- 3. SECCIÓN DE RESULTADOS --}}
     <section class="container mx-auto px-4 mb-20 -mt-8">
@@ -247,5 +355,4 @@
         </div>
     </section>
 
-    {{-- <x-arrendito /> --}}
 @endsection

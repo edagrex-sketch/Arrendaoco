@@ -167,5 +167,4 @@
         @endif
     </div>
 
-    {{-- <x-arrendito /> --}}
 @endsection

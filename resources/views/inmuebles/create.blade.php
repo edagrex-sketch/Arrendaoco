@@ -78,7 +78,6 @@
                                         class="w-full rounded-lg border-input bg-background/50 border py-3 pl-8 px-4">
                                 </div>
                             </div>
-                            {{-- 
                             <div>
                                 <label class="block text-sm font-medium mb-1">Depósito <span
                                         class="text-xs text-muted-foreground font-normal">(Opcional)</span></label>
@@ -88,7 +87,6 @@
                                         class="w-full rounded-lg border-input bg-background/50 border py-3 pl-8 px-4">
                                 </div>
                             </div>
-                            --}}
                         </div>
                     </div>
                 </div>
@@ -97,7 +95,6 @@
                 <div x-show="step === 2" x-ref="step2" x-transition style="display: none;">
                     <h2 class="text-xl font-bold mb-4 flex items-center gap-2">✨ Características y Ubicación</h2>
 
-                    {{-- 
                     <div class="mb-4">
                         <label class="block text-sm font-medium mb-1">Dirección Completa <span
                                 class="text-red-500">*</span></label>
@@ -106,7 +103,7 @@
                                 placeholder="Calle, Número, Colonia..." required
                                 class="flex-1 rounded-lg border-input bg-background/50 border py-3 px-4">
                             <button type="button" onclick="buscarDireccion()"
-                                class="bg-primary/10 text-primary border border-primary/20 px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-all text-sm font-bold flex items-center gap-2">
+                                class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all text-sm font-bold flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                     stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -116,10 +113,8 @@
                             </button>
                         </div>
                     </div>
-                    --}}
 
-                    {{-- 🗺️ Selector de Mapa (SUSPENDIDO) --}}
-                    {{-- 
+                    {{-- 🗺️ Selector de Mapa --}}
                     <div class="mb-6">
                         <label class="block text-sm font-medium mb-2">Marca el punto en el mapa <span
                                 class="text-xs text-muted-foreground font-normal">(Seleccionado automáticamente al buscar
@@ -132,7 +127,6 @@
 
                     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
                     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-                    --}}
 
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
@@ -268,11 +262,24 @@
         function initMapPicker() {
             if (mapPicker) return;
             setTimeout(() => {
-                mapPicker = L.map('map-picker').setView([16.9068, -92.0941], 14);
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
                     attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(mapPicker);
+                });
+
+                const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                });
+
+                mapPicker = L.map('map-picker', {
+                    layers: [osm]
+                }).setView([16.9068, -92.0941], 14);
+
+                const baseMaps = {
+                    'Callejero': osm,
+                    'Satélite': satellite
+                };
+                L.control.layers(baseMaps, null, { collapsed: false, position: 'topright' }).addTo(mapPicker);
 
                 mapPicker.on('click', function(e) {
                     actualizarPin(e.latlng.lat, e.latlng.lng);

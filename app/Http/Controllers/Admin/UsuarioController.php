@@ -36,9 +36,18 @@ class UsuarioController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre' => 'required|string|max:255',
+            'nombre' => 'required|string|max:255|min:3',
             'email' => 'required|string|email|max:255|unique:usuarios',
             'password' => 'required|string|min:8|confirmed',
+        ], [
+            'nombre.required' => 'El nombre es obligatorio.',
+            'nombre.min' => 'El nombre debe tener al menos 3 caracteres.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'Formato de correo inválido.',
+            'email.unique' => 'Este correo ya está registrado.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'Las contraseñas no coinciden.'
         ]);
 
         Usuario::create([
@@ -63,28 +72,59 @@ class UsuarioController extends Controller
         $usuario = Usuario::findOrFail($id);
 
         $request->validate([
-            'nombre' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:usuarios,email,'.$id,
+            'nombre' => 'required|string|max:255|min:3',
+            'email' => 'required|string|email|max:255|unique:usuarios,email,' . $id,
+            'password' => 'nullable|string|min:8',
+            'estatus' => 'required|in:activo,inactivo',
+        ], [
+            'nombre.required' => 'El nombre es obligatorio.',
+            'nombre.min' => 'El nombre debe tener al menos 3 caracteres.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'Formato de correo inválido.',
+            'email.unique' => 'Este correo ya está registrado por otro usuario.',
+            'password.min' => 'La nueva contraseña debe tener al menos 8 caracteres.',
+            'estatus.in' => 'El estatus seleccionado no es válido.'
         ]);
 
-        $usuario->update([
+        $usuario->fill([
             'nombre' => $request->nombre,
             'email' => $request->email,
             'estatus' => $request->estatus,
         ]);
 
         if ($request->filled('password')) {
-            $usuario->update(['password' => Hash::make($request->password)]);
+            $usuario->password = Hash::make($request->password);
         }
 
-        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario actualizado exitosamente');
+        $usuario->save();
+
+        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario actualizado con éxito y validaciones completadas.');
     }
 
     public function destroy($id)
     {
         $usuario = Usuario::findOrFail($id);
+
+        // 1. Evitar que el admin se elimine a sí mismo
+        if ($id == auth()->id()) {
+            return redirect()->back()->with('error', 'No puedes eliminar tu propia cuenta de administrador.');
+        }
+
+        // 2. Verificar si tiene contratos activos (como dueño o inquilino)
+        $tieneContratosActivos = $usuario->contratosComoPropietario()->where('estatus', 'activo')->exists() || 
+                                 $usuario->contratosComoInquilino()->where('estatus', 'activo')->exists();
+
+        if ($tieneContratosActivos) {
+            return redirect()->back()->with('error', 'No se puede eliminar al usuario: tiene contratos vigentes. Finalice los contratos primero.');
+        }
+
+        // 3. Verificar si tiene inmuebles publicados
+        if ($usuario->inmuebles()->exists()) {
+            return redirect()->back()->with('error', 'El usuario tiene propiedades registradas. Elimine o transfiera las propiedades antes de borrar al usuario.');
+        }
+
         $usuario->delete();
-        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario eliminado exitosamente');
+        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario eliminado correctamente.');
     }
 
     public function reporte()

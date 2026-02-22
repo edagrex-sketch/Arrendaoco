@@ -12,6 +12,11 @@ use App\Http\Controllers\ArrenditoController;
 use App\Http\Controllers\ResenaController;
 use App\Http\Controllers\FavoritoController;
 use App\Http\Controllers\ArrenditoChatController;
+use App\Http\Controllers\Auth\SocialAuthController;
+
+// Social Login Routes
+Route::get('/auth/{provider}', [SocialAuthController::class, 'redirectToProvider'])->name('social.login');
+Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])->name('social.callback');
 
 // Test Gemini API
 Route::get('/test-gemini', function () {
@@ -114,7 +119,6 @@ Route::get('/', function () {
     return view('welcome', compact('inmuebles'));
 })->name('welcome');
 
-Route::get('/buscar', [InmuebleController::class, 'publicSearch'])->name('inmuebles.public_search');
 
 
 // Mostrar formulario de login
@@ -158,6 +162,7 @@ Route::post('/logout', function (Request $request) {
 
 Route::middleware('auth')->group(function () {
     Route::get('/inicio', [InmuebleController::class, 'home'])->name('inicio');
+    Route::get('/buscar', [InmuebleController::class, 'publicSearch'])->name('inmuebles.public_search');
     Route::get('/inmuebles/{inmueble}', [InmuebleController::class, 'show'])->name('inmuebles.show');
 
     // Rutas de Inmuebles
@@ -260,3 +265,16 @@ Route::post('/reset-password', function (\Illuminate\Http\Request $request) {
         ->withErrors(['email' => __($status)]);
 })->name('password.update');
 
+
+// Rutas de Test para Vistas de Pagos
+Route::prefix('test-pagos')->group(function () {
+    Route::get('/', function () {
+        return view('pagos.index');
+    })->name('pagos.test.index');
+    Route::get('/checkout', function () {
+        return view('pagos.checkout');
+    })->name('pagos.test.checkout');
+    Route::get('/success', function () {
+        return view('pagos.success');
+    })->name('pagos.test.success');
+});

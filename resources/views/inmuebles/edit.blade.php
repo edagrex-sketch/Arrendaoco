@@ -53,17 +53,14 @@
                         <input type="text" name="direccion" id="direccion-input" value="{{ $inmueble->direccion }}"
                             required
                             class="flex-1 px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
-                        {{-- 
                         <button type="button" onclick="buscarDireccion()"
                             class="bg-[#003049] text-white px-6 py-3 rounded-xl hover:bg-[#003049]/90 transition-all font-bold flex items-center gap-2">
                             🔍 Buscar en mapa
                         </button>
-                        --}}
                     </div>
                 </div>
 
-                {{-- 🗺️ Selector de Mapa (SUSPENDIDO) --}}
-                {{-- 
+                {{-- 🗺️ Selector de Mapa --}}
                 <div>
                     <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Ubicación en el
                         mapa</label>
@@ -73,10 +70,8 @@
                     <input type="hidden" name="latitud" id="lat-input" value="{{ $inmueble->latitud }}">
                     <input type="hidden" name="longitud" id="longitud-input" value="{{ $inmueble->longitud }}">
                 </div>
-                --}}
 
-                {{-- Leaflet y Scripts de Mapa (SUSPENDIDO) --}}
-                {{-- 
+                {{-- Leaflet y Scripts de Mapa --}}
                 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
                 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
                 <script>
@@ -85,16 +80,39 @@
                         var initialLat = {{ $inmueble->latitud ?? 16.9068 }};
                         var initialLng = {{ $inmueble->longitud ?? -92.0941 }};
 
-                        map = L.map('map-edit').setView([initialLat, initialLng], 15);
-
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
                             attribution: '&copy; OpenStreetMap contributors'
+                        });
+
+                        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                        });
+
+                        map = L.map('map-edit', {
+                            center: [initialLat, initialLng],
+                            zoom: 15,
+                            layers: [osm]
+                        });
+
+                        const baseMaps = {
+                            'Callejero': osm,
+                            'Satélite': satellite
+                        };
+                        L.control.layers(baseMaps, null, { collapsed: false }).addTo(map);
+                        L.control.scale({ imperial: false }).addTo(map);
+
+                        marker = L.marker([initialLat, initialLng], {
+                            draggable: true
                         }).addTo(map);
 
-                        marker = L.marker([initialLat, initialLng]).addTo(map);
+                        marker.on('dragend', function(event) {
+                            var position = marker.getLatLng();
+                            actualizarCampos(position.lat, position.lng);
+                        });
 
                         map.on('click', function(e) {
-                            actualizarPin(e.latlng.lat, e.latlng.lng);
+                            actualizarCampos(e.latlng.lat, e.latlng.lng, true);
                         });
 
                         setTimeout(() => {
@@ -102,11 +120,11 @@
                         }, 500);
                     });
 
-                    function actualizarPin(lat, lng, zoom = null) {
+                    function actualizarCampos(lat, lng, zoom = false) {
                         marker.setLatLng([lat, lng]);
                         document.getElementById('lat-input').value = lat;
                         document.getElementById('longitud-input').value = lng;
-                        if (zoom) map.setView([lat, lng], zoom);
+                        if (zoom) map.setView([lat, lng], map.getZoom());
                     }
 
                     async function buscarDireccion() {
@@ -140,7 +158,6 @@
                         }
                     }
                 </script>
-                --}}
 
                 <div class="grid grid-cols-3 gap-6">
                     <div>

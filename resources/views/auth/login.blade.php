@@ -39,6 +39,13 @@
                             </div>
                         @enderror
 
+                        @error('error')
+                            <div
+                                class="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 text-sm rounded-r shadow-sm animate-fade-in-up">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
                         <div class="space-y-1 animate-fade-in-up delay-100">
                             <label class="block text-sm font-semibold text-[#003049]">Correo electrónico</label>
                             <input type="email" name="email" value="{{ old('email') }}"
@@ -58,6 +65,30 @@
                             class="w-full bg-[#003049] hover:bg-[#002538] text-white py-3.5 rounded-lg font-bold shadow-md transform transition-all duration-200 animate-fade-in-up delay-300 hover-lift">
                             Iniciar sesión
                         </button>
+
+                        <!-- Social Login Divider -->
+                        <div class="relative py-4 animate-fade-in-up delay-400">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-gray-200"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="px-3 bg-white text-gray-400 font-medium">O continuar con</span>
+                            </div>
+                        </div>
+
+                        <!-- Social Login Buttons -->
+                        <div class="grid grid-cols-2 gap-4 animate-fade-in-up delay-500">
+                            <a href="{{ route('social.login', 'google') }}"
+                                class="flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200 font-semibold text-gray-700 shadow-sm hover-lift">
+                                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="h-5 w-5" alt="Google">
+                                <span>Google</span>
+                            </a>
+                            <a href="{{ route('social.login', 'facebook') }}"
+                                class="flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200 font-semibold text-gray-700 shadow-sm hover-lift">
+                                <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" class="h-5 w-5" alt="Facebook">
+                                <span>Facebook</span>
+                            </a>
+                        </div>
 
                         <div class="flex items-center justify-between mt-6 text-sm animate-fade-in-up delay-400">
                             <a href="{{ route('registro') }}"

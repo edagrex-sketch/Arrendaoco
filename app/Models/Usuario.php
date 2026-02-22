@@ -21,6 +21,8 @@ class Usuario extends Authenticatable
         'es_admin',
         'estatus',
         'foto_perfil',
+        'google_id',
+        'facebook_id',
     ];
     protected $hidden = [
         'password',

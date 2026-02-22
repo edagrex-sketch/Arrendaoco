@@ -75,6 +75,30 @@
                     <button class="w-full bg-[#003049] hover:bg-[#002538] text-white py-3.5 rounded-lg font-bold shadow-md transform transition-all duration-200 mt-2 animate-fade-in-up delay-500 hover-lift">
                         Registrarse
                     </button>
+
+                    <!-- Social Login Divider -->
+                    <div class="relative py-4 animate-fade-in-up delay-600">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-200"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-3 bg-white text-gray-400 font-medium">O registrarse con</span>
+                        </div>
+                    </div>
+
+                    <!-- Social Login Buttons -->
+                    <div class="grid grid-cols-2 gap-4 animate-fade-in-up delay-[700ms]">
+                        <a href="{{ route('social.login', 'google') }}"
+                            class="flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200 font-semibold text-gray-700 shadow-sm hover-lift">
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="h-5 w-5" alt="Google">
+                            <span>Google</span>
+                        </a>
+                        <a href="{{ route('social.login', 'facebook') }}"
+                            class="flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200 font-semibold text-gray-700 shadow-sm hover-lift">
+                            <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" class="h-5 w-5" alt="Facebook">
+                            <span>Facebook</span>
+                        </a>
+                    </div>
                     
                     <div class="mt-6 text-center text-sm animate-fade-in-up delay-500">
                         <a href="{{ route('login') }}" class="text-gray-600 hover:text-[#780000] font-medium transition-colors">

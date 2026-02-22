@@ -86,6 +86,8 @@ class InmuebleSeeder extends Seeder
                 'metros' => $data['metros'],
                 'propietario_id' => $propietario->id,
                 'imagen' => $stockImages[array_rand($stockImages)],
+                'latitud' => 16.9068 + (mt_rand(-100, 100) / 10000),
+                'longitud' => -92.0941 + (mt_rand(-100, 100) / 10000),
             ]);
 
             // Generar 5 imágenes adicionales

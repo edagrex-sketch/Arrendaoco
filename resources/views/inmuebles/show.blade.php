@@ -328,7 +328,7 @@
                                 <div class="flex items-center gap-4 mb-6">
                                     <div class="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500 font-black text-xl overflow-hidden shadow-inner">
                                         @if($resena->usuario->foto_perfil)
-                                            <img src="{{ asset('storage/' . $resena->usuario->foto_perfil) }}" class="h-full w-full object-cover">
+                                            <img src="{{ str_starts_with($resena->usuario->foto_perfil, 'http') ? $resena->usuario->foto_perfil : asset('storage/' . $resena->usuario->foto_perfil) }}" class="h-full w-full object-cover">
                                         @else
                                             {{ substr($resena->usuario->nombre, 0, 1) }}
                                         @endif
@@ -438,12 +438,106 @@
                     </div>
                 </div>
 
-                {{-- Leaflet y Scripts de Mapa (SUSPENDIDO) --}}
-                {{-- 
+                {{-- Tiempos de Traslado (Calculados) --}}
+                <div class="mt-16 bg-slate-50 rounded-[3rem] p-10 border border-slate-100 shadow-inner" x-data="{
+                    lat1: {{ $inmueble->latitud ?? 16.9068 }},
+                    lng1: {{ $inmueble->longitud ?? -92.0941 }},
+                    puntos: [
+                        { nombre: 'Parque Central', lat: 16.9068, lng: -92.0941 },
+                        { nombre: 'UT de la Selva (UTS)', lat: 16.9188, lng: -92.1032 },
+                        { nombre: 'Terminal OCC', lat: 16.9042, lng: -92.0995 }
+                    ],
+                    getDistancia(lat2, lng2) {
+                        const R = 6371; // Radio de la Tierra en km
+                        const dLat = (lat2 - this.lat1) * Math.PI / 180;
+                        const dLng = (lng2 - this.lng1) * Math.PI / 180;
+                        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                                  Math.cos(this.lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                        return (R * c).toFixed(2);
+                    }
+                }">
+                    <div class="flex items-center gap-4 mb-10">
+                        <div class="h-14 w-14 rounded-2xl bg-[#003049] flex items-center justify-center text-white shadow-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-[#003049] tracking-tight">Ubicación Estratégica</h3>
+                            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Tiempos estimados desde esta propiedad en Ocosingo</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <template x-for="punto in puntos" :key="punto.nombre">
+                            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 flex flex-col justify-between group hover:shadow-md transition-all">
+                                <div>
+                                    <h4 class="font-black text-[#003049] text-sm group-hover:text-primary transition-colors" x-text="punto.nombre"></h4>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1" x-text="`${getDistancia(punto.lat, punto.lng)} km`"></p>
+                                </div>
+                                <div class="mt-6 flex items-center justify-between gap-2 border-t border-slate-50 pt-4">
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-[8px] font-black text-slate-300 uppercase">A pie</span>
+                                        <span class="text-xs font-black text-[#003049]" x-text="`${Math.ceil(getDistancia(punto.lat, punto.lng) * 12)} min`"></span>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-[8px] font-black text-orange-300 uppercase">Bici</span>
+                                        <span class="text-xs font-black text-orange-600" x-text="`${Math.ceil(getDistancia(punto.lat, punto.lng) * 4)} min`"></span>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-[8px] font-black text-[#003049]/30 uppercase">Taxi</span>
+                                        <span class="text-xs font-black text-[#003049]" x-text="`${Math.ceil(getDistancia(punto.lat, punto.lng) * 2) + 2} min`"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Leaflet y Scripts de Mapa --}}
                 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
                 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-                <script> ... </script>
-                --}}
+                <div id="map-show" class="w-full h-[400px] rounded-[2.5rem] border border-slate-100 shadow-inner mt-12 z-0"></div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const lat = {{ $inmueble->latitud ?? 16.9068 }};
+                        const lng = {{ $inmueble->longitud ?? -92.0941 }};
+                        
+                        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                            attribution: '&copy; OpenStreetMap contributors'
+                        });
+
+                        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                        });
+
+                        const map = L.map('map-show', {
+                            center: [lat, lng],
+                            zoom: 16,
+                            layers: [osm]
+                        });
+
+                        const baseMaps = {
+                            'Callejero': osm,
+                            'Satélite': satellite
+                        };
+                        L.control.layers(baseMaps, null, { collapsed: false }).addTo(map);
+                        L.control.scale({ imperial: false }).addTo(map);
+
+                        L.marker([lat, lng]).addTo(map)
+                            .bindPopup(`
+                                <div class='font-sans p-1'>
+                                    <h4 class='font-black text-[#003049] text-sm'>{{ $inmueble->titulo }}</h4>
+                                    <p class='text-[10px] text-slate-500'>{{ $inmueble->direccion }}</p>
+                                </div>
+                            `)
+                            .openPopup();
+
+                        // Forzar redibujo por problemas de Alpine / Tabs
+                        setTimeout(() => { map.invalidateSize(); }, 500);
+                    });
+                </script>
                 <script>
                     function confirmDeleteResena(id) {
                         Swal.fire({
@@ -463,5 +557,4 @@
                         })
                     }
                 </script>
-    {{-- <x-arrendito /> --}}
 @endsection
