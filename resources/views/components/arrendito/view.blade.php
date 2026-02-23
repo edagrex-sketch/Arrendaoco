@@ -35,21 +35,21 @@
 {{-- Contenedor Principal de Arrendito --}}
 <div id="mascot-wrapper">
 
-    {{-- Menú de Asistente (Oculto por defecto) --}}
+    {{-- Menú de Asistente --}}
     <div id="mascot-menu" class="hidden-menu">
         <div class="menu-header">
-            <span class="text-xs font-black uppercase tracking-tighter text-primary">Asistente Arrendaoco</span>
-            <button onclick="toggleMascotMenu()" class="text-muted-foreground hover:text-foreground">
+            <span>Asistente ArrendaOco</span>
+            <button onclick="toggleMascotMenu()" class="text-white/70 hover:text-white transition-all hover:rotate-90 duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
         <div class="menu-options">
             <button onclick="toggleMascotChat()" class="menu-item">
                 <div class="item-icon">💬</div>
-                <div class="item-text"><b>Hablar</b> con IA</div>
+                <div class="item-text"><b>Hablar</b> con ROCO AI</div>
             </button>
             @unless(Auth::check() && (Auth::user()->tieneRol('admin') || Auth::user()->es_admin))
             <a href="{{ route('favoritos.index') }}" class="menu-item">
@@ -67,45 +67,54 @@
             </button>
         </div>
         <div class="menu-footer">
-            "Tu hogar a un clic de distancia"
+            🏠 Tu hogar a un clic de distancia
         </div>
     </div>
 
-    {{-- Ventana de Chat IA --}}
+    {{-- Ventana de Chat IA (Premium) --}}
     <div id="mascot-chat" class="hidden-chat">
+        {{-- Header Premium --}}
         <div class="chat-header">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-lg">🐶</div>
+            <div class="flex items-center gap-3" style="position: relative; z-index: 1;">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-lg"
+                     style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.3);">
+                    🐶
+                </div>
                 <div>
-                    <div class="text-xs font-bold text-primary leading-none" id="chat-mascot-name">ROCO AI</div>
-                    <div class="text-[10px] text-green-500 flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> En línea
+                    <div class="font-bold leading-none" id="chat-mascot-name" style="font-size: 14px; letter-spacing: 0.5px;">ROCO AI</div>
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 5px; margin-top: 2px;">
+                        <span style="width: 7px; height: 7px; background: #10B981; border-radius: 50%; display: inline-block; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);"></span>
+                        En línea · Gemini 2.5
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1" style="position: relative; z-index: 1;">
                 <button onclick="toggleMascotMenu(); event.stopPropagation();"
-                    class="text-white/80 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
-                    title="Más opciones">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    class="transition-all p-2 rounded-xl hover:bg-white/15"
+                    title="Más opciones" style="color: rgba(255,255,255,0.8);">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z">
                         </path>
                     </svg>
                 </button>
                 <button onclick="toggleMascotChat()"
-                    class="text-white/80 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
-                    title="Cerrar chat">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    class="transition-all p-2 rounded-xl hover:bg-white/15"
+                    title="Cerrar chat" style="color: rgba(255,255,255,0.8);">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12">
                         </path>
                     </svg>
                 </button>
             </div>
         </div>
 
+        {{-- Cuerpo del Chat --}}
         <div id="chat-messages" class="chat-body">
-            <div class="msg-ai">¡Guau! Soy ROCO, tu asistente Beagle. ¿En qué puedo ayudarte hoy? 🐶🦴</div>
+            <div class="msg-ai">
+                ¡Guau! 🦴 Soy <b>ROCO</b>, tu asistente Beagle con inteligencia artificial.<br>
+                Puedo ayudarte a encontrar el inmueble perfecto en <b>Ocosingo</b>. ¿En qué te ayudo hoy? 🏠
+            </div>
 
             {{-- Botones de respuesta rápida --}}
             <div class="quick-replies" id="quick-replies">
@@ -118,37 +127,47 @@
                 <button onclick="sendQuickReply('Busco algo barato en Ocosingo')" class="quick-reply-btn">
                     💰 Opciones económicas
                 </button>
+                <button onclick="sendQuickReply('¿Qué hay cerca de la UTS?')" class="quick-reply-btn">
+                    🎓 Cerca de la UTS
+                </button>
             </div>
         </div>
 
+        {{-- Footer Premium --}}
         <div class="chat-footer">
             <div style="width: 100%;">
                 <input type="text" id="chat-input" placeholder="Pregúntame sobre inmuebles..."
-                    onkeypress="handleChatKeyPress(event)" oninput="updateCharCounter()" maxlength="500">
+                    onkeypress="handleChatKeyPress(event)" oninput="updateCharCounter()" maxlength="500"
+                    autocomplete="off">
                 <div class="char-counter" id="char-counter">0/500</div>
             </div>
             <button onclick="sendMascotMessage()" id="chat-send-btn" title="Enviar mensaje (Enter)">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
                         d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                 </svg>
             </button>
+        </div>
+
+        {{-- Powered By --}}
+        <div class="roco-powered-by">
+            Potenciado por <span>Google Gemini AI</span> · ArrendaOco
         </div>
     </div>
 
     {{-- Globo de Texto Interactivo --}}
     <div class="mascot-bubble" onclick="toggleMascotChat()">
         Soy <span id="mascot-name-display" class="mascot-name-highlight">ROCO</span>.
-        <br><span style="font-weight:400; color:#888; font-size:10px;">¡Haz clic para hablar!</span>
+        <br><span style="font-weight:400; color:#94a3b8; font-size:10px;">¡Haz clic para hablar!</span>
     </div>
 
-    {{-- Escena de la Mascarota --}}
+    {{-- Escena de la Mascota --}}
     <div class="mascot-scene">
         {{-- Botón de minimizar mascota --}}
         <button onclick="toggleMascotVisibility()" class="minimize-assistant-btn" title="Ocultar asistente">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
         </button>
 
@@ -159,7 +178,7 @@
                 background="transparent" speed="1" loop autoplay renderer="svg">
             </lottie-player>
 
-            {{-- Tooltip flotante - AHORA CLICABLE --}}
+            {{-- Tooltip flotante --}}
             <div class="chat-tooltip" id="chat-tooltip" onclick="toggleMascotChat(); event.stopPropagation();"
                 style="cursor: pointer;">
                 💬 ¡Chatea conmigo!

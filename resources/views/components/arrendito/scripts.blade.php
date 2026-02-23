@@ -6,13 +6,11 @@
         const oldName = localStorage.getItem('arrenditoName');
         const currentName = localStorage.getItem('rocoName');
 
-        // Si existe el nombre antiguo, migrarlo
         if (oldName) {
             localStorage.setItem('rocoName', oldName);
             localStorage.removeItem('arrenditoName');
         }
 
-        // Si el nombre actual es "Arrendito", cambiarlo a "ROCO"
         if (currentName === 'Arrendito') {
             localStorage.setItem('rocoName', 'ROCO');
         }
@@ -29,68 +27,70 @@
                 }
             })
             .catch(err => console.error('Error al cargar nombre de ROCO:', err));
-    @else
-        const savedName = localStorage.getItem('rocoName') || 'ROCO';
-        updateMascotNameUI(savedName);
-    @endauth
+        @else
+            const savedName = localStorage.getItem('rocoName') || 'ROCO';
+            updateMascotNameUI(savedName);
+        @endauth
 
-    // 2. Lógica del Overlay (Carga)
-    const overlay = document.getElementById('lock-overlay');
-    if (overlay) {
-        @if (auth()->check())
-            @if (session('login_success'))
+        // 2. Lógica del Overlay (Carga)
+        const overlay = document.getElementById('lock-overlay');
+        if (overlay) {
+            @if (auth()->check())
+                @if (session('login_success'))
+                    setTimeout(() => {
+                        overlay.classList.add('overlay-hidden');
+                    }, 3000);
+                @else
+                    overlay.style.display = 'none';
+                @endif
+            @else
                 setTimeout(() => {
                     overlay.classList.add('overlay-hidden');
                 }, 3000);
-            @else
-                overlay.style.display = 'none';
             @endif
-        @else
-            setTimeout(() => {
-                overlay.classList.add('overlay-hidden');
-            }, 3000);
-        @endif
-    }
-
-    // 3. Restaurar estado de visibilidad de ROCO
-    const rocoHidden = localStorage.getItem('rocoHidden') === 'true';
-    if (rocoHidden) {
-        const wrapper = document.getElementById('mascot-wrapper');
-        const btn = document.getElementById('maximize-assistant-btn');
-        if (wrapper) wrapper.classList.add('hidden');
-        if (btn) btn.classList.remove('hidden');
-    }
-
-    // 4. Sistema de Mensajes Contextuales
-    setTimeout(() => {
-        const currentPath = window.location.pathname;
-        const mascotName = localStorage.getItem('rocoName') || 'ROCO';
-        let message = "";
-
-        if (currentPath === '/inicio') {
-            message = `¡Guau! Soy <b>${mascotName}</b>. ¿Buscamos una casa con jardín hoy? 🏡🐶`;
-        } else if (currentPath.includes('/inmuebles/')) {
-            message = "¡Qué lugar tan acogedor! 🐶 ¿Exploramos juntos este hogar?";
-        } else if (currentPath === '/favoritos') {
-            message = "¡Tus favoritos son geniales! Los guardo como mis huesos favoritos. 🦴❤️";
-        } else if (currentPath === '/perfil') {
-            message = "¡Hola amigo! Actualiza tus datos para conocerte mejor. 🐾";
-        } else {
-            message = `¡Guau! Soy <b>${mascotName}</b>, tu compañero leal. ¿En qué te ayudo?`;
         }
-        triggerMascotMessage(message);
-    }, 2000);
+
+        // 3. Restaurar estado de visibilidad de ROCO
+        const rocoHidden = localStorage.getItem('rocoHidden') === 'true';
+        if (rocoHidden) {
+            const wrapper = document.getElementById('mascot-wrapper');
+            const btn = document.getElementById('maximize-assistant-btn');
+            if (wrapper) wrapper.classList.add('hidden');
+            if (btn) btn.classList.remove('hidden');
+        }
+
+        // 4. Sistema de Mensajes Contextuales
+        setTimeout(() => {
+            const currentPath = window.location.pathname;
+            const mascotName = localStorage.getItem('rocoName') || 'ROCO';
+            let message = "";
+
+            if (currentPath === '/inicio') {
+                message = `¡Guau! Soy <b>${mascotName}</b>. ¿Buscamos una casa con jardín hoy? 🏡🐶`;
+            } else if (currentPath.includes('/inmuebles/')) {
+                message = "¡Qué lugar tan acogedor! 🐶 ¿Exploramos juntos este hogar?";
+            } else if (currentPath === '/favoritos') {
+                message = "¡Tus favoritos son geniales! Los guardo como mis huesos favoritos. 🦴❤️";
+            } else if (currentPath === '/perfil') {
+                message = "¡Hola amigo! Actualiza tus datos para conocerte mejor. 🐾";
+            } else {
+                message = `¡Guau! Soy <b>${mascotName}</b>, tu compañero leal. ¿En qué te ayudo?`;
+            }
+            triggerMascotMessage(message);
+        }, 2000);
     });
 
     function triggerMascotMessage(htmlContent) {
         const bubble = document.querySelector('.mascot-bubble');
         if (bubble) {
             bubble.style.opacity = '0';
+            bubble.style.transform = 'translateY(5px)';
             setTimeout(() => {
                 const cleanContent = htmlContent.split('<br>')[0];
                 bubble.innerHTML =
-                    `${cleanContent} <br><span style="font-weight:400; color:#888; font-size:10px;">¡Haz clic para hablar!</span>`;
+                    `${cleanContent} <br><span style="font-weight:400; color:#94a3b8; font-size:10px;">¡Haz clic para hablar!</span>`;
                 bubble.style.opacity = '1';
+                bubble.style.transform = 'translateY(0)';
             }, 300);
         }
     }
@@ -109,13 +109,12 @@
         if (menu && !menu.classList.contains('hidden-menu')) menu.classList.add('hidden-menu');
 
         if (chat && !chat.classList.contains('hidden-chat')) {
-            document.getElementById('chat-input').focus();
+            setTimeout(() => {
+                document.getElementById('chat-input').focus();
+            }, 300);
         }
     }
 
-    /**
-     * Alterna la visibilidad total del asistente (Minimizar/Maximizar)
-     */
     function toggleMascotVisibility() {
         const wrapper = document.getElementById('mascot-wrapper');
         const btn = document.getElementById('maximize-assistant-btn');
@@ -136,9 +135,11 @@
 
         if (!message) return;
 
+        // Ocultar quick replies
         const quickReplies = document.getElementById('quick-replies');
         if (quickReplies) quickReplies.style.display = 'none';
 
+        // Mensaje del usuario
         const userMsgDiv = document.createElement('div');
         userMsgDiv.className = 'msg-user';
         userMsgDiv.textContent = message;
@@ -148,11 +149,16 @@
         updateCharCounter();
         container.scrollTop = container.scrollHeight;
 
+        // Indicador de typing mejorado
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'msg-ai typing';
-        loadingDiv.textContent = 'ROCO está pensando';
+        loadingDiv.innerHTML = '<span>ROCO está pensando</span>';
         container.appendChild(loadingDiv);
         container.scrollTop = container.scrollHeight;
+
+        // Deshabilitar input mientras procesa
+        input.disabled = true;
+        document.getElementById('chat-send-btn').disabled = true;
 
         fetch("{{ route('arrendito.chat') }}", {
                 method: 'POST',
@@ -188,6 +194,12 @@
                 errorDiv.innerHTML =
                     '¡Guau! 🐾 Tuve un pequeño problema al procesar tu mensaje. ¿Podrías intentar de nuevo?';
                 container.appendChild(errorDiv);
+            })
+            .finally(() => {
+                // Re-habilitar input
+                input.disabled = false;
+                document.getElementById('chat-send-btn').disabled = false;
+                input.focus();
             });
     }
 
@@ -203,7 +215,16 @@
         if (input && counter) {
             const length = input.value.length;
             counter.textContent = `${length}/500`;
-            counter.style.color = length > 450 ? '#e74c3c' : '#999';
+            if (length > 450) {
+                counter.style.color = '#ef4444';
+                counter.style.fontWeight = '700';
+            } else if (length > 350) {
+                counter.style.color = '#f59e0b';
+                counter.style.fontWeight = '600';
+            } else {
+                counter.style.color = '#94a3b8';
+                counter.style.fontWeight = '500';
+            }
         }
     }
 
@@ -219,18 +240,25 @@
 
     const placeholders = [
         "Pregúntame sobre inmuebles...",
-        "¿Buscas algo en particular?",
-        "¿Cuál es tu presupuesto?",
-        "¿Qué zona te interesa?",
-        "Cuéntame qué necesitas 🏠"
+        "¿Buscas algo en particular? 🔍",
+        "¿Cuál es tu presupuesto? 💰",
+        "¿Qué zona te interesa? 📍",
+        "Cuéntame qué necesitas 🏠",
+        "¿Cerca de la UTS? 🎓",
+        "¿Casa, depa o cuarto? 🏡"
     ];
     let placeholderIndex = 0;
 
     function rotatePlaceholder() {
         const input = document.getElementById('chat-input');
-        if (input) {
+        if (input && !input.disabled) {
             placeholderIndex = (placeholderIndex + 1) % placeholders.length;
-            input.placeholder = placeholders[placeholderIndex];
+            input.style.transition = 'opacity 0.2s';
+            input.style.opacity = '0.5';
+            setTimeout(() => {
+                input.placeholder = placeholders[placeholderIndex];
+                input.style.opacity = '1';
+            }, 200);
         }
     }
 
@@ -239,19 +267,38 @@
     function renameMascot() {
         const currentName = localStorage.getItem('rocoName') || 'ROCO';
         Swal.fire({
-            title: '¡Ponle nombre a tu compañero Beagle!',
+            title: '🐶 ¡Ponle nombre a tu compañero Beagle!',
+            text: 'Tu asistente te acompañará en toda tu búsqueda',
             input: 'text',
             inputValue: currentName,
             showCancelButton: true,
-            confirmButtonColor: '#4A90E2',
+            confirmButtonText: '¡Listo! 🎉',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#1F3A5F',
+            cancelButtonColor: '#94a3b8',
             inputValidator: (value) => {
                 if (!value) return '¡Tu perrito necesita un nombre!';
+                if (value.length > 20) return 'El nombre es muy largo (máx. 20 caracteres)';
+            },
+            customClass: {
+                popup: 'rounded-2xl',
+                input: 'rounded-xl',
             }
         }).then((result) => {
                 if (result.isConfirmed) {
                     const newName = result.value;
                     localStorage.setItem('rocoName', newName);
                     updateMascotNameUI(newName);
+
+                    Swal.fire({
+                        title: '¡Guau! 🐶',
+                        text: `Ahora me llamo ${newName}. ¡Qué bonito nombre!`,
+                        icon: 'success',
+                        confirmButtonColor: '#1F3A5F',
+                        timer: 2500,
+                        showConfirmButton: false,
+                    });
+
                     @auth
                     fetch("{{ route('arrendito.update') }}", {
                         method: 'POST',
@@ -278,20 +325,33 @@
     function startMiniGuide() {
         toggleMascotMenu();
         Swal.fire({
-            title: '🐶 Guía Rápida',
-            text: 'ROCO te ayuda a encontrar el lugar ideal. Puedes filtrar por precio, zona y tipo de propiedad. ¡Vamos a encontrar tu hogar perfecto!',
+            title: '🐶 Guía Rápida de ArrendaOco',
+            html: `
+                <div style="text-align: left; font-size: 14px; line-height: 1.8; color: #334155;">
+                    <p><b>1.</b> 🔍 Explora los inmuebles disponibles</p>
+                    <p><b>2.</b> ❤️ Guarda tus favoritos</p>
+                    <p><b>3.</b> 💬 Pregúntame por zona, precio o tipo</p>
+                    <p><b>4.</b> 📞 Contacta al propietario</p>
+                    <p><b>5.</b> 📝 ¡Renta tu nuevo hogar!</p>
+                </div>
+            `,
             icon: 'info',
-            confirmButtonColor: '#4A90E2'
+            confirmButtonColor: '#1F3A5F',
+            confirmButtonText: '¡Entendido! 🏠',
+            customClass: {
+                popup: 'rounded-2xl',
+            }
         });
     }
 
     function playWithBone() {
         const bone = document.querySelector('.yarn-pro');
         if (bone) {
-            bone.style.transform = "scale(1.4) rotate(360deg)";
+            bone.style.transform = "scale(1.5) rotate(360deg)";
+            bone.style.transition = "all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
             setTimeout(() => {
                 bone.style.transform = "";
-            }, 300);
+            }, 500);
         }
     }
 </script>

@@ -2,41 +2,69 @@
 
 use Illuminate\Support\Facades\Http;
 
-$apiKey = env('GEMINI_API_KEY');
+$apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY'));
+$model = config('services.gemini.model', 'gemini-2.5-flash');
 
-echo "Testing Gemini API...\n";
-echo "API Key exists: " . ($apiKey ? 'Yes' : 'No') . "\n\n";
+echo "=== Test de API Gemini para ROCO ===\n";
+echo "Modelo: {$model}\n";
+echo "API Key: " . ($apiKey ? 'Sí (configurada)' : 'No (FALTA)') . "\n\n";
 
 if (!$apiKey) {
-    echo "ERROR: No API key found in .env file\n";
+    echo "ERROR: No se encontró GEMINI_API_KEY en el archivo .env\n";
+    echo "Agrega: GEMINI_API_KEY=tu_llave_aquí\n";
     exit(1);
 }
 
 try {
-    $response = Http::timeout(10)->withHeaders([
-        'Content-Type' => 'application/json',
-    ])->post("https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
-        'contents' => [
-            [
-                'parts' => [
-                    ['text' => 'Say hello in one word']
+    echo "Enviando solicitud a Gemini {$model}...\n";
+
+    $response = Http::withoutVerifying()
+        ->timeout(15)
+        ->withHeaders(['Content-Type' => 'application/json'])
+        ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
+            'systemInstruction' => [
+                'parts' => [['text' => 'Eres ROCO, un perrito Beagle asistente. Responde en una sola línea corta.']]
+            ],
+            'contents' => [
+                [
+                    'role' => 'user',
+                    'parts' => [['text' => 'Di hola en español como un perrito amigable']]
                 ]
+            ],
+            'generationConfig' => [
+                'temperature' => 0.8,
+                'maxOutputTokens' => 100,
             ]
-        ]
-    ]);
+        ]);
 
     echo "Status Code: " . $response->status() . "\n";
-    
+
     if ($response->successful()) {
-        echo "SUCCESS! API is working\n";
+        echo "✅ ¡ÉXITO! La API funciona correctamente con {$model}\n";
         $data = $response->json();
+
         if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
-            echo "Response: " . $data['candidates'][0]['content']['parts'][0]['text'] . "\n";
+            echo "Respuesta de ROCO: " . $data['candidates'][0]['content']['parts'][0]['text'] . "\n";
+        }
+
+        // Mostrar tokens usados si disponible
+        if (isset($data['usageMetadata'])) {
+            $usage = $data['usageMetadata'];
+            echo "\n📊 Uso de tokens:\n";
+            echo "  - Prompt: " . ($usage['promptTokenCount'] ?? 'N/A') . "\n";
+            echo "  - Respuesta: " . ($usage['candidatesTokenCount'] ?? 'N/A') . "\n";
+            echo "  - Total: " . ($usage['totalTokenCount'] ?? 'N/A') . "\n";
         }
     } else {
-        echo "ERROR: API returned error\n";
-        echo "Response: " . $response->body() . "\n";
+        echo "❌ ERROR: La API devolvió un error\n";
+        echo "Código: " . $response->status() . "\n";
+        echo "Respuesta: " . $response->body() . "\n";
+
+        $errorData = $response->json();
+        if (isset($errorData['error']['message'])) {
+            echo "\nMensaje: " . $errorData['error']['message'] . "\n";
+        }
     }
 } catch (\Exception $e) {
-    echo "EXCEPTION: " . $e->getMessage() . "\n";
+    echo "❌ EXCEPCIÓN: " . $e->getMessage() . "\n";
 }

@@ -77,17 +77,18 @@
                         </div>
 
                         <!-- Social Login Buttons -->
-                        <div class="grid grid-cols-2 gap-4 animate-fade-in-up delay-500">
+                        <div class="grid grid-cols-1 gap-4 animate-fade-in-up delay-500">
                             <a href="{{ route('social.login', 'google') }}"
                                 class="flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200 font-semibold text-gray-700 shadow-sm hover-lift">
                                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="h-5 w-5" alt="Google">
                                 <span>Google</span>
                             </a>
-                            <a href="{{ route('social.login', 'facebook') }}"
+                            {{-- Botón Facebook desactivado temporalmente --}}
+                            {{-- <a href="{{ route('social.login', 'facebook') }}"
                                 class="flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200 font-semibold text-gray-700 shadow-sm hover-lift">
                                 <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" class="h-5 w-5" alt="Facebook">
                                 <span>Facebook</span>
-                            </a>
+                            </a> --}}
                         </div>
 
                         <div class="flex items-center justify-between mt-6 text-sm animate-fade-in-up delay-400">

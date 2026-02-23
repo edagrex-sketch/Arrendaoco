@@ -1,0 +1,375 @@
+================================================================================
+        PROMPT DESCRIPTIVO COMPLETO DE ARRENDAOCO
+================================================================================
+
+Recrea fielmente la aplicación web "ArrendaOco", una plataforma de 
+arrendamiento inmobiliario local enfocada en la ciudad de Ocosingo, Chiapas, 
+México, dirigida a estudiantes universitarios y familias. La aplicación está 
+construida con Laravel (backend PHP), Blade (templates), Tailwind CSS v4, 
+Alpine.js para interactividad reactiva, Vite como bundler, Leaflet.js para 
+mapas, SweetAlert2 para notificaciones/confirmaciones modales, Lottie Player 
+para animaciones, y Google Fonts (Instrument Sans). A continuación se describe 
+TODO: diseño visual, paleta de colores, tipografía, animaciones, y cada 
+funcionalidad del sistema.
+
+
+================================================================================
+1. PALETA DE COLORES
+================================================================================
+
+--- Variables CSS (Design Tokens) ---
+
+Token                     | Hex       | Uso
+--------------------------|-----------|---------------------------------------------
+--background              | #F5F1E8   | Fondo general crema suave (calidez/hogar)
+--foreground              | #1F3A5F   | Textos principales (azul marino profundo)
+--card                    | #FFFFFF   | Fondo de tarjetas blancas
+--card-foreground          | #1F3A5F   | Texto dentro de tarjetas
+--primary                 | #1F3A5F   | Botones principales, encabezados fuertes
+--primary-foreground       | #FFFFFF   | Texto sobre elementos primarios
+--secondary               | #F5F1E8   | Fondos alternos, botones secundarios
+--secondary-foreground     | #1F3A5F   | Texto sobre secundarios
+--muted                   | #E8E4DB   | Fondos silenciados
+--muted-foreground         | #5A6B7D   | Subtítulos, textos menos importantes
+--accent                  | #2E5E8C   | Hover/interacciones, ring de focus
+--accent-foreground        | #FFFFFF   | Texto sobre acento
+--border                  | #D4CFC3   | Bordes suaves
+--input                   | #E8E4DB   | Fondo de inputs
+--ring                    | #2E5E8C   | Anillo de enfoque
+
+
+--- Colores Adicionales Usados Directamente ---
+
+Hex       | Uso
+----------|------------------------------------------------------------------
+#003049   | Navbar, footer, botones principales, fondo de secciones CTA,
+          | títulos de admin. Azul oscuro institucional.
+#002538   | Hover de #003049, menú móvil fondo.
+#669BBC   | Acento azul medio (hover en links del nav, badges, headers en
+          | footer/admin, íconos de redes sociales, bordes decorativos).
+#FDF0D5   | Crema claro (botón "Registrarse", badges de info, sección de
+          | contacto footer, encabezados del footer).
+#C1121F   | Rojo vibrante (botón "Publicar", botones de eliminar, botón
+          | "Confirmar y Pagar", botón "Quiero Publicar").
+#780000   | Rojo oscuro para hover de #C1121F, link "Regístrate".
+#4F6D7A   | Gris azulado para labels pequeños uppercase.
+#64748B   | Gris medio para subtítulos del propietario.
+#F4F7F9   | Gris ultra claro para badge de renta mensual.
+#E5EDF2   | Borde del badge de renta.
+Amber     | Estrellas de reseñas (amber-400, amber-600, amber-700).
+Verde     | Badges de "Pagado" (green-100, green-700).
+Amarillo  | Badges "Pendiente" (yellow-100, yellow-700).
+Rojo      | Mensajes de error (red-50, red-500, red-700).
+
+
+================================================================================
+2. TIPOGRAFÍA
+================================================================================
+
+- Fuente Principal: Instrument Sans (Google Fonts), pesos 400 a 700, con
+  itálicas.
+- Font Stack Tailwind: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+  'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'
+- Estilo general: font-sans antialiased en <body>
+- Uso de pesos:
+    * font-medium para labels
+    * font-bold para subtítulos
+    * font-extrabold / font-black para títulos principales
+    * Labels de características usan text-[11px] font-black uppercase
+      tracking-[0.25em]
+    * Labels secundarios usan text-[10px] font-black uppercase tracking-widest
+
+
+================================================================================
+3. ANIMACIONES PERSONALIZADAS
+================================================================================
+
+1. fadeInUp: Contenido aparece elevándose desde 20px abajo con fade (0.6s
+   ease-out). Usado en formularios de login/registro con delays escalonados
+   (delay-100 a delay-500).
+
+2. scaleIn: Zoom lento (scale 1 → 1.05) en 20s linear infinite alternate,
+   usado en imágenes de fondo del login/registro.
+
+3. hover-lift: Al hacer hover sobre tarjetas/botones, translateY(-2px) con
+   sombra suave (transición 0.2s).
+
+4. Transiciones Alpine.js: Fade + scale (transform opacity-0 scale-95 →
+   transform opacity-100 scale-100) en menús dropdown y modales.
+
+5. Transiciones del carrusel: opacity-0 scale-105 → opacity-100 scale-100
+   con duración de 1 segundo.
+
+6. Border-radius personalizado: --radius: 0.625rem con variantes sm, md, lg.
+   Las tarjetas premium usan bordes de rounded-3xl (1.5rem) a rounded-[3rem].
+
+7. x-cloak: display: none !important para evitar flash de contenido Alpine
+   antes de hidratación.
+
+
+================================================================================
+4. LAYOUT GENERAL
+================================================================================
+
+- Navbar sticky (top-0 z-50) con fondo #003049, shadow-lg, borde inferior.
+- Contenido principal: flex-1 w-full max-w-7xl mx-auto py-8
+- Footer Premium: Fondo #003049, borde superior border-t-4 border-[#669BBC],
+  3 columnas (Marca, Contacto, Redes Sociales), barra de copyright inferior
+  con links a Términos y Política de Privacidad.
+- Diseño Responsive: Grid de 1, 2 o 3 columnas (sm:grid-cols-2
+  lg:grid-cols-3), menú hamburguesa para móvil con transiciones.
+
+
+================================================================================
+5. FUNCIONALIDADES POR MÓDULO
+================================================================================
+
+--- 5.1 Autenticación (Login / Registro / Recuperar Contraseña) ---
+
+- Login (/login): Card dividida 50/50 — imagen de fondo con overlay +
+  formulario. Campos: email, contraseña. Login social con Google y Facebook
+  (OAuth via Laravel Socialite). Link "¿Olvidaste tu contraseña?" y "¿No
+  tienes cuenta? Regístrate".
+
+- Registro (/register): Misma estructura visual que login. Campos: Nombre
+  completo, foto de perfil (opcional con input file estilizado), email,
+  contraseña, confirmar contraseña. Login social Google/Facebook. Link "¿Ya
+  tienes cuenta? Iniciar sesión".
+
+- Recuperar Contraseña (/forgot-password, /reset-password): Flujo de reset
+  por email.
+
+- Logout: Confirmación modal SweetAlert2 ("¿Cerrar sesión?") antes de enviar
+  formulario POST.
+
+
+--- 5.2 Página de Inicio / Welcome (/ y /inicio) ---
+
+- Buscador Hero: Para usuarios autenticados: formulario con 3 filtros
+  (Ubicación texto libre, Rango de Precio dropdown, Categoría dropdown:
+  Casa/Departamento/Cuarto) + botón Buscar. Para invitados: formulario
+  bloqueado con blur + overlay que invita a iniciar sesión.
+
+- Grid de Propiedades Disponibles: Tarjetas con imagen (o placeholder "Sin
+  imagen"), badge de precio ($/mes), título, dirección con ícono, conteo de
+  habitaciones/baños, tipo de propiedad, botón "Ver Detalles" (auth) o
+  "🔒 Sesión para Ver" (guest). Los invitados ven las primeras 3 tarjetas
+  claras y el resto bloqueadas (blur + candado).
+
+- Paginación: Solo para usuarios autenticados. Invitados ven banner pidiendo
+  registro.
+
+- CTA de Publicar: Sección con fondo --primary, texto blanco, botón
+  "🚀 Publicar Inmueble Gratis".
+
+
+--- 5.3 Detalle de Inmueble (/inmuebles/{id}) ---
+
+- Carrusel de Imágenes: Auto-rotación cada 5s, flechas de navegación,
+  indicadores de puntos, click para abrir modal fullscreen con miniaturas
+  inferiores, navegación por teclado (flechas + Escape).
+
+- Badge de Precio: Fijo sobre la imagen, backdrop-blur.
+
+- Información del Inmueble: Título grande, dirección con ícono, grid de
+  características (Habitaciones, Baños, Área m², Renta Mensual).
+
+- Sidebar del Propietario: Muestra inicial del nombre (con avatar de letra),
+  verificación, botón "Contactar" (mailto) o botones de gestión
+  (Editar/Eliminar) si es el dueño.
+
+- Sistema de Reseñas: Promedio con estrellas, formulario para dejar reseña
+  (puntuación interactiva con estrellas hover, textarea). Grid de reseñas
+  con avatar del usuario, nombre, badge "Tú" si es propia, puntuación,
+  comentario, tiempo relativo. Edición en modal con Alpine.js. Eliminación
+  con SweetAlert2. Solo el autor puede editar; autor y admin pueden eliminar.
+
+- Ubicación Estratégica: Calcula distancias (Haversine) a puntos clave
+  (Parque Central, UT de la Selva, Terminal OCC) con tiempos estimados
+  (a pie, bicicleta, taxi).
+
+- Mapa Leaflet: Mapa interactivo con vista callejero/satélite, marcador de
+  ubicación, popup con título y dirección.
+
+
+--- 5.4 Publicar Inmueble (/inmuebles/create) — Wizard de 3 pasos ---
+
+- Paso 1 (Básico): Nombre del anuncio, dirección, tipo
+  (Casa/Departamento/Cuarto), renta mensual, depósito (opcional).
+
+- Paso 2 (Detalles y Ubicación): Dirección con botón "Buscar en mapa"
+  (geocodificación Nominatim OpenStreetMap), mapa interactivo Leaflet donde
+  se puede hacer click para marcar ubicación (geocodificación inversa),
+  campos de habitaciones, baños, calculadora de área (largo × ancho = m²
+  automático), descripción.
+
+- Paso 3 (Fotos): Upload múltiple de imágenes con drag & drop,
+  previsualización en grid, botones rojos para eliminar fotos individuales.
+  Botón "✨ ¡Publicar Ahora!".
+
+- Stepper visual: 3 círculos numerados con estados activo/inactivo,
+  validación por paso, transiciones animadas entre pasos.
+
+
+--- 5.5 Editar Inmueble (/inmuebles/{id}/edit) ---
+
+- Formulario similar al de creación con datos pre-poblados.
+
+
+--- 5.6 Mis Propiedades (/inmuebles) — Solo para Propietarios ---
+
+- Lista de propiedades publicadas por el usuario autenticado.
+
+
+--- 5.7 Favoritos (/favoritos) ---
+
+- Grid de propiedades guardadas como favoritas con animación de eliminación.
+  Botón de corazón rojo para quitar de favoritos (petición AJAX con fetch).
+  Contador dinámico. Estado vacío con CTA "Explorar Propiedades". Toast
+  SweetAlert2 al eliminar.
+
+
+--- 5.8 Perfil de Usuario (/perfil) ---
+
+- Sidebar: Avatar circular (foto o inicial), nombre, email, badges de roles,
+  botón "¡Quiero Publicar!" (para convertirse en propietario) o "Publicar
+  Inmueble"/"Mis Propiedades" si ya es propietario.
+
+- Formulario de Edición: Foto de perfil (file input), nombre completo,
+  email, cambiar contraseña (nueva + confirmar), botón "Guardar Cambios".
+
+
+--- 5.9 Pagos y Rentas (/pagos) ---
+
+- Pagos Pendientes: Card con ícono, concepto, badge status "Pendiente"
+  (amarillo), monto, días restantes, botón "Pagar Ahora".
+
+- Historial de Transacciones: Tabla con concepto, fecha, monto, status
+  "Pagado" (verde), botón ver recibo. Botón "Descargar todo (PDF)".
+
+- Checkout (/pagos/checkout): 3 métodos de pago seleccionables con radio
+  buttons estilizados (Tarjeta de Crédito/Débito, Transferencia SPEI,
+  Efectivo OXXO). Formulario de tarjeta visual. Resumen de orden en sidebar
+  sticky con desglose (subtotal, comisión, seguro gratuito, total). Badge
+  de "Pago 100% Seguro". Botón "Confirmar y Pagar" rojo.
+
+- Página de Éxito (/pagos/success).
+
+
+--- 5.10 Panel de Administración ---
+
+- Gestión de Usuarios (/admin/usuarios): Tabla con nombre, email, roles
+  (badges), estatus (activo/inactivo), acciones (editar/eliminar). Buscador
+  full-width estilizado con fondo #669BBC. Botón "Crear Usuario" y
+  "Descarga PDF". Paginación.
+
+- Crear/Editar Usuario (/admin/usuarios/create, /admin/usuarios/{id}/edit).
+
+- Reporte de Usuarios (PDF) (/admin/usuarios/reporte).
+
+- Gestión de Inmuebles (reutiliza /inmuebles/index con vista admin).
+
+- Reporte de Inmuebles (PDF) (/admin/inmuebles/reporte).
+
+- Gestión de Reseñas (/admin/resenas): Tabla con reseñas, opciones de
+  eliminación.
+
+- Menú Dropdown "Gestiones": En navbar solo visible para admins, con
+  opciones: Usuarios, Propiedades, Reseñas.
+
+
+--- 5.11 Arrendito (Chatbot Asistente UX) ---
+
+- Componente <x-arrendito /> incluido solo para usuarios autenticados.
+- Compuesto por 3 sub-componentes Blade: styles, view, scripts.
+- Actúa como agente de acompañamiento UX (chatbot de ayuda).
+
+
+--- 5.12 Páginas Informativas ---
+
+- Nosotros (/nosotros): Hero con fondo #003049, sección Misión/Visión,
+  valores (Seguridad, Búsqueda Inteligente, Comunidad Local), equipo de 4
+  desarrolladores con foto, nombre, cargo y cita. CTA final.
+
+- Términos de Servicio (/terminos)
+
+- Política de Privacidad (/privacidad)
+
+
+--- 5.13 Emails y PDFs ---
+
+- Email de Estado de Cuenta (emails/estado_cuenta.blade.php).
+- PDF de Estado de Cuenta (pdf/estado_cuenta.blade.php).
+
+
+================================================================================
+6. ROLES Y PERMISOS
+================================================================================
+
+Rol            | Permisos
+---------------|--------------------------------------------------------------
+Invitado       | Ver max 3 propiedades sin blur, ver página principal con
+               | buscador bloqueado, ver Nosotros. Sin paginación.
+Inquilino      | Buscar propiedades, ver detalles, favoritos, reseñas
+(usuario       | (crear/editar/eliminar propias), pagar rentas, perfil,
+registrado)    | chatbot Arrendito. Puede solicitar rol "Propietario".
+Propietario    | Todo lo de inquilino + Publicar/Editar/Eliminar inmuebles
+               | propios, botón "Publicar" rojo en navbar.
+Admin          | Todo lo anterior + Panel admin (CRUD usuarios, ver todos
+               | los inmuebles, eliminar cualquier reseña, generar reportes
+               | PDF), menú "Gestiones". No ve enlaces de Favoritos ni
+               | Mis Pagos.
+
+
+================================================================================
+7. TECNOLOGÍAS Y LIBRERÍAS
+================================================================================
+
+Tecnología          | Versión / Uso
+--------------------|------------------------------------------------------------
+Laravel             | Backend PHP, MVC, Blade templates, Eloquent ORM
+Tailwind CSS v4     | Directiva @import 'tailwindcss', @source, @theme
+Alpine.js           | v3.13.3 via CDN, x-data, x-show, x-transition, x-cloak
+Vite                | Bundler para assets CSS/JS
+Leaflet.js          | v1.9.4, mapas interactivos con capas OSM y Satellite
+                    | (ArcGIS)
+SweetAlert2         | v11 via CDN, alertas modales de
+                    | éxito/error/warning/confirmación
+Lottie Player       | Via unpkg CDN, animaciones vectoriales
+Google Fonts        | Instrument Sans
+Laravel Socialite   | OAuth Google y Facebook
+Nominatim (OSM)     | Geocodificación y geocodificación inversa
+
+
+================================================================================
+8. DISEÑO RESPONSIVE
+================================================================================
+
+- Navbar: Menú hamburguesa en móvil (md:hidden) con panel desplegable
+  animado, grid 2 columnas para botones auth.
+- Grid de propiedades: grid-cols-1 → sm:grid-cols-2 → lg:grid-cols-3
+- Login/Registro: Card vertical en móvil, horizontal (50/50) en desktop.
+- Detalle de inmueble: Características en 2 cols, sidebar apilado en móvil,
+  grid 12 cols en desktop.
+- Pagos checkout: Columnas apiladas en móvil, sidebar sticky en desktop.
+- Tablas admin: Scroll horizontal en móvil.
+
+
+================================================================================
+9. DETALLES DE UX PREMIUM
+================================================================================
+
+- Bordes redondeados extremos (rounded-3xl, rounded-[3rem], rounded-[2.5rem])
+  para sensación premium.
+- backdrop-blur en badges, overlays y modales.
+- Sombras con colores (shadow-[#003049]/10, shadow-primary/20).
+- Micro-animaciones en hover: scale-110, -translate-y-1, brightness-110.
+- Labels con text-[10px] o text-[11px] en font-black uppercase
+  tracking-[0.25em] para apariencia de diseño editorial.
+- Transiciones active:scale-95 en botones para feedback táctil.
+- Gradientes en headers de equipo (from-[#003049] to-[#669BBC]).
+- Favicon con logo personalizado (logo1.png).
+
+================================================================================
+                          FIN DEL PROMPT
+================================================================================
