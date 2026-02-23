@@ -30,6 +30,17 @@ class Inmueble extends Model
         'imagen',
         'latitud',
         'longitud',
+        'video_youtube',
+        'video_youtube_id',
+        'video_thumbnail',
+        'video_titulo',
+        'video_canal',
+        'video_descripcion',
+        'video_duracion',
+        'video_vistas',
+        'video_likes',
+        'video_publicado_en',
+        'video_actualizado_en',
     ];
 
     public function propietario()

@@ -214,6 +214,36 @@
                         </div>
                     </div>
 
+                {{-- 🎬 Video Tour de YouTube --}}
+                    <div class="mb-6 bg-red-50/40 border border-red-100 rounded-2xl p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl">🎬</span>
+                            <label class="text-sm font-bold text-slate-700">Video Tour de YouTube <span class="text-xs text-muted-foreground font-normal">(Opcional)</span></label>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">Pega el enlace de YouTube del recorrido de tu propiedad. Funciona con cualquier formato: youtube.com/watch?v=..., youtu.be/..., Shorts.</p>
+                        <input type="url" name="video_youtube" id="yt-url-input"
+                            value="{{ old('video_youtube') }}"
+                            placeholder="https://www.youtube.com/watch?v=..."
+                            class="w-full rounded-lg border-input bg-white border py-3 px-4 focus:ring-2 focus:ring-red-400/30 focus:border-red-400 transition-all text-sm"
+                            @input="previewYoutube($event.target.value)">
+
+                        {{-- Preview del video en vivo --}}
+                        <div id="yt-preview" class="mt-4 hidden">
+                            <div class="relative w-full rounded-xl overflow-hidden shadow-md" style="padding-top: 56.25%;">
+                                <iframe id="yt-iframe"
+                                    class="absolute inset-0 w-full h-full"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen>
+                                </iframe>
+                            </div>
+                            <p class="text-xs text-green-600 font-bold mt-2 flex items-center gap-1">✅ Video válido detectado — se mostrará en tu anuncio</p>
+                        </div>
+                        <div id="yt-error" class="mt-3 hidden">
+                            <p class="text-xs text-red-500 font-bold flex items-center gap-1">⚠️ No pudimos detectar un ID de YouTube válido en ese enlace.</p>
+                        </div>
+                    </div>
+
                     {{-- Grid de Previsualización --}}
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6" x-show="previews.length > 0">
                         <template x-for="(img, index) in previews" :key="index">
@@ -432,4 +462,51 @@
             }))
         });
     </script>
+
+    {{-- 🎬 Script de Preview de YouTube en vivo --}}
+    <script>
+        function extractYouTubeId(url) {
+            const patterns = [
+                /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+            ];
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) return match[1];
+            }
+            return null;
+        }
+
+        function previewYoutube(url) {
+            const preview = document.getElementById('yt-preview');
+            const error   = document.getElementById('yt-error');
+            const iframe  = document.getElementById('yt-iframe');
+
+            if (!url) {
+                preview.classList.add('hidden');
+                error.classList.add('hidden');
+                return;
+            }
+
+            const id = extractYouTubeId(url);
+            if (id) {
+                iframe.src = `https://www.youtube.com/embed/${id}`;
+                preview.classList.remove('hidden');
+                error.classList.add('hidden');
+            } else {
+                preview.classList.add('hidden');
+                error.classList.remove('hidden');
+            }
+        }
+
+        // Auto-preview si hay un valor previo (old input por error de validación)
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('yt-url-input');
+            if (input && input.value) previewYoutube(input.value);
+        });
+    </script>
 @endsection
+

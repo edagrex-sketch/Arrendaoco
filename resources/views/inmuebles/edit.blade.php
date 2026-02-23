@@ -185,6 +185,42 @@
                     <textarea name="descripcion" rows="5" required
                         class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none transition-all">{{ $inmueble->descripcion }}</textarea>
                 </div>
+
+                {{-- 🎬 Video Tour de YouTube --}}
+                <div class="bg-red-50/40 border border-red-100 rounded-2xl p-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xl">🎬</span>
+                        <label class="text-sm font-bold text-slate-700">Video Tour de YouTube
+                            <span class="text-xs text-muted-foreground font-normal">(Opcional)</span></label>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-3">Pega el enlace de YouTube del recorrido de tu propiedad. Funciona con cualquier formato: youtube.com/watch?v=..., youtu.be/..., Shorts.</p>
+                    <input type="url" name="video_youtube" id="yt-url-input-edit"
+                        value="{{ $inmueble->video_youtube }}"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        oninput="previewYoutubeEdit(this.value)"
+                        class="w-full rounded-lg border bg-white border-slate-200 py-3 px-4 focus:ring-2 focus:ring-red-400/30 focus:border-red-400 transition-all text-sm">
+
+                    @if($inmueble->video_youtube_id)
+                        <p class="text-xs text-green-600 font-bold mt-2">✅ Video actual: <span class="font-normal text-slate-500">{{ $inmueble->video_titulo }}</span></p>
+                    @endif
+
+                    {{-- Preview en vivo --}}
+                    <div id="yt-preview-edit" class="mt-4 {{ $inmueble->video_youtube_id ? '' : 'hidden' }}">
+                        <div class="relative w-full rounded-xl overflow-hidden shadow-md" style="padding-top: 56.25%;">
+                            <iframe id="yt-iframe-edit"
+                                src="{{ $inmueble->video_youtube_id ? 'https://www.youtube.com/embed/' . $inmueble->video_youtube_id : '' }}"
+                                class="absolute inset-0 w-full h-full"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        <p class="text-xs text-green-600 font-bold mt-2">✅ Video válido &mdash; se mostrará en tu anuncio</p>
+                    </div>
+                    <div id="yt-error-edit" class="mt-3 hidden">
+                        <p class="text-xs text-red-500 font-bold">⚠️ No pudimos detectar un ID de YouTube válido en ese enlace.</p>
+                    </div>
+                </div>
             </div>
 
             <div class="flex gap-4">
@@ -200,3 +236,44 @@
         </form>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    function extractYouTubeIdEdit(url) {
+        const patterns = [
+            /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+            /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+            /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+            /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+            /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+        ];
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match) return match[1];
+        }
+        return null;
+    }
+
+    function previewYoutubeEdit(url) {
+        const preview = document.getElementById('yt-preview-edit');
+        const error   = document.getElementById('yt-error-edit');
+        const iframe  = document.getElementById('yt-iframe-edit');
+
+        if (!url) {
+            preview.classList.add('hidden');
+            error.classList.add('hidden');
+            return;
+        }
+
+        const id = extractYouTubeIdEdit(url);
+        if (id) {
+            iframe.src = `https://www.youtube.com/embed/${id}`;
+            preview.classList.remove('hidden');
+            error.classList.add('hidden');
+        } else {
+            preview.classList.add('hidden');
+            error.classList.remove('hidden');
+        }
+    }
+</script>
+@endpush
