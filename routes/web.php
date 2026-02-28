@@ -151,7 +151,7 @@ Route::post('/login', function (Request $request) {
 });
 
 // Logout
-Route::post('/logout', function (Request $request) {
+Route::match(['get', 'post'], '/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();

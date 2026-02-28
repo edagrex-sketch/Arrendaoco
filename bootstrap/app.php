@@ -12,13 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trusted Proxies para ngrok/localtonet
+        $middleware->trustProxies(at: '*');
+        
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
 
+        // Excepciones CSRF
         $middleware->validateCsrfTokens(except: [
-            '/publicar',
             '/arrendito/chat',
+            'auth/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

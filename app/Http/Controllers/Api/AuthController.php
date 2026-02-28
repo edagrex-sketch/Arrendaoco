@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\UserResource;
+
 class AuthController extends Controller
 {
     public function login(Request $request)
@@ -23,12 +25,13 @@ class AuthController extends Controller
 
         /** @var Usuario $usuario */
         $usuario = Auth::user();
+        $usuario->load('roles');
 
         $token = $usuario->createToken('arrendaoco-token')->plainTextToken;
 
         return response()->json([
             'token' => $token,
-            'usuario' => $usuario,
+            'usuario' => new UserResource($usuario),
         ]);
     }
 

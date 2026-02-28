@@ -61,4 +61,9 @@ class Inmueble extends Model
     {
         return $this->hasMany(Favorito::class, 'inmueble_id');
     }
+
+    public function imagenes()
+    {
+        return $this->hasMany(ImagenInmueble::class, 'inmueble_id');
+    }
 }

@@ -19,6 +19,40 @@ class ContratoController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Listar contratos del usuario autenticado (como propietario o inquilino)
+     */
+    public function index(Request $request)
+    {
+        $usuario = $request->user();
+        
+        $contratos = Contrato::with(['inmueble', 'propietario', 'inquilino'])
+            ->where('propietario_id', $usuario->id)
+            ->orWhere('inquilino_id', $usuario->id)
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'data' => $contratos->map(function($c) {
+                return [
+                    'id' => $c->id,
+                    'inmueble_id' => $c->inmueble_id,
+                    'inmueble_titulo' => $c->inmueble->titulo,
+                    'rutas_imagen' => $c->inmueble->rutas_imagen,
+                    'arrendador_id' => $c->propietario_id,
+                    'arrendador_nombre' => $c->propietario->nombre,
+                    'inquilino_id' => $c->inquilino_id,
+                    'inquilino_nombre' => $c->inquilino->nombre,
+                    'fecha_inicio' => $c->fecha_inicio,
+                    'fecha_fin' => $c->fecha_fin,
+                    'monto_mensual' => $c->renta_mensual,
+                    'deposito' => $c->deposito,
+                    'estado' => $c->estatus,
+                ];
+            })
+        ]);
+    }
+
     /* ======================================================
      *  CREAR CONTRATO (RENTAR INMUEBLE)
      * ====================================================== */

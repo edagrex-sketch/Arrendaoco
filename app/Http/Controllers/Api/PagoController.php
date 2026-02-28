@@ -104,7 +104,34 @@ class PagoController extends Controller
                 'total_pagado' => $pagos->where('estatus', 'pagado')->sum('monto'),
                 'total_pendiente' => $pagos->where('estatus', 'pendiente')->sum('monto'),
             ],
-            'pagos' => $pagos
         ]);
+    }
+
+    public function pendientes(Request $request)
+    {
+        $usuario = $request->user();
+
+        $pagos = Pago::with(['contrato.inmueble'])
+            ->whereHas('contrato', function ($query) use ($usuario) {
+                $query->where('propietario_id', $usuario->id)
+                      ->orWhere('inquilino_id', $usuario->id);
+            })
+            ->whereIn('estatus', ['pendiente', 'vencido'])
+            ->orderBy('anio')
+            ->orderBy('mes')
+            ->get();
+
+        return response()->json($pagos->map(function($p) {
+            return [
+                'id' => $p->id,
+                'contrato_id' => $p->contrato_id,
+                'inmueble_titulo' => $p->contrato->inmueble->titulo,
+                'monto' => $p->monto,
+                'mes' => $p->mes,
+                'anio' => $p->anio,
+                'estatus' => $p->estatus,
+                'fecha_pago' => Carbon::create($p->anio, $p->mes, 1)->toDateString(), // Simplified
+            ];
+        }));
     }
 }

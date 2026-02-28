@@ -7,22 +7,45 @@ use App\Models\Inmueble;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
+use App\Http\Resources\InmuebleResource;
+use Illuminate\Support\Facades\Storage;
+use App\Models\ImagenInmueble;
+
 class InmuebleController extends Controller
 {
     use AuthorizesRequests;
 
     /**
-     * Listar inmuebles
-     * - Admin: todos
-     * - Propietario: solo los suyos
+     * Listar inmuebles disponibles (Publico para la App)
+     */
+    public function publicList(Request $request)
+    {
+        $query = Inmueble::with(['propietario', 'imagenes', 'resenas.usuario'])
+            ->where('estatus', 'disponible');
+
+        if ($request->has('tipo')) {
+            $query->where('tipo', $request->tipo);
+        }
+
+        if ($request->has('ciudad')) {
+            $query->where('ciudad', 'like', '%' . $request->ciudad . '%');
+        }
+
+        return InmuebleResource::collection($query->latest()->paginate(15));
+    }
+
+    /**
+     * Listar inmuebles (Admin/Propietario)
      */
     public function index(Request $request)
     {
-        if ($request->user()->es_admin) {
-            return Inmueble::all();
+        $query = Inmueble::with(['propietario', 'imagenes', 'resenas.usuario']);
+
+        if (!$request->user()->es_admin && !$request->user()->tieneRol('admin')) {
+            $query->where('propietario_id', $request->user()->id);
         }
 
-        return $request->user()->inmuebles;
+        return InmuebleResource::collection($query->latest()->paginate(15));
     }
 
     /**
@@ -32,21 +55,46 @@ class InmuebleController extends Controller
     {
         $data = $request->validate([
             'titulo'          => 'required|string|max:255',
-            'descripcion'     => 'nullable|string',
+            'descripcion'     => 'required|string',
             'direccion'       => 'required|string',
-            'ciudad'          => 'required|string',
-            'estado'          => 'required|string',
-            'codigo_postal'   => 'required|string|max:10',
+            'tipo'            => 'required|string',
             'renta_mensual'   => 'required|numeric|min:0',
             'deposito'        => 'nullable|numeric|min:0',
+            'habitaciones'    => 'required|integer|min:0',
+            'banos'           => 'required|integer|min:0',
+            'metros'          => 'required|numeric|min:0',
+            'latitud'         => 'nullable|numeric',
+            'longitud'        => 'nullable|numeric',
+            'imagenes'        => 'nullable|array',
+            'imagenes.*'      => 'image|max:5120', // Max 5MB
         ]);
 
         $inmueble = Inmueble::create([
-            ...$data,
+            ...collect($data)->except('imagenes')->toArray(),
             'propietario_id' => $request->user()->id,
+            'ciudad'         => 'Ocosingo',
+            'estado'         => 'Chiapas',
+            'codigo_postal'  => '29950',
+            'estatus'        => 'disponible',
         ]);
 
-        return response()->json($inmueble, 201);
+        if ($request->hasFile('imagenes')) {
+            foreach ($request->file('imagenes') as $index => $file) {
+                $path = $file->store('inmuebles', 'public');
+                $ruta = 'storage/' . $path;
+                
+                if ($index === 0) {
+                    $inmueble->update(['imagen' => $ruta]);
+                }
+
+                ImagenInmueble::create([
+                    'inmueble_id' => $inmueble->id,
+                    'ruta_imagen' => $ruta
+                ]);
+            }
+        }
+
+        return new InmuebleResource($inmueble->load(['propietario', 'imagenes']));
     }
 
     /**
@@ -54,9 +102,8 @@ class InmuebleController extends Controller
      */
     public function show(Inmueble $inmueble)
     {
-        $this->authorize('view', $inmueble);
-
-        return $inmueble;
+        // No autorizamos para que sea publico el detalle en la app si se desea
+        return new InmuebleResource($inmueble->load(['propietario', 'imagenes', 'resenas.usuario']));
     }
 
     /**
@@ -68,20 +115,39 @@ class InmuebleController extends Controller
 
         $data = $request->validate([
             'titulo'          => 'sometimes|string|max:255',
-            'descripcion'     => 'nullable|string',
+            'descripcion'     => 'sometimes|string',
             'direccion'       => 'sometimes|string',
-            'ciudad'          => 'sometimes|string',
-            'estado'          => 'sometimes|string',
-            'codigo_postal'   => 'sometimes|string|max:10',
             'renta_mensual'   => 'sometimes|numeric|min:0',
             'deposito'        => 'nullable|numeric|min:0',
             'estatus'         => 'in:disponible,rentado,inactivo',
+            'habitaciones'    => 'sometimes|integer|min:0',
+            'banos'           => 'sometimes|integer|min:0',
+            'metros'          => 'sometimes|numeric|min:0',
+            'imagenes'        => 'nullable|array',
+            'imagenes.*'      => 'image|max:5120',
         ]);
 
-        $inmueble->fill($data);
-        $inmueble->save();
+        $inmueble->update(collect($data)->except('imagenes')->toArray());
 
-        return $inmueble;
+        if ($request->hasFile('imagenes')) {
+            // Opcional: Eliminar imagenes anteriores or keep them
+            // Por ahora agregamos nuevas
+            foreach ($request->file('imagenes') as $index => $file) {
+                $path = $file->store('inmuebles', 'public');
+                $ruta = 'storage/' . $path;
+                
+                if ($index === 0 && !$inmueble->imagen) {
+                    $inmueble->update(['imagen' => $ruta]);
+                }
+
+                ImagenInmueble::create([
+                    'inmueble_id' => $inmueble->id,
+                    'ruta_imagen' => $ruta
+                ]);
+            }
+        }
+
+        return new InmuebleResource($inmueble->load(['propietario', 'imagenes']));
     }
 
     /**
@@ -90,9 +156,7 @@ class InmuebleController extends Controller
     public function destroy(Inmueble $inmueble)
     {
         $this->authorize('delete', $inmueble);
-
         $inmueble->delete();
-
-        return response()->noContent();
+        return response()->json(['message' => 'Inmueble eliminado']);
     }
 }

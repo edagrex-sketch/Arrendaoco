@@ -4,15 +4,33 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\InmuebleController;
 use App\Http\Controllers\Api\ContratoController;
+use App\Http\Controllers\Api\NotificacionController;
 use App\Http\Controllers\Api\PagoController;
 use App\Http\Controllers\Api\ReporteController;
+use App\Http\Controllers\Api\FavoritoController;
+use App\Http\Controllers\Api\ArrenditoController;
+use App\Http\Controllers\Api\ResenaController;
+use App\Http\Controllers\Api\PerfilController;
+use App\Http\Controllers\Api\EventoController;
 
 /*
 |--------------------------------------------------------------------------
 | Auth
 |--------------------------------------------------------------------------
 */
+// Auth
 Route::post('/login', [AuthController::class, 'login']);
+
+// Inmuebles Públicos
+Route::get('/inmuebles/public-list', [InmuebleController::class, 'publicList']);
+Route::get('/inmuebles/public-detail/{inmueble}', [InmuebleController::class, 'show']);
+
+// Reseñas Públicas
+Route::get('/resenas/{resena}', [ResenaController::class, 'show']);
+Route::get('/inmuebles/{inmueble}/resenas', [ResenaController::class, 'index']);
+
+// Arrendito Chat (IA)
+Route::post('/arrendito/chat', [ArrenditoController::class, 'chat']);
 
 /*
 |--------------------------------------------------------------------------
@@ -21,31 +39,58 @@ Route::post('/login', [AuthController::class, 'login']);
 */
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Auth
+    // Auth & Perfil
     Route::post('/logout', [AuthController::class, 'logout']);
-
-    // ✅ Esto regresa tu App\Models\Usuario (aunque la función se llame user())
     Route::get('/me', function () {
-        return auth()->user();
+        return new \App\Http\Resources\UserResource(auth()->user()->load('roles'));
     });
 
-    // Inmuebles
+    Route::post('/perfil/actualizar', [PerfilController::class, 'update']);
+    Route::post('/perfil/solicitar-propietario', [PerfilController::class, 'publicar']);
+
+    // Favoritos
+    Route::get('/favoritos', [FavoritoController::class, 'index']);
+    Route::post('/favoritos/{inmueble}/toggle', [FavoritoController::class, 'toggle']);
+    Route::put('/favoritos/{inmueble}', [FavoritoController::class, 'update']);
+
+    // Reseñas (Auth)
+    Route::post('/inmuebles/{inmueble}/resenas', [ResenaController::class, 'store']);
+    Route::put('/resenas/{resena}', [ResenaController::class, 'update']);
+    Route::delete('/resenas/{resena}', [ResenaController::class, 'destroy']);
+
+    // Notificaciones
+    Route::get('/notificaciones', [NotificacionController::class, 'index']);
+    Route::get('/notificaciones/unread-count', [NotificacionController::class, 'unreadCount']);
+    Route::post('/notificaciones/mark-all-read', [NotificacionController::class, 'markAllAsRead']);
+    Route::put('/notificaciones/{notificacion}', [NotificacionController::class, 'update']);
+    Route::delete('/notificaciones/{notificacion}', [NotificacionController::class, 'destroy']);
+
+    // Inmuebles (Gestión Propietario/Admin)
     Route::apiResource('inmuebles', InmuebleController::class)->names('api.inmuebles');
 
     // Contratos
+    Route::get('/contratos', [ContratoController::class, 'index']);
     Route::post('/inmuebles/{inmueble}/rentar', [ContratoController::class, 'rentar']);
     Route::post('/contratos/{contrato}/renovar', [ContratoController::class, 'renovar']);
     Route::post('/contratos/{contrato}/cancelar', [ContratoController::class, 'cancelar']);
 
-    // Estado de cuenta (JSON)
+    // Estado de cuenta
     Route::get('/contratos/{contrato}/estado-cuenta', [ContratoController::class, 'estadoCuenta']);
 
     // Pagos
+    Route::get('/pagos/pendientes', [PagoController::class, 'pendientes']);
     Route::post('/contratos/{contrato}/pagos/generar', [PagoController::class, 'generar']);
     Route::post('/pagos/{pago}/pagar', [PagoController::class, 'pagar']);
 
     // Reportes
     Route::get('/reportes/ingresos', [ReporteController::class, 'ingresos']);
+
+    // Calendario / Eventos
+    Route::get('/calendario', [EventoController::class, 'index']);
+    Route::post('/calendario', [EventoController::class, 'store']);
+    Route::put('/calendario/{evento}', [EventoController::class, 'update']);
+    Route::delete('/calendario/{evento}', [EventoController::class, 'destroy']);
+    Route::get('/contratos/{contrato}/eventos', [EventoController::class, 'byRenta']);
 
     // Excel
     Route::get('/contratos/{contrato}/estado-cuenta/excel', [ContratoController::class, 'exportarEstadoCuentaExcel']);

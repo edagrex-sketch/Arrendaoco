@@ -1,7 +1,7 @@
 *.log
 .DS_Store
 .env
-.env.example
+*.bat
 .env.backup
 .env.production
 .phpactor.json
