@@ -79,6 +79,8 @@
                                     @if (Auth::user()->foto_perfil)
                                         <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}" alt="Perfil"
                                             class="h-8 w-8 rounded-full object-cover border-2 border-white/20">
+                                    @else
+                                        <div class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-xs border-2 border-white/20">👤</div>
                                     @endif
                                     {{ Auth::user()->nombre }}
                                 </a>

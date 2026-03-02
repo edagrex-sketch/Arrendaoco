@@ -35,6 +35,33 @@ class AuthController extends Controller
         ]);
     }
 
+    public function register(Request $request)
+    {
+        $data = $request->validate([
+            'nombre'   => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:usuarios',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $usuario = Usuario::create([
+            'nombre'   => $data['nombre'],
+            'email'    => $data['email'],
+            'password' => bcrypt($data['password']),
+            'es_admin' => false,
+            'estatus'  => 'activo',
+        ]);
+
+        // Asignar rol de inquilino por defecto
+        $usuario->asignarRol('inquilino');
+
+        $token = $usuario->createToken('arrendaoco-token')->plainTextToken;
+
+        return response()->json([
+            'token'   => $token,
+            'usuario' => new UserResource($usuario),
+        ], 201);
+    }
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();

@@ -110,4 +110,22 @@ class ResenaController extends Controller
 
         return response()->json(['message' => 'Reseña eliminada']);
     }
+
+    /**
+     * Eliminar la reseña del usuario actual para un inmueble específico
+     */
+    public function destroyByInmueble(Inmueble $inmueble)
+    {
+        $resena = Resena::where('usuario_id', Auth::id())
+            ->where('inmueble_id', $inmueble->id)
+            ->first();
+
+        if (!$resena) {
+            return response()->json(['message' => 'No tienes una reseña en este inmueble'], 404);
+        }
+
+        $resena->delete();
+
+        return response()->json(['message' => 'Reseña eliminada correctamente']);
+    }
 }

@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\EventoController;
 */
 // Auth
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
 
 // Inmuebles Públicos
 Route::get('/inmuebles/public-list', [InmuebleController::class, 'publicList']);
@@ -55,6 +56,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Reseñas (Auth)
     Route::post('/inmuebles/{inmueble}/resenas', [ResenaController::class, 'store']);
+    Route::put('/inmuebles/{inmueble}/resenas', [ResenaController::class, 'store']); // Nuevo: Permitir PUT en la misma ruta
+    Route::delete('/inmuebles/{inmueble}/resenas', [ResenaController::class, 'destroyByInmueble']); // Nuevo: Borrar mi reseña de este inmueble
     Route::put('/resenas/{resena}', [ResenaController::class, 'update']);
     Route::delete('/resenas/{resena}', [ResenaController::class, 'destroy']);
 
