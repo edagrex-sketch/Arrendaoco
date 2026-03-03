@@ -41,6 +41,7 @@ class AuthController extends Controller
             'nombre'   => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:usuarios',
             'password' => 'required|string|min:8|confirmed',
+            'rol'      => 'nullable|string'
         ]);
 
         $usuario = Usuario::create([
@@ -51,8 +52,9 @@ class AuthController extends Controller
             'estatus'  => 'activo',
         ]);
 
-        // Asignar rol de inquilino por defecto
-        $usuario->asignarRol('inquilino');
+        // Asignar rol. Por defecto inquilino.
+        $rolNombre = strtolower($data['rol'] ?? 'inquilino');
+        $usuario->asignarRol($rolNombre);
 
         $token = $usuario->createToken('arrendaoco-token')->plainTextToken;
 
