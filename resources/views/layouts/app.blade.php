@@ -80,7 +80,11 @@
                                         <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}" alt="Perfil"
                                             class="h-8 w-8 rounded-full object-cover border-2 border-white/20">
                                     @else
-                                        <div class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-xs border-2 border-white/20">👤</div>
+                                        <div class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-xs border-2 border-white/20">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-white">
+                                                <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
                                     @endif
                                     {{ Auth::user()->nombre }}
                                 </a>
@@ -209,7 +213,10 @@
                                     <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}" alt="Perfil"
                                         class="h-12 w-12 rounded-full border-2 border-[#669BBC]">
                                 @else
-                                    <div class="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center text-xl">👤
+                                    <div class="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center text-xl">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-white">
+                                            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+                                        </svg>
                                     </div>
                                 @endif
                                 <div>
@@ -439,9 +446,9 @@
             })
         }
     </script>
-    @auth
+    @unless(request()->routeIs(['login', 'registro', 'password.*']))
         <x-arrendito />
-    @endauth
+    @endunless
 </body>
 
 </html>

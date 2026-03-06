@@ -177,17 +177,24 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex gap-4 mt-4 text-sm text-muted-foreground border-t border-border pt-4">
-                            <div class="flex items-center gap-1.5" title="Habitaciones">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 21v-3a2 2 0 012-2h8a2 2 0 012 2v3" /></svg>
-                                <span>{{ $inmueble->habitaciones ?? 2 }}</span>
+                        <div class="flex items-center gap-4 py-4 border-t border-slate-100 mt-4">
+                            <div class="flex items-center gap-1.5 text-slate-500" title="Habitaciones">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 11v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path><path d="M5 16v2"></path><path d="M19 16v2"></path><path d="M5 11V7a2 2 0 012-2h10a2 2 0 012 2v4"></path><path d="M5 11h14"></path>
+                                </svg>
+                                <span class="text-base font-bold text-slate-700">{{ $inmueble->habitaciones ?? 2 }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Hab</span></span>
                             </div>
-                            <div class="flex items-center gap-1.5" title="Baños">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" /></svg>
-                                <span>{{ $inmueble->banos ?? 1 }}</span>
+                            <div class="flex items-center gap-1.5 text-slate-500" title="Baños">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><line x1="10" x2="8" y1="5" y2="7"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="7" x2="7" y1="19" y2="21"/><line x1="17" x2="17" y1="19" y2="21"/>
+                                </svg>
+                                <span class="text-base font-bold text-slate-700">{{ $inmueble->banos ?? 1 }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Baño</span></span>
                             </div>
-                            <div class="flex items-center gap-1.5 ml-auto">
-                                <span class="bg-secondary px-2 py-0.5 rounded text-xs font-medium text-secondary-foreground">{{ ucfirst($inmueble->tipo ?? 'Casa') }}</span>
+                            <div class="flex items-center gap-1.5 text-slate-500" title="Superficie">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/>
+                                </svg>
+                                <span class="text-base font-bold text-slate-700">{{ number_format($inmueble->metros ?? 0, 0) }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">M²</span></span>
                             </div>
                         </div>
                         @auth
@@ -197,7 +204,9 @@
                         @else
                             <button type="button" onclick="window.location.href='{{ route('login') }}'" 
                                 class="mt-4 flex w-full items-center justify-center rounded-lg bg-slate-50 border border-dashed border-slate-200 px-4 py-2.5 text-xs font-black text-slate-400 hover:bg-slate-100 transition-all duration-300 cursor-pointer uppercase tracking-widest gap-2">
-                                🔒 Sesión para Ver
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                                    <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
+                                </svg> Sesión para Ver
                             </button>
                         @endauth
                     </div>
@@ -234,8 +243,11 @@
                 <h2 class="mb-4 text-3xl font-bold text-primary-foreground">¿Tienes una propiedad en Ocosingo?</h2>
                 <p class="mb-8 text-lg text-primary-foreground/90 max-w-2xl mx-auto">Únete a ArrendaOco y conecta con inquilinos verificados de la universidad y la ciudad.</p>
                 <a href="{{ route('inmuebles.create') }}" 
-                   class="inline-flex h-12 items-center justify-center rounded-md bg-white px-8 text-sm font-black text-[#003049] shadow-xl hover:scale-105 transition-all uppercase tracking-widest">
-                   🚀 Publicar Inmueble Gratis
+                   class="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-white px-8 text-sm font-black text-[#003049] shadow-xl hover:scale-105 transition-all uppercase tracking-widest">
+                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                       <path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" />
+                   </svg>
+                   Publicar Inmueble Gratis
                 </a>
             </div>
         </div>

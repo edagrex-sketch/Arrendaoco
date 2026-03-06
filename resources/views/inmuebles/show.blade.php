@@ -235,7 +235,9 @@
                                     <div class="bg-[#003049]/5 border-2 border-dashed border-[#003049]/20 p-6 rounded-3xl text-center">
                                         <p class="text-[#003049] font-bold text-sm mb-3">Para contactar al dueño debes iniciar sesión</p>
                                         <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-xs font-black text-white bg-[#003049] px-6 py-3 rounded-xl hover:scale-105 transition-all uppercase tracking-widest">
-                                            🔑 Iniciar Sesión para Contactar
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                                                <path fill-rule="evenodd" d="M8 7a5 5 0 113.61 4.804l-1.903 1.903A1 1 0 019 14H8v1a1 1 0 01-1 1H6v1a1 1 0 01-1 1H3a1 1 0 01-1-1v-2a1 1 0 01.293-.707L8.196 8.39A5.002 5.002 0 018 7zm5-3a.75.75 0 000 1.5A1.5 1.5 0 0114.5 7 .75.75 0 0016 7a3 3 0 00-3-3z" clip-rule="evenodd" />
+                                            </svg> Iniciar Sesión para Contactar
                                         </a>
                                     </div>
                                 @endauth
@@ -271,7 +273,12 @@
                         @if(Auth::id() !== $inmueble->propietario_id)
                             <div class="mb-12 bg-[#003049]/5 rounded-[2.5rem] p-8 md:p-10 border border-[#003049]/10">
                                 <h3 class="text-xl font-black text-[#003049] mb-6 flex items-center gap-3">
-                                    <span class="flex h-10 w-10 items-center justify-center bg-[#003049] text-white rounded-xl shadow-lg">✍️</span>
+                                    <span class="flex h-10 w-10 items-center justify-center bg-[#003049] text-white rounded-xl shadow-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                                            <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.158 3.71 3.71 1.159-1.157a2.625 2.625 0 000-3.711z" />
+                                            <path d="M16.273 5.337l-3.71-3.71L3.926 10.263a4.5 4.5 0 00-1.077 1.637l-1.42 4.259a.75.75 0 00.95.95l4.259-1.42a4.5 4.5 0 001.637-1.077l8.636-8.636z" />
+                                        </svg>
+                                    </span>
                                     Cuéntanos tu experiencia
                                 </h3>
                                 <form action="{{ route('resenas.store', $inmueble) }}" method="POST" class="space-y-6">
@@ -309,7 +316,11 @@
                             </div>
                         @else
                             <div class="mb-12 bg-amber-50 rounded-[2.5rem] p-8 text-center border border-amber-100">
-                                <p class="text-amber-700 font-bold mb-1">👑 Estás viendo tu propia publicación</p>
+                                <p class="text-amber-700 font-bold mb-1 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 inline mr-2 text-amber-500">
+                                        <path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clip-rule="evenodd" />
+                                    </svg> Estás viendo tu propia publicación
+                                </p>
                                 <p class="text-amber-600 text-xs">Los dueños no pueden calificar sus propias propiedades.</p>
                             </div>
                         @endif
@@ -438,7 +449,7 @@
                     </div>
                 </div>
 
-                {{-- 🎬 Video Tour Virtual (Solo si existe) --}}
+                {{-- Video Tour Virtual (Solo si existe) --}}
                 @if($inmueble->video_youtube_id)
                 <div class="mt-16 pt-12 border-t border-slate-100/80" id="video-tour-section">
                     {{-- Header --}}
@@ -670,7 +681,7 @@
                     }
                 </script>
 
-    {{-- 🎬 Script de actualización de estadísticas de YouTube --}}
+    {{-- Script de actualización de estadísticas de YouTube --}}
     @if($inmueble->video_youtube_id && auth()->check() && (auth()->id() === $inmueble->propietario_id || auth()->user()->es_admin))
     <script>
         async function refreshVideoStats(inmuebleId) {
@@ -696,14 +707,14 @@
 
                 if (data.success) {
                     Swal.fire({
-                        title:  '✅ Estadísticas actualizadas',
+                        title:  'Estadísticas actualizadas',
                         html: `
                             <div style="text-align:left; font-size:14px; line-height:2;">
-                                <p>📺 <b>Título:</b> ${data.data.titulo ?? '—'}</p>
-                                <p>📡 <b>Canal:</b> ${data.data.canal ?? '—'}</p>
-                                <p>👁️ <b>Vistas:</b> ${data.data.vistas ?? '—'}</p>
-                                <p>👍 <b>Likes:</b> ${data.data.likes ?? '—'}</p>
-                                <p>⏱️ <b>Duración:</b> ${data.data.duracion ?? '—'}</p>
+                                <p><b>Título:</b> ${data.data.titulo ?? '—'}</p>
+                                <p><b>Canal:</b> ${data.data.canal ?? '—'}</p>
+                                <p><b>Vistas:</b> ${data.data.vistas ?? '—'}</p>
+                                <p><b>Likes:</b> ${data.data.likes ?? '—'}</p>
+                                <p><b>Duración:</b> ${data.data.duracion ?? '—'}</p>
                             </div>`,
                         icon: 'success',
                         confirmButtonColor: '#003049',
@@ -713,7 +724,7 @@
                     }).then(() => location.reload());
                 } else {
                     Swal.fire({
-                        title: '⚠️ No se pudo actualizar',
+                        title: 'No se pudo actualizar',
                         text: data.error ?? 'Intenta de nuevo más tarde.',
                         icon: 'warning',
                         confirmButtonColor: '#003049',
@@ -721,7 +732,7 @@
                 }
             } catch (err) {
                 Swal.fire({
-                    title: '❌ Error de conexión',
+                    title: 'Error de conexión',
                     text: 'No se pudo conectar con el servidor.',
                     icon: 'error',
                     confirmButtonColor: '#003049',
