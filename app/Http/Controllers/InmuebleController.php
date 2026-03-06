@@ -327,11 +327,37 @@ class InmuebleController extends Controller
         $rules = [
             'nombre'        => 'required|string|max:255',
             'tipo'          => 'required|string',
-            'precio'        => 'required|numeric',
-            'habitaciones'  => 'required|integer',
-            'banos'         => 'required|integer',
-            'metros'        => 'required|numeric',
-            'descripcion'   => 'required|string',
+            'precio'        => [
+                'required',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->tipo === 'Cuarto' && $value < 300) {
+                        $fail('La renta mínima para cuartos es de $300.');
+                    }
+                    if (in_array($request->tipo, ['Departamento', 'Casa']) && $value < 500) {
+                        $fail('La renta mínima para este tipo de propiedad es de $500.');
+                    }
+                },
+            ],
+            'deposito'      => [
+                'nullable',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->tipo === 'Cuarto' && $value < 300) {
+                        $fail('El depósito mínimo para cuartos es de $300.');
+                    }
+                    if (in_array($request->tipo, ['Departamento', 'Casa']) && $value < 500) {
+                        $fail('El depósito mínimo para este tipo de propiedad es de $500.');
+                    }
+                },
+            ],
+            'habitaciones'      => 'required|integer|min:0',
+            'banos_casa'        => 'required|string',
+            'bano_compartido'   => 'nullable|boolean',
+            'metros'            => 'required|numeric|min:0',
+            'descripcion'   => ['required', 'string', 'regex:/^[a-zA-Z0-9\s.,?!áéíóúÁÉÍÓÚñÑüÜ\r\n]*$/'],
             'direccion'     => 'required|string',
             'imagenes'      => 'required|array|min:1|max:10',
             'imagenes.*'    => 'image|max:10240',
@@ -351,9 +377,14 @@ class InmuebleController extends Controller
             $inmueble->direccion = $request->direccion;
             $inmueble->tipo = $request->tipo;
             $inmueble->renta_mensual = $request->precio;
-            $inmueble->deposito = $request->precio;
+            $inmueble->deposito = $request->deposito;
             $inmueble->habitaciones = $request->habitaciones;
-            $inmueble->banos = $request->banos;
+            
+            $parts = explode(',', $request->banos_casa);
+            $inmueble->banos = isset($parts[0]) ? (int)$parts[0] : 0;
+            $inmueble->medios_banos = isset($parts[1]) ? (int)$parts[1] : 0;
+            $inmueble->bano_compartido = $request->tipo === 'Cuarto' ? ($request->has('bano_compartido') ? true : false) : false;
+
             $inmueble->metros = $request->metros;
             $inmueble->latitud = $request->latitud;
             $inmueble->longitud = $request->longitud;
@@ -405,8 +436,37 @@ class InmuebleController extends Controller
         $request->validate([
             'nombre'        => 'required|string|max:255',
             'tipo'          => 'required|string',
-            'precio'        => 'required|numeric',
-            'descripcion'   => 'required|string',
+            'precio'        => [
+                'required',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->tipo === 'Cuarto' && $value < 300) {
+                        $fail('La renta mínima para cuartos es de $300.');
+                    }
+                    if (in_array($request->tipo, ['Departamento', 'Casa']) && $value < 500) {
+                        $fail('La renta mínima para este tipo de propiedad es de $500.');
+                    }
+                },
+            ],
+            'deposito'      => [
+                'nullable',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->tipo === 'Cuarto' && $value < 300) {
+                        $fail('El depósito mínimo para cuartos es de $300.');
+                    }
+                    if (in_array($request->tipo, ['Departamento', 'Casa']) && $value < 500) {
+                        $fail('El depósito mínimo para este tipo de propiedad es de $500.');
+                    }
+                },
+            ],
+            'habitaciones'      => 'required|integer|min:0',
+            'banos_casa'        => 'required|string',
+            'bano_compartido'   => 'nullable|boolean',
+            'metros'            => 'required|numeric|min:0',
+            'descripcion'   => ['required', 'string', 'regex:/^[a-zA-Z0-9\s.,?!áéíóúÁÉÍÓÚñÑüÜ\r\n]*$/'],
             'direccion'     => 'required|string',
             'video_youtube' => 'nullable|url|max:255',
         ]);
@@ -430,15 +490,22 @@ class InmuebleController extends Controller
             ];
         }
 
+        $parts = explode(',', $request->banos_casa);
+        $banos = isset($parts[0]) ? (int)$parts[0] : 0;
+        $medios_banos = isset($parts[1]) ? (int)$parts[1] : 0;
+        $bano_compartido = $request->tipo === 'Cuarto' ? ($request->has('bano_compartido') ? true : false) : false;
+
         $inmueble->update(array_merge([
             'titulo'       => $request->nombre,
             'tipo'         => $request->tipo,
             'renta_mensual'=> $request->precio,
-            'deposito'     => $request->precio,
+            'deposito'     => $request->deposito,
             'descripcion'  => $request->descripcion,
             'direccion'    => $request->direccion,
             'habitaciones' => $request->habitaciones,
-            'banos'        => $request->banos,
+            'banos'        => $banos,
+            'medios_banos' => $medios_banos,
+            'bano_compartido' => $bano_compartido,
             'metros'       => $request->metros,
             'latitud'      => $request->latitud,
             'longitud'     => $request->longitud,

@@ -33,7 +33,7 @@
 
         {{-- Formulario --}}
         <div class="bg-card border border-border rounded-2xl shadow-lg p-6 sm:p-8">
-            <form method="POST" action="{{ route('inmuebles.guardar') }}" class="space-y-6" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('inmuebles.guardar') }}" class="space-y-6" enctype="multipart/form-data" novalidate>
                 @csrf
 
                 {{-- PASO 1 --}}
@@ -49,23 +49,16 @@
                                 placeholder="Ej. Depa moderno cerca de la UTC" required
                                 class="w-full rounded-lg border-input bg-background/50 border py-3 px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Dirección <span
-                                    class="text-red-500">*</span></label>
-                            <input type="text" name="direccion" value="{{ old('direccion') }}"
-                                placeholder="Calle, Número, Colonia..." required
-                                class="w-full rounded-lg border-input bg-background/50 border py-3 px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
-                        </div>
+                    
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium mb-1">Tipo <span
                                         class="text-red-500">*</span></label>
-                                <select name="tipo" required
+                                <select name="tipo" x-model="tipo" required
                                     class="w-full rounded-lg border-input bg-background/50 border py-3 px-4">
-                                    <option value="Casa" {{ old('tipo') == 'Casa' ? 'selected' : '' }}>Casa</option>
-                                    <option value="Departamento" {{ old('tipo') == 'Departamento' ? 'selected' : '' }}>
-                                        Departamento</option>
-                                    <option value="Cuarto" {{ old('tipo') == 'Cuarto' ? 'selected' : '' }}>Cuarto</option>
+                                    <option value="Casa">Casa</option>
+                                    <option value="Departamento">Departamento</option>
+                                    <option value="Cuarto">Cuarto</option>
                                 </select>
                             </div>
                             <div>
@@ -74,7 +67,7 @@
                                 <div class="relative">
                                     <span class="absolute left-3 top-3 text-gray-500">$</span>
                                     <input type="number" name="precio" value="{{ old('precio') }}" placeholder="0.00"
-                                        required
+                                        required :min="minPrecio" step="any" oninput="if(this.value < 0) this.value = '';"
                                         class="w-full rounded-lg border-input bg-background/50 border py-3 pl-8 px-4">
                                 </div>
                             </div>
@@ -84,6 +77,7 @@
                                 <div class="relative">
                                     <span class="absolute left-3 top-3 text-gray-500">$</span>
                                     <input type="number" name="deposito" value="{{ old('deposito') }}" placeholder="0.00"
+                                        :min="minPrecio" oninput="if(this.value < 0) this.value = '';"
                                         class="w-full rounded-lg border-input bg-background/50 border py-3 pl-8 px-4">
                                 </div>
                             </div>
@@ -128,18 +122,43 @@
                     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
                     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-                    <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-xs font-medium mb-1 uppercase text-muted-foreground">Habitaciones <span
                                     class="text-red-500">*</span></label>
                             <input type="number" name="habitaciones" value="{{ old('habitaciones') }}" required
+                                min="0" step="any" oninput="if(this.value < 0) this.value = '';"
                                 class="w-full rounded-lg border-input bg-background/50 border py-2 px-3">
                         </div>
+                        
+                        <!-- Baños (Igual para todas las categorías) -->
                         <div>
                             <label class="block text-xs font-medium mb-1 uppercase text-muted-foreground">Baños <span
                                     class="text-red-500">*</span></label>
-                            <input type="number" name="banos" value="{{ old('banos') }}" required
-                                class="w-full rounded-lg border-input bg-background/50 border py-2 px-3">
+                            <select name="banos_casa" required class="w-full rounded-lg border-input bg-background/50 border py-2 px-3">
+                                <option value="0,1" {{ old('banos_casa') === '0,1' ? 'selected' : '' }}>Medio Baño</option>
+                                <option value="1,0" {{ old('banos_casa') === '1,0' ? 'selected' : '' }}>1 Baño Completo</option>
+                                <option value="1,1" {{ old('banos_casa') === '1,1' ? 'selected' : '' }}>1 Baño Completo y Medio Baño</option>
+                                <option value="2,0" {{ old('banos_casa') === '2,0' ? 'selected' : '' }}>2 Baños Completos</option>
+                                <option value="2,1" {{ old('banos_casa') === '2,1' ? 'selected' : '' }}>2 Baños Completos y Medio Baño</option>
+                                <option value="3,0" {{ old('banos_casa') === '3,0' ? 'selected' : '' }}>3 Baños Completos</option>
+                                <option value="3,1" {{ old('banos_casa') === '3,1' ? 'selected' : '' }}>3 Baños Completos y Medio Baño</option>
+                                <option value="4,0" {{ old('banos_casa') === '4,0' ? 'selected' : '' }}>4 Baños o más</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 sm:-mt-2" x-show="tipo === 'Cuarto'" style="display: none;">
+                        <!-- Columna vacía para alinear a la derecha -->
+                        <div class="hidden sm:block"></div> 
+
+                        <!-- ¿Baño Compartido? (Para todas las categorías) -->
+                        <div class="flex items-center">
+                            <label class="flex items-center gap-2 text-sm font-medium text-slate-500 cursor-pointer">
+                                <input type="checkbox" name="bano_compartido" value="1"
+                                    class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary">
+                                ¿El baño es compartido?
+                            </label>
                         </div>
                     </div>
 
@@ -154,6 +173,7 @@
                             <div>
                                 <label class="block text-xs text-muted-foreground mb-1">Largo (m)</label>
                                 <input type="number" x-model="largo" @input="calcularm2()" placeholder="0"
+                                    min="0" step="any" oninput="if(this.value < 0) this.value = '';"
                                     class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
                             </div>
                             <div class="flex items-center justify-center pb-2 text-muted-foreground">
@@ -162,6 +182,7 @@
                             <div>
                                 <label class="block text-xs text-muted-foreground mb-1">Ancho (m)</label>
                                 <input type="number" x-model="ancho" @input="calcularm2()" placeholder="0"
+                                    min="0" step="any" oninput="if(this.value < 0) this.value = '';"
                                     class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
                             </div>
                         </div>
@@ -171,6 +192,7 @@
                                     class="text-red-500">*</span></label>
                             <div class="relative">
                                 <input type="number" name="metros" x-model="metros" required
+                                    min="0" step="any" oninput="if(this.value < 0) this.value = '';"
                                     class="w-full rounded-lg border-input bg-white border-2 border-blue-100 py-2 px-3 font-bold text-slate-800 focus:border-blue-400 focus:ring-0">
                                 <span class="absolute right-3 top-2.5 text-xs text-muted-foreground font-bold">M²</span>
                             </div>
@@ -183,6 +205,7 @@
                         <label class="block text-sm font-medium mb-1">Descripción <span
                                 class="text-red-500">*</span></label>
                         <textarea name="descripcion" rows="4" placeholder="Cuéntanos más detalles..." required
+                            oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s.,?!áéíóúÁÉÍÓÚñÑüÜ\r\n]/g, '')"
                             class="w-full rounded-lg border-input bg-background/50 border py-3 px-4">{{ old('descripcion') }}</textarea>
                     </div>
                 </div>
@@ -211,36 +234,6 @@
                                 </svg>
                             </div>
                             <p class="text-sm font-medium text-foreground">Haz clic o arrastra más fotos</p>
-                        </div>
-                    </div>
-
-                {{-- 🎬 Video Tour de YouTube --}}
-                    <div class="mb-6 bg-red-50/40 border border-red-100 rounded-2xl p-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xl">🎬</span>
-                            <label class="text-sm font-bold text-slate-700">Video Tour de YouTube <span class="text-xs text-muted-foreground font-normal">(Opcional)</span></label>
-                        </div>
-                        <p class="text-xs text-slate-500 mb-3">Pega el enlace de YouTube del recorrido de tu propiedad. Funciona con cualquier formato: youtube.com/watch?v=..., youtu.be/..., Shorts.</p>
-                        <input type="url" name="video_youtube" id="yt-url-input"
-                            value="{{ old('video_youtube') }}"
-                            placeholder="https://www.youtube.com/watch?v=..."
-                            class="w-full rounded-lg border-input bg-white border py-3 px-4 focus:ring-2 focus:ring-red-400/30 focus:border-red-400 transition-all text-sm"
-                            @input="previewYoutube($event.target.value)">
-
-                        {{-- Preview del video en vivo --}}
-                        <div id="yt-preview" class="mt-4 hidden">
-                            <div class="relative w-full rounded-xl overflow-hidden shadow-md" style="padding-top: 56.25%;">
-                                <iframe id="yt-iframe"
-                                    class="absolute inset-0 w-full h-full"
-                                    frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen>
-                                </iframe>
-                            </div>
-                            <p class="text-xs text-green-600 font-bold mt-2 flex items-center gap-1">✅ Video válido detectado — se mostrará en tu anuncio</p>
-                        </div>
-                        <div id="yt-error" class="mt-3 hidden">
-                            <p class="text-xs text-red-500 font-bold flex items-center gap-1">⚠️ No pudimos detectar un ID de YouTube válido en ese enlace.</p>
                         </div>
                     </div>
 
@@ -277,7 +270,7 @@
                         Paso →</button>
 
                     <button type="submit" x-show="step === 3"
-                        style="background-color: #003049; color: white; padding: 12px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 48, 73, 0.3); display: flex; align-items: center; gap: 8px;"
+                        style="background-color: #003049; color: white; padding: 12px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 48, 73, 0.3); display: flex; align-items: center; gap: 8px;">
                         <span>✨</span> ¡Publicar Ahora!
                     </button>
                 </div>
@@ -407,7 +400,12 @@
                 previews: [],
                 largo: '',
                 ancho: '',
-                metros: '{{ old('metros') }}',
+                metros: "{{ old('metros') }}",
+                tipo: "{{ old('tipo', 'Casa') }}",
+
+                get minPrecio() {
+                    return this.tipo === 'Cuarto' ? 300 : 500;
+                },
 
                 calcularm2() {
                     if (this.largo && this.ancho) {
@@ -446,7 +444,24 @@
                     let esValido = true;
                     for (let input of inputs) {
                         if (!input.checkValidity()) {
+                            console.error("Validación fallida en campo:", input.name);
+                            console.error("Valor actual:", input.value);
+                            console.error("Mensaje de error:", input.validationMessage);
+                            // Creamos un fake popup si no puede reportar visualmente (por si el navegador estricto no lo muestra bien)
+                            if (input.validationMessage) {
+                                let span = document.createElement("span");
+                                span.classList.add("text-sm", "text-red-500", "absolute", "mt-16", "z-50");
+                                span.style.top = "100%";
+                                span.innerText = input.validationMessage;
+                                input.parentNode.style.position = "relative";
+                                // Remove old errors
+                                Array.from(input.parentNode.querySelectorAll(".text-red-500.absolute")).forEach(e=>e.remove());
+                                input.parentNode.appendChild(span);
+                                setTimeout(() => span.remove(), 4000);
+                            }
+                            
                             input.reportValidity();
+                            input.focus();
                             esValido = false;
                             break;
                         }

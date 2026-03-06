@@ -28,7 +28,7 @@
                     <div>
                         <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Tipo de
                             Inmueble</label>
-                        <select name="tipo"
+                        <select name="tipo" id="tipo-select" onchange="updateMinVal()"
                             class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                             <option value="Casa" {{ $inmueble->tipo == 'Casa' ? 'selected' : '' }}>Casa</option>
                             <option value="Departamento" {{ $inmueble->tipo == 'Departamento' ? 'selected' : '' }}>
@@ -41,7 +41,17 @@
                     <div>
                         <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Renta Mensual
                             ($)</label>
-                        <input type="number" name="precio" value="{{ $inmueble->renta_mensual }}" required
+                        <input type="number" name="precio" id="precio-input" value="{{ $inmueble->renta_mensual }}" required
+                            min="{{ $inmueble->tipo === 'Cuarto' ? 300 : 500 }}" oninput="if(this.value < 0) this.value = '';"
+                            class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
+                    </div>
+
+                    {{-- Depósito --}}
+                    <div>
+                        <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Depósito
+                            ($) <span class="text-xs font-normal text-muted-foreground">(Opcional)</span></label>
+                        <input type="number" name="deposito" id="deposito-input" value="{{ $inmueble->deposito }}"
+                            min="{{ $inmueble->tipo === 'Cuarto' ? 300 : 500 }}" oninput="if(this.value < 0) this.value = '';"
                             class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                     </div>
                 </div>
@@ -159,23 +169,48 @@
                     }
                 </script>
 
-                <div class="grid grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label
                             class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Habitaciones</label>
-                        <input type="number" name="habitaciones" value="{{ $inmueble->habitaciones }}"
-                            class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Baños</label>
-                        <input type="number" name="banos" value="{{ $inmueble->banos }}"
+                        <input type="number" name="habitaciones" value="{{ $inmueble->habitaciones }}" required
+                            min="0" oninput="if(this.value < 0) this.value = '';"
                             class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Metros
                             (m²)</label>
-                        <input type="number" name="metros" value="{{ $inmueble->metros }}"
+                        <input type="number" name="metros" value="{{ $inmueble->metros }}" required
+                            min="0" oninput="if(this.value < 0) this.value = '';"
                             class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div>
+                        <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Baños</label>
+                        @php $banoCombo = $inmueble->banos . ',' . $inmueble->medios_banos; @endphp
+                        <select id="banos-casa-input" name="banos_casa" required class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
+                            <option value="0,1" {{ $banoCombo === '0,1' ? 'selected' : '' }}>Medio Baño</option>
+                            <option value="1,0" {{ $banoCombo === '1,0' ? 'selected' : '' }}>1 Baño Completo</option>
+                            <option value="1,1" {{ $banoCombo === '1,1' ? 'selected' : '' }}>1 Baño Completo y Medio Baño</option>
+                            <option value="2,0" {{ $banoCombo === '2,0' ? 'selected' : '' }}>2 Baños Completos</option>
+                            <option value="2,1" {{ $banoCombo === '2,1' ? 'selected' : '' }}>2 Baños Completos y Medio Baño</option>
+                            <option value="3,0" {{ $banoCombo === '3,0' ? 'selected' : '' }}>3 Baños Completos</option>
+                            <option value="3,1" {{ $banoCombo === '3,1' ? 'selected' : '' }}>3 Baños Completos y Medio Baño</option>
+                            <option value="4,0" {{ $banoCombo === '4,0' ? 'selected' : '' }}>4 Baños o más</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="bano-compartido-wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2 mb-6" style="display: {{ $inmueble->tipo === 'Cuarto' ? 'grid' : 'none' }};">
+                    <div class="hidden md:block"></div>
+                    <div class="flex items-center sm:-mt-3">
+                        <label class="flex items-center gap-2 text-sm font-medium text-slate-500 cursor-pointer">
+                            <input type="checkbox" name="bano_compartido" value="1" {{ $inmueble->bano_compartido ? 'checked' : '' }}
+                                class="w-4 h-4 rounded border-slate-300 text-[#003049] focus:ring-[#003049]">
+                            ¿El baño es compartido?
+                        </label>
                     </div>
                 </div>
 
@@ -183,6 +218,7 @@
                 <div>
                     <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Descripción</label>
                     <textarea name="descripcion" rows="5" required
+                        oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s.,?!áéíóúÁÉÍÓÚñÑüÜ\r\n]/g, '')"
                         class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none transition-all">{{ $inmueble->descripcion }}</textarea>
                 </div>
 
@@ -273,6 +309,20 @@
         } else {
             preview.classList.add('hidden');
             error.classList.remove('hidden');
+        }
+    }
+
+    function updateMinVal() {
+        const tipo = document.getElementById('tipo-select').value;
+        const minVal = tipo === 'Cuarto' ? 300 : 500;
+        document.getElementById('precio-input').min = minVal;
+        document.getElementById('deposito-input').min = minVal;
+        const banoCompartidoWrapper = document.getElementById('bano-compartido-wrapper');
+        
+        if (tipo === 'Cuarto') {
+            if (banoCompartidoWrapper) banoCompartidoWrapper.style.display = 'grid';
+        } else {
+            if (banoCompartidoWrapper) banoCompartidoWrapper.style.display = 'none';
         }
     }
 </script>
