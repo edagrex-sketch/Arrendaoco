@@ -446,7 +446,8 @@
             })
         }
     </script>
-    @unless(request()->routeIs(['login', 'registro', 'password.*']))
+    @stack('scripts')
+    @auth
         <x-arrendito />
     @endunless
 </body>
