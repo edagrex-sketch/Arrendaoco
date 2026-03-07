@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', $inmueble->titulo)
 
@@ -32,12 +32,12 @@
              style="display: none;"
              x-cloak>
             
-            {{-- Botón Cerrar Ultra-Premium --}}
+            {{-- Bot├│n Cerrar Ultra-Premium --}}
             <button @click="showFullscreen = false" class="absolute top-8 right-8 p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-all z-[100001] group">
                 <svg class="h-8 w-8 transition-transform group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
 
-            {{-- Navegación Principal --}}
+            {{-- Navegaci├│n Principal --}}
             <div class="relative w-full h-full flex flex-col items-center justify-center select-none p-4 md:p-12">
                 {{-- Flechas Laterales Flotantes --}}
                 <button @click.stop="prev()" class="absolute left-6 md:left-12 p-5 text-white/40 hover:text-white transition-all bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full z-[100001]">
@@ -79,7 +79,7 @@
                              :class="i === 1 ? 'col-span-2 row-span-2' : ((images.length === 2 && i === 2) || (images.length === 4 && i === 4) ? 'col-span-2 row-span-1' : 'col-span-1 row-span-1')"
                              @click="showFullscreen = true; active = (active + i - 1) % images.length">
                             
-                            {{-- Imagen actual en la posición rotativa --}}
+                            {{-- Imagen actual en la posici├│n rotativa --}}
                             <img :src="images[(active + i - 1) % images.length]" 
                                  class="absolute inset-0 w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-500">
                         </div>
@@ -108,12 +108,12 @@
                     <h1 class="text-3xl lg:text-4xl font-semibold text-slate-800 mb-6">{{ $inmueble->titulo }}</h1>
                     
                     <div class="mb-6">
-                        <h3 class="text-lg font-bold text-slate-700 mb-2">Descripción</h3>
-                        <p class="text-[12px] font-semibold text-slate-500 leading-relaxed">{{ $inmueble->descripcion ?? 'Sin descripción proporcionada.' }}</p>
+                        <h3 class="text-lg font-bold text-slate-700 mb-2">Descripci├│n</h3>
+                        <p class="text-[12px] font-semibold text-slate-500 leading-relaxed">{{ $inmueble->descripcion ?? 'Sin descripci├│n proporcionada.' }}</p>
                     </div>
 
                     <div class="mb-8">
-                        <h3 class="text-lg font-bold text-slate-700 mb-2">Dirección</h3>
+                        <h3 class="text-lg font-bold text-slate-700 mb-2">Direcci├│n</h3>
                         <p class="text-[12px] font-semibold text-slate-500 leading-relaxed">{{ $inmueble->direccion }}</p>
                     </div>
 
@@ -133,9 +133,9 @@
                             </ul>
                         </div>
                         
-                        {{-- Baños -> Áreas --}}
+                        {{-- Ba├▒os -> ├üreas --}}
                         <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3">Áreas</h4>
+                            <h4 class="text-base font-bold text-slate-700 mb-3">├üreas</h4>
                             <ul class="space-y-3">
                                 <li class="flex flex-col text-sm font-bold text-slate-600">
                                     <div class="flex items-center">
@@ -145,14 +145,14 @@
                                         <span>
                                         @if($inmueble->tipo == 'Cuarto')
                                             @if($inmueble->banos == 0 && $inmueble->medios_banos == 1)
-                                                Medio Baño
+                                                Medio Ba├▒o
                                             @elseif($inmueble->banos == 1 && $inmueble->medios_banos == 0)
-                                                Baño Completo
+                                                Ba├▒o Completo
                                             @else
-                                                {{ $inmueble->banos }} Baños
+                                                {{ $inmueble->banos }} Ba├▒os
                                             @endif
                                         @else
-                                            {{ $inmueble->banos }} Baños
+                                            {{ $inmueble->banos }} Ba├▒os
                                         @endif
                                         </span>
                                     </div>
@@ -162,7 +162,7 @@
                                         </span>
                                     @elseif(($inmueble->medios_banos ?? 0) > 0)
                                         <span class="text-[10px] text-slate-400 mt-1 ml-7 whitespace-nowrap">
-                                            y {{ $inmueble->medios_banos }} Medio Baño
+                                            y {{ $inmueble->medios_banos }} Medio Ba├▒o
                                         </span>
                                     @endif
                                 </li>
@@ -178,7 +178,7 @@
                                         <svg class="w-5 h-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                         </svg>
-                                        {{ number_format($inmueble->metros, 0) }}m²
+                                        {{ number_format($inmueble->metros, 0) }}m┬▓
                                     </div>
                                 </li>
                             </ul>
@@ -216,7 +216,7 @@
             </div>
         </div>
 
-        {{-- Contenedor fondo blanco para lo demás, similar a la card de Reseñas --}}
+        {{-- Contenedor fondo blanco para lo dem├ís, similar a la card de Rese├▒as --}}
         <div class="bg-white rounded-3xl p-6 lg:p-8 shadow-sm border border-slate-200">
 
                 {{-- Tiempos de Traslado (Calculados) --}}
@@ -244,7 +244,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-black text-[#003049] tracking-tight">Ubicación Estratégica</h3>
+                            <h3 class="text-xl font-black text-[#003049] tracking-tight">Ubicaci├│n Estrat├®gica</h3>
                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Tiempos estimados desde esta propiedad</p>
                         </div>
                     </div>
@@ -326,7 +326,7 @@
 
                                 const baseMaps = {
                                     'Callejero': osm,
-                                    'Satélite': satellite
+                                    'Sat├®lite': satellite
                                 };
                                 L.control.layers(baseMaps, null, { collapsed: false }).addTo(map);
                                 L.control.scale({ imperial: false }).addTo(map);
@@ -366,7 +366,7 @@
                             </div>
                             <div>
                                 <h3 class="text-2xl font-black text-[#003049] tracking-tight">Video Tour Virtual</h3>
-                                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Recorre la propiedad desde donde estés</p>
+                                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Recorre la propiedad desde donde est├®s</p>
                             </div>
                         </div>
                         @if($inmueble->video_canal)
@@ -395,7 +395,7 @@
                         @if($inmueble->video_duracion)
                         <div class="bg-slate-50 rounded-2xl p-4 text-center border border-slate-100">
                             <p class="text-2xl font-black text-[#003049]">{{ $inmueble->video_duracion }}</p>
-                            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1">Duración</p>
+                            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1">Duraci├│n</p>
                         </div>
                         @endif
                         @if($inmueble->video_publicado_en)
@@ -407,7 +407,7 @@
                     </div>
                     @endif
 
-                    {{-- Título del video --}}
+                    {{-- T├¡tulo del video --}}
                     @if($inmueble->video_titulo)
                         <p class="text-base font-bold text-slate-700 mb-4 flex items-start gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-2.75 12.61 12.61 0 00-7.38 0A4.83 4.83 0 014.67 6.69 46.55 46.55 0 004 12a46.55 46.55 0 00.67 5.31 4.83 4.83 0 003.77 2.75 12.61 12.61 0 007.38 0 4.83 4.83 0 003.77-2.75A46.55 46.55 0 0020 12a46.55 46.55 0 00-.41-5.31zM10 15V9l5 3z"/></svg>
@@ -428,10 +428,10 @@
                         </iframe>
                     </div>
 
-                    {{-- Descripción del video (si viene de API) --}}
+                    {{-- Descripci├│n del video (si viene de API) --}}
                     @if($inmueble->video_descripcion)
                     <div class="mt-6 bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Descripción del video</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Descripci├│n del video</p>
                         <p class="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{{ $inmueble->video_descripcion }}</p>
                     </div>
                     @endif
@@ -451,13 +451,13 @@
                         </span>
                         @endif
 
-                        {{-- Botón refresh (solo para el propietario o admin) --}}
+                        {{-- Bot├│n refresh (solo para el propietario o admin) --}}
                         @if(auth()->check() && (auth()->id() === $inmueble->propietario_id || auth()->user()->es_admin))
                         <button id="btn-refresh-video"
                             onclick="refreshVideoStats({{ $inmueble->id }})"
                             class="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-[#003049] transition-all bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl border border-slate-200 ml-auto">
                             <svg id="refresh-icon" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            Actualizar estadísticas
+                            Actualizar estad├¡sticas
                         </button>
                         @endif
                     </div>
@@ -466,11 +466,11 @@
 
 
                 
-{{-- Sección de Reseñas --}}
+{{-- Secci├│n de Rese├▒as --}}
                 <div class="mt-8 pt-8 border-t border-slate-100/80">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                         <div>
-                            <h2 class="text-3xl font-black text-[#003049] tracking-tight">Experiencias y Reseñas</h2>
+                            <h2 class="text-3xl font-black text-[#003049] tracking-tight">Experiencias y Rese├▒as</h2>
                             <p class="text-slate-500 font-medium mt-1">Lo que otros dicen sobre esta propiedad.</p>
                         </div>
                         <div class="flex items-center gap-3 bg-amber-50 px-5 py-3 rounded-2xl border border-amber-100 self-start md:self-auto">
@@ -501,7 +501,7 @@
                                         <span class="block font-black text-[#003049] leading-tight">
                                             {{ $resena->usuario->nombre }}
                                             @if(Auth::id() === $resena->usuario_id)
-                                                <span class="ml-2 text-[8px] bg-[#003049] text-white px-2 py-0.5 rounded-full uppercase tracking-tighter">Tú</span>
+                                                <span class="ml-2 text-[8px] bg-[#003049] text-white px-2 py-0.5 rounded-full uppercase tracking-tighter">T├║</span>
                                             @endif
                                         </span>
                                         <div class="flex text-amber-400 mt-0.5 scale-75 origin-left">
@@ -527,7 +527,7 @@
                                             <div class="flex gap-6 pt-6 mt-2 border-t border-slate-50" x-data="{ editing: false, comentario: '{{ $resena->comentario }}', puntuacion: {{ $resena->puntuacion }} }">
                                                 
                                                 @if($esAutor)
-                                                    {{-- Botón Editar (Solo Autor) --}}
+                                                    {{-- Bot├│n Editar (Solo Autor) --}}
                                                     <button @click="editing = !editing" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] hover:text-[#003049] transition-all group/edit">
                                                         <div class="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover/edit:bg-[#003049]/5 transition-colors">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -538,7 +538,7 @@
                                                     </button>
                                                 @endif
                                                 
-                                                {{-- Botón Eliminar (Autor o Admin) --}}
+                                                {{-- Bot├│n Eliminar (Autor o Admin) --}}
                                                 <form id="delete-resena-{{ $resena->id }}" action="{{ route('resenas.destroy', $resena) }}" method="POST" class="inline">
                                                     @csrf
                                                     @method('DELETE')
@@ -554,15 +554,15 @@
                                                 </form>
 
                                                 @if($esAutor)
-                                                    {{-- Modal de Edición (Solo para el Autor) --}}
+                                                    {{-- Modal de Edici├│n (Solo para el Autor) --}}
                                                     <div x-show="editing" x-transition class="fixed inset-0 bg-[#003049]/40 backdrop-blur-sm z-[2000] flex items-center justify-center p-4" x-cloak>
                                                         <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl" @click.away="editing = false">
-                                                            <h4 class="text-xl font-black text-[#003049] mb-6">Actualizar Reseña</h4>
+                                                            <h4 class="text-xl font-black text-[#003049] mb-6">Actualizar Rese├▒a</h4>
                                                             <form action="{{ route('resenas.update', $resena) }}" method="POST" class="space-y-6">
                                                                 @csrf
                                                                 @method('PUT')
                                                                 <div class="flex flex-col gap-2">
-                                                                    <label class="text-[10px] font-black text-[#003049] uppercase tracking-widest">Nueva Calificación</label>
+                                                                    <label class="text-[10px] font-black text-[#003049] uppercase tracking-widest">Nueva Calificaci├│n</label>
                                                                     <div class="flex gap-1">
                                                                         <template x-for="i in 5">
                                                                             <button type="button" @click="puntuacion = i" class="transition-transform hover:scale-125">
@@ -595,13 +595,13 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-bold text-slate-400">Aún no hay reseñas</h3>
-                                <p class="text-slate-400 text-sm max-w-xs mt-2 font-medium">Sé el primero en rentar esta propiedad y compartir tu experiencia.</p>
+                                <h3 class="text-xl font-bold text-slate-400">A├║n no hay rese├▒as</h3>
+                                <p class="text-slate-400 text-sm max-w-xs mt-2 font-medium">S├® el primero en rentar esta propiedad y compartir tu experiencia.</p>
                             </div>
                         @endforelse
                     </div>
 
-                    {{-- Formulario de Nueva Reseña --}}
+                    {{-- Formulario de Nueva Rese├▒a --}}
                     @auth
                         @if(Auth::id() !== $inmueble->propietario_id)
                             <div class="mt-8 mb-8 bg-[#003049]/5 rounded-[2rem] p-5 lg:p-6 border border-[#003049]/10" x-data="{ showForm: false }">
@@ -613,7 +613,7 @@
                                                 <path d="M16.273 5.337l-3.71-3.71L3.926 10.263a4.5 4.5 0 00-1.077 1.637l-1.42 4.259a.75.75 0 00.95.95l4.259-1.42a4.5 4.5 0 001.637-1.077l8.636-8.636z" />
                                             </svg>
                                         </span>
-                                        Cuéntanos tu experiencia
+                                        Cu├®ntanos tu experiencia
                                     </h3>
                                     <button @click="showForm = !showForm" 
                                             class="flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-[#003049] font-bold text-xs rounded-xl hover:bg-slate-50 transition border border-slate-200 shadow-sm whitespace-nowrap">
@@ -628,7 +628,7 @@
                                     <form action="{{ route('resenas.store', $inmueble) }}" method="POST" class="space-y-5">
                                         @csrf
                                         <div class="flex flex-col gap-3">
-                                            <label class="text-[10px] font-black text-[#003049] uppercase tracking-[0.2em]">Tu Calificación</label>
+                                            <label class="text-[10px] font-black text-[#003049] uppercase tracking-[0.2em]">Tu Calificaci├│n</label>
                                             <div class="flex gap-2" x-data="{ rating: 0, hover: 0 }">
                                                 @for($i = 1; $i <= 5; $i++)
                                                     <button type="button" 
@@ -638,8 +638,6 @@
                                                         class="transition-all duration-300 transform hover:scale-125 focus:outline-none">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" :class="(hover || rating) >= {{ $i }} ? 'text-amber-400' : 'text-slate-200'" viewBox="0 0 20 20" fill="currentColor">
                                                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                        </svg>
-                                                    </button>
                                                 @endfor
                                                 <input type="hidden" name="puntuacion" :value="rating" required>
                                             </div>
@@ -647,14 +645,17 @@
                                                 <p class="text-red-500 text-xs mt-1 font-semibold">{{ $message }}</p>
                                             @enderror
                                         </div>
+                                                <p class="text-red-500 text-xs mt-1 font-semibold">{{ $message }}</p>
+                                            @enderror
+                                        </div>
 
                                         <div class="space-y-2">
                                             <label class="text-[10px] font-black text-[#003049] uppercase tracking-[0.2em]">Comentario</label>
                                             <textarea name="comentario" rows="3" required
-                                                placeholder="¿Qué te pareció la propiedad y la atención del dueño?"
-                                                pattern="^[a-zA-Z0-9\s.,?!*\-áéíóúÁÉÍÓÚñÑ]*$"
-                                                title="Solo se permiten letras, números y los siguientes signos: . , ? ! * -"
-                                                oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s.,?!*\-áéíóúÁÉÍÓÚñÑ]/g, '')"
+                                                placeholder="┬┐Qu├® te pareci├│ la propiedad y la atenci├│n del due├▒o?"
+                                                pattern="^[a-zA-Z0-9\s.,?!*\-├í├®├¡├│├║├ü├ë├ì├ô├Ü├▒├æ]*$"
+                                                title="Solo se permiten letras, n├║meros y los siguientes signos: . , ? ! * -"
+                                                oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s.,?!*\-├í├®├¡├│├║├ü├ë├ì├ô├Ü├▒├æ]/g, '')"
                                                 class="w-full rounded-2xl border-slate-200 bg-white/50 backdrop-blur-sm p-4 text-sm focus:ring-4 focus:ring-[#003049]/10 focus:border-[#003049] transition-all outline-none text-slate-700"></textarea>
                                             @error('comentario')
                                                 <p class="text-red-500 text-xs mt-1 font-semibold">{{ $message }}</p>
@@ -663,7 +664,7 @@
 
                                         <button type="submit" 
                                             class="w-full md:w-auto px-8 py-3 bg-[#003049] text-white font-black rounded-xl shadow-lg shadow-[#003049]/20 hover:-translate-y-0.5 hover:brightness-110 transition-all uppercase tracking-widest text-[10px]">
-                                            Publicar Reseña
+                                            Publicar Rese├▒a
                                         </button>
                                     </form>
                                 </div>
@@ -673,16 +674,16 @@
                                 <p class="text-amber-700 font-bold mb-1 flex items-center justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 inline mr-2 text-amber-500">
                                         <path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clip-rule="evenodd" />
-                                    </svg> Estás viendo tu propia publicación
+                                    </svg> Est├ís viendo tu propia publicaci├│n
                                 </p>
-                                <p class="text-amber-600 text-xs">Los dueños no pueden calificar sus propias propiedades.</p>
+                                <p class="text-amber-600 text-xs">Los due├▒os no pueden calificar sus propias propiedades.</p>
                             </div>
                         @endif
                     @else
                         <div class="mt-8 mb-8 bg-slate-100/50 rounded-3xl p-6 text-center border-2 border-dashed border-slate-200">
-                            <p class="text-[#003049] font-bold mb-4">¿Quieres compartir tu experiencia?</p>
+                            <p class="text-[#003049] font-bold mb-4">┬┐Quieres compartir tu experiencia?</p>
                             <a href="{{ route('login') }}" class="inline-block px-8 py-3 bg-[#003049] text-white font-black rounded-2xl shadow-lg hover:-translate-y-1 transition-all uppercase tracking-widest text-xs">
-                                Inicia sesión para calificar
+                                Inicia sesi├│n para calificar
                             </a>
                         </div>
                     @endauth
@@ -692,13 +693,13 @@
 <script>
                     function confirmDeleteResena(id) {
                         Swal.fire({
-                            title: '¿Eliminar reseña?',
-                            text: "Esta acción no se puede deshacer.",
+                            title: '┬┐Eliminar rese├▒a?',
+                            text: "Esta acci├│n no se puede deshacer.",
                             icon: 'warning',
                             showCancelButton: true,
                             confirmButtonColor: '#003049',
                             cancelButtonColor: '#ff4444',
-                            confirmButtonText: 'Sí, eliminar',
+                            confirmButtonText: 'S├¡, eliminar',
                             cancelButtonText: 'Cancelar',
                             borderRadius: '1.5rem',
                         }).then((result) => {
@@ -709,7 +710,7 @@
                     }
                 </script>
 
-    {{-- Script de actualización de estadísticas de YouTube --}}
+    {{-- Script de actualizaci├│n de estad├¡sticas de YouTube --}}
     @if($inmueble->video_youtube_id && auth()->check() && (auth()->id() === $inmueble->propietario_id || auth()->user()->es_admin))
     <script>
         async function refreshVideoStats(inmuebleId) {
@@ -735,14 +736,14 @@
 
                 if (data.success) {
                     Swal.fire({
-                        title:  'Estadísticas actualizadas',
+                        title:  'Estad├¡sticas actualizadas',
                         html: `
                             <div style="text-align:left; font-size:14px; line-height:2;">
-                                <p><b>Título:</b> ${data.data.titulo ?? '—'}</p>
-                                <p><b>Canal:</b> ${data.data.canal ?? '—'}</p>
-                                <p><b>Vistas:</b> ${data.data.vistas ?? '—'}</p>
-                                <p><b>Likes:</b> ${data.data.likes ?? '—'}</p>
-                                <p><b>Duración:</b> ${data.data.duracion ?? '—'}</p>
+                                <p><b>T├¡tulo:</b> ${data.data.titulo ?? 'ÔÇö'}</p>
+                                <p><b>Canal:</b> ${data.data.canal ?? 'ÔÇö'}</p>
+                                <p><b>Vistas:</b> ${data.data.vistas ?? 'ÔÇö'}</p>
+                                <p><b>Likes:</b> ${data.data.likes ?? 'ÔÇö'}</p>
+                                <p><b>Duraci├│n:</b> ${data.data.duracion ?? 'ÔÇö'}</p>
                             </div>`,
                         icon: 'success',
                         confirmButtonColor: '#003049',
@@ -753,14 +754,14 @@
                 } else {
                     Swal.fire({
                         title: 'No se pudo actualizar',
-                        text: data.error ?? 'Intenta de nuevo más tarde.',
+                        text: data.error ?? 'Intenta de nuevo m├ís tarde.',
                         icon: 'warning',
                         confirmButtonColor: '#003049',
                     });
                 }
             } catch (err) {
                 Swal.fire({
-                    title: 'Error de conexión',
+                    title: 'Error de conexi├│n',
                     text: 'No se pudo conectar con el servidor.',
                     icon: 'error',
                     confirmButtonColor: '#003049',
@@ -771,7 +772,7 @@
             }
         }
 
-        // Añadir keyframe de spin si no existe
+        // A├▒adir keyframe de spin si no existe
         if (!document.getElementById('yt-spin-style')) {
             const s = document.createElement('style');
             s.id = 'yt-spin-style';

@@ -223,9 +223,60 @@
                         oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s.,?!áéíóúÁÉÍÓÚñÑüÜ\r\n]/g, '')"
                         class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none transition-all">{{ $inmueble->descripcion }}</textarea>
                 </div>
+            </div>
 
-@endpush
+            <div class="flex gap-4">
+                <button type="submit"
+                    class="flex-1 bg-[#003049] text-white font-black py-4 rounded-2xl shadow-xl hover:bg-[#003049]/90 transition-all uppercase tracking-widest">
+                    Guardar Cambios
+                </button>
+                <a href="{{ route('inmuebles.index') }}"
+                    class="flex-1 bg-white text-muted-foreground font-bold py-4 rounded-2xl border border-slate-200 hover:bg-slate-50 transition-all text-center uppercase tracking-widest">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
 @endsection
+
+@push('scripts')
+<script>
+    function extractYouTubeIdEdit(url) {
+        const patterns = [
+            /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+            /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+            /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+            /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+            /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+        ];
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match) return match[1];
+        }
+        return null;
+    }
+
+    function previewYoutubeEdit(url) {
+        const preview = document.getElementById('yt-preview-edit');
+        const error   = document.getElementById('yt-error-edit');
+        const iframe  = document.getElementById('yt-iframe-edit');
+
+        if (!url) {
+            preview.classList.add('hidden');
+            error.classList.add('hidden');
+            return;
+        }
+
+        const id = extractYouTubeIdEdit(url);
+        if (id) {
+            iframe.src = `https://www.youtube.com/embed/${id}`;
+            preview.classList.remove('hidden');
+            error.classList.add('hidden');
+        } else {
+            preview.classList.add('hidden');
+            error.classList.remove('hidden');
+        }
+    }
 
     function updateMinVal() {
         const tipo = document.getElementById('tipo-select').value;
