@@ -32,10 +32,11 @@ class UsuarioSeeder extends Seeder
         $admin->asignarRol('admin');
 
         // 2. Propietarios (3)
-        for ($i = 1; $i <= 3; $i++) {
+        $nombresPropietarios = ['Juan Carlos Pérez', 'María Elena García', 'Roberto Hernández'];
+        foreach ($nombresPropietarios as $i => $nombre) {
             $user = Usuario::create([
-                'nombre' => "Propietario Real $i",
-                'email' => "prop$i@arrendaoco.com",
+                'nombre' => $nombre,
+                'email' => "propietario".($i+1)."@arrendaoco.com",
                 'password' => Hash::make('password123'),
                 'es_admin' => false,
                 'estatus' => 'activo',
@@ -44,10 +45,11 @@ class UsuarioSeeder extends Seeder
         }
 
         // 3. Inquilinos (3)
-        for ($i = 1; $i <= 3; $i++) {
+        $nombresInquilinos = ['Ana Lucía Velasco', 'Fernando Ruiz', 'Guadalupe Jiménez'];
+        foreach ($nombresInquilinos as $i => $nombre) {
             $user = Usuario::create([
-                'nombre' => "Inquilino Real $i",
-                'email' => "inq$i@arrendaoco.com",
+                'nombre' => $nombre,
+                'email' => "inquilino".($i+1)."@arrendaoco.com",
                 'password' => Hash::make('password123'),
                 'es_admin' => false,
                 'estatus' => 'activo',
@@ -56,10 +58,11 @@ class UsuarioSeeder extends Seeder
         }
 
         // 4. Inquilino + Propietario (2)
-        for ($i = 1; $i <= 2; $i++) {
+        $nombresDuo = ['Carlos Méndez', 'Patricia Solis'];
+        foreach ($nombresDuo as $i => $nombre) {
             $user = Usuario::create([
-                'nombre' => "Doble Rol $i",
-                'email' => "dual$i@arrendaoco.com",
+                'nombre' => $nombre,
+                'email' => "dual".($i+1)."@arrendaoco.com",
                 'password' => Hash::make('password123'),
                 'es_admin' => false,
                 'estatus' => 'activo',

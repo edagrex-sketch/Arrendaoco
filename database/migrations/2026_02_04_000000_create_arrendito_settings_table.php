@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('arrendito_settings', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('usuario_id')->nullable()->unique();
-            $table->string('nombre')->default('Arrendito');
+            $table->increments('id');
+            $table->unsignedInteger('usuario_id')->nullable()->unique();
+            $table->string('nombre', 100)->default('Arrendito');
             $table->timestamps();
 
             $table->foreign('usuario_id')->references('id')->on('usuarios')->onDelete('cascade');

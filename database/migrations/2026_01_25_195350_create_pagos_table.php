@@ -8,11 +8,10 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('pagos', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
 
-            $table->foreignId('contrato_id')
-                ->constrained('contratos')
-                ->cascadeOnDelete();
+            $table->unsignedInteger('contrato_id');
+            $table->foreign('contrato_id')->references('id')->on('contratos')->cascadeOnDelete();
 
             $table->unsignedTinyInteger('mes');
             $table->unsignedSmallInteger('anio'); 

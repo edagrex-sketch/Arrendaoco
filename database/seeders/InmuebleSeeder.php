@@ -67,12 +67,23 @@ class InmuebleSeeder extends Seeder
             'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80',
         ];
 
+        $descripcionesTemplates = [
+            "Hermosa propiedad tipo {tipo} ubicada en el barrio {barrio} de Ocosingo. Cuenta con todos los servicios básicos, excelente iluminación y espacios bien distribuidos. Ideal para quienes buscan comodidad y seguridad.",
+            "Increíble oportunidad en {barrio}. Este {tipo} ha sido recientemente remodelado y cuenta con espacios amplios, mucha luz natural y una ubicación privilegiada cerca de comercios locales.",
+            "Si buscas tranquilidad, este {tipo} en {barrio} es para ti. Zona muy segura y familiar. La propiedad está lista para habitarse y cuenta con excelentes acabados.",
+            "Ubicación céntrica y de fácil acceso. {tipo} en el corazón de {barrio}, perfecto para quienes trabajan o estudian cerca. Amplio y con buena ventilación.",
+            "Propiedad con excelente mantenimiento en el barrio {barrio}. Este {tipo} ofrece el balance perfecto entre precio y calidad. ¡Ven a conocerlo!"
+        ];
+
         foreach ($inmueblesData as $index => $data) {
             $propietario = $propietarios->random();
             
+            $template = $descripcionesTemplates[array_rand($descripcionesTemplates)];
+            $descripcion = str_replace(['{tipo}', '{barrio}'], [$data['tipo'], $data['barrio']], $template);
+
             $inmueble = Inmueble::create([
                 'titulo' => $data['titulo'],
-                'descripcion' => "Hermosa propiedad tipo {$data['tipo']} ubicada en el barrio {$data['barrio']} de Ocosingo. Cuenta con todos los servicios básicos, excelente iluminación y espacios bien distribuidos. Ideal para quienes buscan comodidad y seguridad.",
+                'descripcion' => $descripcion,
                 'direccion' => "Calle Principal, Barrio {$data['barrio']}",
                 'ciudad' => 'Ocosingo',
                 'estado' => 'Chiapas',

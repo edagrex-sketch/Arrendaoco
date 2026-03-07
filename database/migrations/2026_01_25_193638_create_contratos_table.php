@@ -9,20 +9,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('contratos', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
 
             // Relaciones principales
-            $table->foreignId('inmueble_id')
-                  ->constrained('inmuebles')
-                  ->cascadeOnDelete();
+            $table->unsignedInteger('inmueble_id');
+            $table->unsignedInteger('propietario_id');
+            $table->unsignedInteger('inquilino_id');
 
-            $table->foreignId('propietario_id')
-                  ->constrained('usuarios')
-                  ->cascadeOnDelete();
-
-            $table->foreignId('inquilino_id')
-                  ->constrained('usuarios')
-                  ->cascadeOnDelete();
+            $table->foreign('inmueble_id')->references('id')->on('inmuebles')->cascadeOnDelete();
+            $table->foreign('propietario_id')->references('id')->on('usuarios')->cascadeOnDelete();
+            $table->foreign('inquilino_id')->references('id')->on('usuarios')->cascadeOnDelete();
 
             // Información contractual
             $table->date('fecha_inicio');
