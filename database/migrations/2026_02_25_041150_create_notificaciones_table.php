@@ -12,14 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notificaciones', function (Blueprint $row) {
-            $row->id();
-            $row->foreignId('usuario_id')->constrained('usuarios')->onDelete('cascade');
-            $row->string('titulo');
+            $row->increments('id');
+            $row->unsignedInteger('usuario_id');
+            $row->string('titulo', 150);
             $row->text('mensaje');
-            $row->string('tipo')->default('sistema'); // sistema, resena, pago, renta, etc.
+            $row->string('tipo', 50)->default('sistema'); // sistema, resena, pago, renta, etc.
             $row->boolean('leida')->default(false);
-            $row->unsignedBigInteger('referencia_id')->nullable();
+            $row->unsignedInteger('referencia_id')->nullable();
             $row->timestamps();
+
+            $row->foreign('usuario_id')->references('id')->on('usuarios')->onDelete('cascade');
         });
     }
 

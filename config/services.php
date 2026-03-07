@@ -52,9 +52,5 @@ return [
         'model'   => env('GEMINI_MODEL', 'gemini-2.5-flash'),
     ],
 
-    'youtube' => [
-        'api_key' => env('YOUTUBE_API_KEY'),
-    ],
-
 ];
 

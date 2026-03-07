@@ -7,19 +7,18 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('inmuebles', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
 
             // Relación con propietario (usuarios)
-            $table->foreignId('propietario_id')
-                  ->constrained('usuarios')
-                  ->cascadeOnDelete();
+            $table->unsignedInteger('propietario_id');
+            $table->foreign('propietario_id')->references('id')->on('usuarios')->cascadeOnDelete();
 
             // Datos del inmueble
-            $table->string('titulo');
+            $table->string('titulo', 150);
             $table->text('descripcion')->nullable();
-            $table->string('direccion');
-            $table->string('ciudad');
-            $table->string('estado');
+            $table->string('direccion', 200);
+            $table->string('ciudad', 100);
+            $table->string('estado', 100);
             $table->string('codigo_postal', 10);
 
             // Información financiera

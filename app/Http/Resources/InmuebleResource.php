@@ -32,9 +32,6 @@ class InmuebleResource extends JsonResource
             'imagen_portada' => $this->imagen ? url($this->imagen) : null,
             'latitud' => $this->latitud,
             'longitud' => $this->longitud,
-            'video_youtube' => $this->video_youtube,
-            'video_thumbnail' => $this->video_thumbnail,
-            'video_titulo' => $this->video_titulo,
             'propietario' => [
                 'id' => $this->propietario->id,
                 'nombre' => $this->propietario->nombre,

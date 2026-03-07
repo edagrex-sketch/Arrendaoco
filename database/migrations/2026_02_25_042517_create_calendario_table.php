@@ -12,13 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('calendario', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('usuario_id')->constrained('usuarios')->onDelete('cascade');
-            $table->foreignId('renta_id')->nullable()->constrained('contratos')->onDelete('set null');
-            $table->string('titulo');
+            $table->increments('id');
+            $table->unsignedInteger('usuario_id');
+            $table->unsignedInteger('renta_id')->nullable();
+            $table->string('titulo', 150);
             $table->text('descripcion')->nullable();
             $table->dateTime('fecha');
             $table->timestamps();
+
+            $table->foreign('usuario_id')->references('id')->on('usuarios')->onDelete('cascade');
+            $table->foreign('renta_id')->references('id')->on('contratos')->onDelete('set null');
         });
     }
 

@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class UsuarioController extends Controller
@@ -17,9 +18,9 @@ class UsuarioController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nombre', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%");
+                    ->orWhere('email', 'like', "%$search%");
             });
         }
 
@@ -35,29 +36,80 @@ class UsuarioController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nombre' => 'required|string|max:255|min:3',
-            'email' => 'required|string|email|max:255|unique:usuarios',
-            'password' => 'required|string|min:8|confirmed',
-        ], [
-            'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.min' => 'El nombre debe tener al menos 3 caracteres.',
-            'email.required' => 'El correo electrónico es obligatorio.',
-            'email.email' => 'Formato de correo inválido.',
-            'email.unique' => 'Este correo ya está registrado.',
-            'password.required' => 'La contraseña es obligatoria.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-            'password.confirmed' => 'Las contraseñas no coinciden.'
+        // Sanitizar nombre: eliminar espacios extra
+        $request->merge([
+            'nombre' => preg_replace('/\s+/', ' ', trim($request->nombre ?? '')),
+            'email' => strtolower(trim($request->email ?? '')),
         ]);
 
-        Usuario::create([
+        $request->validate([
+            'nombre' => [
+                'required',
+                'string',
+                'min:3',
+                'max:100',
+                'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/',
+            ],
+            'email' => [
+                'required',
+                'string',
+                'email:rfc,dns',
+                'max:255',
+                'unique:usuarios,email',
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'max:64',
+                'confirmed',
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(3),
+            ],
+            'estatus' => 'required|in:activo,inactivo',
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'exists:roles,id',
+        ], [
+            'nombre.required' => 'El nombre completo es obligatorio.',
+            'nombre.min' => 'El nombre debe tener al menos 3 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder los 100 caracteres.',
+            'nombre.regex' => 'El nombre solo puede contener letras y espacios (sin números ni caracteres especiales).',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'Ingresa un correo electrónico válido (ej: usuario@dominio.com).',
+            'email.unique' => 'Este correo ya está registrado en la plataforma. Usa otro o edita el usuario existente.',
+            'email.regex' => 'El formato del correo electrónico no es válido.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.max' => 'La contraseña no puede exceder los 64 caracteres.',
+            'password.confirmed' => 'Las contraseñas no coinciden. Verifica ambos campos.',
+            'password.mixed' => 'La contraseña debe contener al menos una mayúscula y una minúscula.',
+            'password.numbers' => 'La contraseña debe incluir al menos un número.',
+            'password.symbols' => 'La contraseña debe incluir al menos un carácter especial (!@#$%^&*).',
+            'password.uncompromised' => 'Esta contraseña ha sido filtrada en brechas de seguridad. Elige una contraseña más segura.',
+            'estatus.required' => 'El estatus es obligatorio.',
+            'estatus.in' => 'El estatus debe ser "activo" o "inactivo".',
+            'roles.required' => 'Debes asignar al menos un rol al usuario.',
+            'roles.min' => 'Debes asignar al menos un rol al usuario.',
+            'roles.*.exists' => 'Uno de los roles seleccionados no es válido.',
+        ]);
+
+        $usuario = Usuario::create([
             'nombre' => $request->nombre,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'estatus' => $request->status ?? 'activo',
+            'estatus' => $request->estatus ?? 'activo',
         ]);
 
-        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario creado exitosamente');
+        // Asignar roles
+        if ($request->has('roles')) {
+            $usuario->roles()->sync($request->roles);
+        }
+
+        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario "' . $usuario->nombre . '" creado exitosamente con ' . count($request->roles) . ' rol(es) asignado(s).');
     }
 
     public function edit($id)
@@ -69,22 +121,105 @@ class UsuarioController extends Controller
 
     public function update(Request $request, $id)
     {
-        $usuario = Usuario::findOrFail($id);
+        $usuario = Usuario::with('roles')->findOrFail($id);
 
-        $request->validate([
-            'nombre' => 'required|string|max:255|min:3',
-            'email' => 'required|string|email|max:255|unique:usuarios,email,' . $id,
-            'password' => 'nullable|string|min:8',
-            'estatus' => 'required|in:activo,inactivo',
-        ], [
-            'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.min' => 'El nombre debe tener al menos 3 caracteres.',
-            'email.required' => 'El correo electrónico es obligatorio.',
-            'email.email' => 'Formato de correo inválido.',
-            'email.unique' => 'Este correo ya está registrado por otro usuario.',
-            'password.min' => 'La nueva contraseña debe tener al menos 8 caracteres.',
-            'estatus.in' => 'El estatus seleccionado no es válido.'
+        // Sanitizar nombre: eliminar espacios extra
+        $request->merge([
+            'nombre' => preg_replace('/\s+/', ' ', trim($request->nombre ?? '')),
+            'email' => strtolower(trim($request->email ?? '')),
         ]);
+
+        // Reglas base
+        $rules = [
+            'nombre' => [
+                'required',
+                'string',
+                'min:3',
+                'max:100',
+                'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/',
+            ],
+            'email' => [
+                'required',
+                'string',
+                'email:rfc,dns',
+                'max:255',
+                'unique:usuarios,email,' . $id,
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+            ],
+            'estatus' => 'required|in:activo,inactivo',
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'exists:roles,id',
+        ];
+
+        // Si se proporciona contraseña, validarla con las mismas reglas de seguridad
+        if ($request->filled('password')) {
+            $rules['password'] = [
+                'string',
+                'min:8',
+                'max:64',
+                'confirmed',
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ];
+        }
+
+        $messages = [
+            'nombre.required' => 'El nombre completo es obligatorio.',
+            'nombre.min' => 'El nombre debe tener al menos 3 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder los 100 caracteres.',
+            'nombre.regex' => 'El nombre solo puede contener letras y espacios.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'Ingresa un correo electrónico válido.',
+            'email.unique' => 'Este correo ya está registrado por otro usuario.',
+            'email.regex' => 'El formato del correo electrónico no es válido.',
+            'password.min' => 'La nueva contraseña debe tener al menos 8 caracteres.',
+            'password.max' => 'La contraseña no puede exceder los 64 caracteres.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
+            'password.mixed' => 'La contraseña debe contener mayúsculas y minúsculas.',
+            'password.numbers' => 'La contraseña debe incluir al menos un número.',
+            'password.symbols' => 'La contraseña debe incluir un carácter especial.',
+            'estatus.in' => 'El estatus seleccionado no es válido.',
+            'roles.required' => 'Debes asignar al menos un rol.',
+            'roles.min' => 'Debes asignar al menos un rol.',
+            'roles.*.exists' => 'Uno de los roles seleccionados no es válido.',
+        ];
+
+        $request->validate($rules, $messages);
+
+        // Protección: no desactivarse a sí mismo
+        if ($id == auth()->id() && $request->estatus === 'inactivo') {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'No puedes desactivar tu propia cuenta de administrador. Pide a otro administrador que lo haga.');
+        }
+
+        // Protección: no quitarse el rol admin a sí mismo
+        if ($id == auth()->id()) {
+            $rolAdmin = Role::where('nombre', 'admin')->first();
+            if ($rolAdmin && !in_array($rolAdmin->id, $request->roles ?? [])) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'No puedes quitarte el rol de administrador a ti mismo.');
+            }
+        }
+
+        // Detectar cambios realizados
+        $cambios = [];
+        if ($usuario->nombre !== $request->nombre)
+            $cambios[] = 'nombre';
+        if ($usuario->email !== $request->email)
+            $cambios[] = 'email';
+        if ($usuario->estatus !== $request->estatus)
+            $cambios[] = 'estatus';
+        if ($request->filled('password'))
+            $cambios[] = 'contraseña';
+
+        $rolesActuales = $usuario->roles->pluck('id')->sort()->values()->toArray();
+        $rolesNuevos = collect($request->roles)->map(fn($r) => (int) $r)->sort()->values()->toArray();
+        if ($rolesActuales !== $rolesNuevos)
+            $cambios[] = 'roles';
 
         $usuario->fill([
             'nombre' => $request->nombre,
@@ -98,33 +233,63 @@ class UsuarioController extends Controller
 
         $usuario->save();
 
-        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario actualizado con éxito y validaciones completadas.');
+        // Actualizar roles
+        if ($request->has('roles')) {
+            $usuario->roles()->sync($request->roles);
+        }
+
+        if (empty($cambios)) {
+            return redirect()->route('admin.usuarios.index')->with('success', 'No se detectaron cambios en el usuario "' . $usuario->nombre . '".');
+        }
+
+        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario "' . $usuario->nombre . '" actualizado. Campos modificados: ' . implode(', ', $cambios) . '.');
     }
 
     public function destroy($id)
     {
-        $usuario = Usuario::findOrFail($id);
+        $usuario = Usuario::with('roles')->findOrFail($id);
 
         // 1. Evitar que el admin se elimine a sí mismo
         if ($id == auth()->id()) {
-            return redirect()->back()->with('error', 'No puedes eliminar tu propia cuenta de administrador.');
+            return redirect()->back()->with('error', 'No puedes eliminar tu propia cuenta de administrador. Pide a otro administrador que realice esta acción.');
         }
 
-        // 2. Verificar si tiene contratos activos (como dueño o inquilino)
-        $tieneContratosActivos = $usuario->contratosComoPropietario()->where('estatus', 'activo')->exists() || 
-                                 $usuario->contratosComoInquilino()->where('estatus', 'activo')->exists();
-
-        if ($tieneContratosActivos) {
-            return redirect()->back()->with('error', 'No se puede eliminar al usuario: tiene contratos vigentes. Finalice los contratos primero.');
+        // 2. No permitir eliminar a otros admins (protección extra)
+        if ($usuario->tieneRol('admin') || $usuario->es_admin) {
+            return redirect()->back()->with('error', 'No se puede eliminar a otro administrador. Primero quítale el rol de administrador desde la edición.');
         }
 
-        // 3. Verificar si tiene inmuebles publicados
-        if ($usuario->inmuebles()->exists()) {
-            return redirect()->back()->with('error', 'El usuario tiene propiedades registradas. Elimine o transfiera las propiedades antes de borrar al usuario.');
+        // 3. Verificar si tiene contratos activos (como dueño o inquilino)
+        $contratosActivosPropietario = $usuario->contratosComoPropietario()->where('estatus', 'activo')->count();
+        $contratosActivosInquilino = $usuario->contratosComoInquilino()->where('estatus', 'activo')->count();
+        $totalContratos = $contratosActivosPropietario + $contratosActivosInquilino;
+
+        if ($totalContratos > 0) {
+            return redirect()->back()->with('error', 'No se puede eliminar al usuario "' . $usuario->nombre . '": tiene ' . $totalContratos . ' contrato(s) vigente(s). Finalice los contratos primero.');
         }
 
+        // 4. Verificar si tiene inmuebles publicados
+        $cantidadInmuebles = $usuario->inmuebles()->count();
+        if ($cantidadInmuebles > 0) {
+            return redirect()->back()->with('error', 'El usuario "' . $usuario->nombre . '" tiene ' . $cantidadInmuebles . ' propiedad(es) registrada(s). Elimine o transfiera las propiedades antes de borrar al usuario.');
+        }
+
+        // 5. Verificar si tiene reseñas
+        if ($usuario->resenas()->exists()) {
+            // Eliminar reseñas asociadas (soft delete o aviso)
+            $usuario->resenas()->delete();
+        }
+
+        // 6. Eliminar favoritos
+        if ($usuario->favoritos()->exists()) {
+            $usuario->favoritos()->delete();
+        }
+
+        $nombreUsuario = $usuario->nombre;
+        $usuario->roles()->detach(); // Limpiar tabla pivot de roles
         $usuario->delete();
-        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario eliminado correctamente.');
+
+        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario "' . $nombreUsuario . '" eliminado correctamente junto con sus datos asociados.');
     }
 
     public function reporte()

@@ -12,12 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('resenas', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('usuario_id')->constrained('usuarios')->onDelete('cascade');
-            $table->foreignId('inmueble_id')->constrained('inmuebles')->onDelete('cascade');
+            $table->increments('id');
+            $table->unsignedInteger('usuario_id');
+            $table->unsignedInteger('inmueble_id');
             $table->integer('puntuacion')->unsigned();
             $table->text('comentario');
             $table->timestamps();
+
+            $table->foreign('usuario_id')->references('id')->on('usuarios')->onDelete('cascade');
+            $table->foreign('inmueble_id')->references('id')->on('inmuebles')->onDelete('cascade');
         });
     }
 
