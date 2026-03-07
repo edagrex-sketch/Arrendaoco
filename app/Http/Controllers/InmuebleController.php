@@ -148,6 +148,15 @@ class InmuebleController extends Controller
             return redirect()->route('inmuebles.show', $inmueble)->with('error', 'Esta propiedad ya no está disponible para rentar.');
         }
 
+        $rentaActiva = \App\Models\Contrato::where('inquilino_id', auth()->id())
+            ->where('estatus', 'activo')
+            ->exists();
+
+        if ($rentaActiva) {
+            return redirect()->route('inmuebles.show', $inmueble)
+                ->with('error', 'Ya tienes una propiedad rentada actualmente. No puedes rentar otra hasta finalizar tu contrato actual.');
+        }
+
         $inmueble->load('propietario');
         return view('inmuebles.rentar', compact('inmueble'));
     }
