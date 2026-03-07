@@ -141,7 +141,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/inmuebles/{inmueble}/editar', [InmuebleController::class, 'edit'])->name('inmuebles.edit');
     Route::put('/inmuebles/{inmueble}', [InmuebleController::class, 'update'])->name('inmuebles.update');
     Route::delete('/inmuebles/{inmueble}', [InmuebleController::class, 'destroy'])->name('inmuebles.destroy');
-    Route::post('/inmuebles/{inmueble}/refresh-video', [InmuebleController::class, 'refreshVideo'])->name('inmuebles.refresh_video');
 
     // Perfil
     Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
