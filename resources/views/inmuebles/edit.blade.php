@@ -65,12 +65,14 @@
                             class="flex-1 px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                         <button type="button" onclick="buscarDireccion()"
                             class="bg-[#003049] text-white px-6 py-3 rounded-xl hover:bg-[#003049]/90 transition-all font-bold flex items-center gap-2">
-                            🔍 Buscar en mapa
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                            </svg> Buscar en mapa
                         </button>
                     </div>
                 </div>
 
-                {{-- 🗺️ Selector de Mapa --}}
+                {{-- Selector de Mapa --}}
                 <div>
                     <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Ubicación en el
                         mapa</label>
@@ -158,7 +160,7 @@
                                 const lon = parseFloat(data[0].lon);
                                 actualizarPin(lat, lon, 17);
                             } else {
-                                alert("No encontramos la ubicación exacta. Prueba moviendo el marcador manualmente en el mapa. 🐶");
+                                alert("No encontramos la ubicación exacta. Prueba moviendo el marcador manualmente en el mapa.");
                             }
                         } catch (error) {
                             console.error("Error:", error);
@@ -222,10 +224,14 @@
                         class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none transition-all">{{ $inmueble->descripcion }}</textarea>
                 </div>
 
-                {{-- 🎬 Video Tour de YouTube --}}
+                {{-- Video Tour de YouTube --}}
                 <div class="bg-red-50/40 border border-red-100 rounded-2xl p-6">
                     <div class="flex items-center gap-2 mb-3">
-                        <span class="text-xl">🎬</span>
+                        <span class="text-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6 text-red-500">
+                                <path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h7.5A2.25 2.25 0 0013 13.75v-7.5A2.25 2.25 0 0010.75 4h-7.5zM19 4.75a.75.75 0 00-1.28-.53l-3 3a.75.75 0 00-.22.53v4.5c0 .199.079.39.22.53l3 3a.75.75 0 001.28-.53V4.75z" />
+                            </svg>
+                        </span>
                         <label class="text-sm font-bold text-slate-700">Video Tour de YouTube
                             <span class="text-xs text-muted-foreground font-normal">(Opcional)</span></label>
                     </div>
@@ -237,7 +243,11 @@
                         class="w-full rounded-lg border bg-white border-slate-200 py-3 px-4 focus:ring-2 focus:ring-red-400/30 focus:border-red-400 transition-all text-sm">
 
                     @if($inmueble->video_youtube_id)
-                        <p class="text-xs text-green-600 font-bold mt-2">✅ Video actual: <span class="font-normal text-slate-500">{{ $inmueble->video_titulo }}</span></p>
+                        <p class="text-xs text-green-600 font-bold mt-2 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 inline mr-1">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                            </svg> Video actual: <span class="font-normal text-slate-500 ml-1">{{ $inmueble->video_titulo }}</span>
+                        </p>
                     @endif
 
                     {{-- Preview en vivo --}}
@@ -251,10 +261,18 @@
                                 allowfullscreen>
                             </iframe>
                         </div>
-                        <p class="text-xs text-green-600 font-bold mt-2">✅ Video válido &mdash; se mostrará en tu anuncio</p>
+                        <p class="text-xs text-green-600 font-bold mt-2 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 inline mr-1">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                            </svg> Video válido &mdash; se mostrará en tu anuncio
+                        </p>
                     </div>
                     <div id="yt-error-edit" class="mt-3 hidden">
-                        <p class="text-xs text-red-500 font-bold">⚠️ No pudimos detectar un ID de YouTube válido en ese enlace.</p>
+                        <p class="text-xs text-red-500 font-bold flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 inline mr-1">
+                                <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                            </svg> No pudimos detectar un ID de YouTube válido en ese enlace.
+                        </p>
                     </div>
                 </div>
             </div>

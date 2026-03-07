@@ -40,7 +40,11 @@
                 <div x-show="step === 1" x-ref="step1"
                     x-transition:enter="transition opacity-0 transform translate-x-4 ease-out duration-300"
                     x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">🏠 ¿Qué vas a rentar?</h2>
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                            <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+                        </svg> ¿Qué vas a rentar?
+                    </h2>
                     <div class="grid grid-cols-1 gap-6">
                         <div>
                             <label class="block text-sm font-medium mb-1">Nombre del Anuncio <span
@@ -87,7 +91,11 @@
 
                 {{-- PASO 2 --}}
                 <div x-show="step === 2" x-ref="step2" x-transition style="display: none;">
-                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">✨ Características y Ubicación</h2>
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-yellow-500">
+                            <path fill-rule="evenodd" d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM13.636 5.864a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM7.485 11.485a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM14.696 14.696a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM7.485 7.485a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM15 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0115 10zM6.5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 016.5 10zM10 7a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd" />
+                        </svg> Características y Ubicación
+                    </h2>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium mb-1">Dirección Completa <span
@@ -108,7 +116,7 @@
                         </div>
                     </div>
 
-                    {{-- 🗺️ Selector de Mapa --}}
+                    {{-- Selector de Mapa --}}
                     <div class="mb-6">
                         <label class="block text-sm font-medium mb-2">Marca el punto en el mapa <span
                                 class="text-xs text-muted-foreground font-normal">(Seleccionado automáticamente al buscar
@@ -165,7 +173,11 @@
                     {{-- Calculadora de Área --}}
                     <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-6">
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="text-lg">📏</span>
+                            <span class="text-blue-600 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                </svg>
+                            </span>
                             <label class="text-sm font-bold text-slate-700">Dimensiones (Opcional)</label>
                         </div>
                         
@@ -196,8 +208,10 @@
                                     class="w-full rounded-lg border-input bg-white border-2 border-blue-100 py-2 px-3 font-bold text-slate-800 focus:border-blue-400 focus:ring-0">
                                 <span class="absolute right-3 top-2.5 text-xs text-muted-foreground font-bold">M²</span>
                             </div>
-                            <p class="text-xs text-blue-600 mt-2" x-show="largo && ancho">
-                                ✨ Cálculo automático: <span x-text="largo"></span>m x <span x-text="ancho"></span>m = <span x-text="metros"></span>m²
+                            <p class="text-xs text-blue-600 mt-2 flex items-center gap-1" x-show="largo && ancho">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 text-yellow-500">
+                                    <path fill-rule="evenodd" d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM13.636 5.864a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM7.485 11.485a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM14.696 14.696a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM7.485 7.485a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM15 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0115 10zM6.5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 016.5 10zM10 7a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd" />
+                                </svg> Cálculo automático: <span x-text="largo"></span>m x <span x-text="ancho"></span>m = <span x-text="metros"></span>m²
                             </p>
                         </div>
                     </div>
@@ -212,7 +226,11 @@
 
                 {{-- PASO 3: FOTOS ILIMITADAS --}}
                 <div x-show="step === 3" x-ref="step3" x-transition style="display: none;">
-                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">📷 Galería de Fotos</h2>
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-gray-700">
+                            <path fill-rule="evenodd" d="M1 8a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 018.07 3h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0016.07 6H17a2 2 0 012 2v7a2 2 0 01-2 2H3a2 2 0 01-2-2V8zm13.5 3a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM10 14a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                        </svg> Galería de Fotos
+                    </h2>
 
                     <div class="mb-6">
                         <label class="block text-sm font-medium mb-1">Subir Fotos <span
@@ -270,8 +288,11 @@
                         Paso →</button>
 
                     <button type="submit" x-show="step === 3"
-                        style="background-color: #003049; color: white; padding: 12px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 48, 73, 0.3); display: flex; align-items: center; gap: 8px;">
-                        <span>✨</span> ¡Publicar Ahora!
+                        class="flex items-center justify-center gap-2 bg-[#003049] text-white px-8 py-3 rounded-xl font-bold text-base border-none cursor-pointer shadow-lg shadow-[#003049]/30 hover:bg-[#003049]/90 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-yellow-500">
+                            <path fill-rule="evenodd" d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM13.636 5.864a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM7.485 11.485a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM14.696 14.696a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM7.485 7.485a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM15 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0115 10zM6.5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 016.5 10zM10 7a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd" />
+                        </svg> 
+                        <span>¡Publicar Ahora!</span>
                     </button>
                 </div>
             </form>
@@ -349,7 +370,7 @@
                     const lon = parseFloat(data[0].lon);
                     actualizarPin(lat, lon, 17); // Zoom más cercano al encontrar dirección
                 } else {
-                    alert("No pudimos encontrar esa calle exacta. ¿Podrías marcar el punto manualmente en el mapa? 🐾");
+                    alert("No pudimos encontrar esa calle exacta. ¿Podrías marcar el punto manualmente en el mapa?");
                 }
             } catch (error) {
                 console.error("Error en geocodificación:", error);
@@ -363,7 +384,7 @@
             const inputDireccion = document.getElementById('direccion-input');
             const originalPlaceholder = inputDireccion.placeholder;
             
-            inputDireccion.value = "📍 Buscando dirección exacta...";
+            inputDireccion.value = "Buscando dirección exacta...";
             // Efecto visual de carga
             inputDireccion.classList.add('bg-blue-50', 'animate-pulse');
 
@@ -415,8 +436,24 @@
 
                 handleFileSelect(event) {
                     const newFiles = Array.from(event.target.files);
-                    this.files = this.files.concat(newFiles);
+                    const limiteBytes = 2 * 1024 * 1024; // Límite de 2MB
+                    const archivosValidos = [];
+
                     newFiles.forEach(file => {
+                        if (file.size > limiteBytes) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Archivo omitido',
+                                text: `No es posible subir el archivo ${file.name}, porque pesa demasiado.`,
+                                confirmButtonColor: '#003049'
+                            });
+                        } else {
+                            archivosValidos.push(file);
+                        }
+                    });
+
+                    this.files = this.files.concat(archivosValidos);
+                    archivosValidos.forEach(file => {
                         const reader = new FileReader();
                         reader.onload = (e) => this.previews.push(e.target.result);
                         reader.readAsDataURL(file);
@@ -478,7 +515,7 @@
         });
     </script>
 
-    {{-- 🎬 Script de Preview de YouTube en vivo --}}
+    {{-- Script de Preview de YouTube en vivo --}}
     <script>
         function extractYouTubeId(url) {
             const patterns = [

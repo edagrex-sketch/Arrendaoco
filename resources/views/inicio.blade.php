@@ -94,16 +94,27 @@
         2. MAPA DE EXPLORACIÓN
     --}}
     <section class="container mx-auto px-4 mb-16" x-data="mapExploration()">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="h-10 w-10 rounded-xl bg-[#003049] flex items-center justify-center text-white shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-xl bg-[#003049] flex items-center justify-center text-white shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-[#003049] tracking-tight">Explora el Mapa</h2>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest hidden md:block">Encuentra disponibilidad cerca de ti con vista satelital</p>
+                </div>
             </div>
-            <div>
-                <h2 class="text-2xl font-black text-[#003049] tracking-tight">Explora el Mapa</h2>
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Encuentra disponibilidad cerca de ti con vista satelital</p>
-            </div>
+            
+            <button @click="toggleMap" class="text-sm font-bold bg-[#FDF0D5] text-[#003049] px-4 py-2 rounded-xl hover:bg-[#FDF0D5]/80 transition-all flex items-center gap-2 shadow-sm whitespace-nowrap">
+                <span x-text="showMap ? 'Contraer Mapa' : 'Mostrar Mapa'"></span>
+                <svg x-show="!showMap" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                <svg x-show="showMap" style="display: none;" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>
+            </button>
         </div>
-        <div id="map-inicio" class="w-full h-[500px] rounded-[2.5rem] border border-slate-100 shadow-2xl overflow-hidden z-0"></div>
+        
+        <div x-show="showMap" x-transition.opacity.duration.300ms style="display: none;" class="w-full relative z-0">
+            <div id="map-inicio" class="w-full h-[500px] rounded-[2.5rem] border border-slate-100 shadow-2xl relative z-0"></div>
+        </div>
     </section>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -115,6 +126,17 @@
                 map: null,
                 userMarker: null,
                 userCircle: null,
+                showMap: false,
+                toggleMap() {
+                    this.showMap = !this.showMap;
+                    if (this.showMap) {
+                        setTimeout(() => {
+                            if (this.map) {
+                                this.map.invalidateSize();
+                            }
+                        }, 100);
+                    }
+                },
                 init() {
                     setTimeout(() => {
                         // Capas Base
@@ -131,8 +153,13 @@
                         this.map = L.map('map-inicio', {
                             center: [16.9068, -92.0941],
                             zoom: 15,
-                            layers: [osm]
+                            layers: [osm],
+                            scrollWheelZoom: false // <--- Deshabilitado por defecto
                         });
+
+                        // Habilitar el zoom con la rueda al hacer clic, deshabilitar al quitar el mouse
+                        this.map.on('click', () => { this.map.scrollWheelZoom.enable(); });
+                        this.map.on('mouseout', () => { this.map.scrollWheelZoom.disable(); });
 
                         const baseMaps = { 'Callejero': osm, 'Satélite': satellite };
                         L.control.layers(baseMaps, null, { collapsed: false, position: 'topright' }).addTo(this.map);
@@ -306,23 +333,23 @@
                         </p>
 
                         <div class="flex items-center gap-4 py-4 border-t border-slate-100 mb-6">
-                            <div class="flex items-center gap-1.5 text-slate-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 11V9a3 3 0 013-3h10a3 3 0 013 3v2M4 11H2a1 1 0 00-1 1v3a2 2 0 002 2h1M20 11h2a1 1 0 011 1v3a2 2 0 01-2 2h-1M4 11h16v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM8 17v2M16 17v2" />
+                            <div class="flex items-center gap-1.5 text-slate-500" title="Habitaciones">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 11v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path><path d="M5 16v2"></path><path d="M19 16v2"></path><path d="M5 11V7a2 2 0 012-2h10a2 2 0 012 2v4"></path><path d="M5 11h14"></path>
                                 </svg>
-                                <span class="text-sm font-bold">{{ $inmueble->habitaciones }} <span class="text-[10px] uppercase font-medium text-slate-400">Hab</span></span>
+                                <span class="text-base font-bold text-slate-700">{{ $inmueble->habitaciones }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Hab</span></span>
                             </div>
-                            <div class="flex items-center gap-1.5 text-slate-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18v3a4 4 0 01-4 4H7a4 4 0 01-4-4v-3zM3 12h18M21 12v-1a2 2 0 00-2-2h-3M7 12V7a3 3 0 013-3h2M12 2v4M14 3l-2 2M10 3l2 2M6 19v2M18 19v2" />
+                            <div class="flex items-center gap-1.5 text-slate-500" title="Baños">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><line x1="10" x2="8" y1="5" y2="7"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="7" x2="7" y1="19" y2="21"/><line x1="17" x2="17" y1="19" y2="21"/>
                                 </svg>
-                                <span class="text-sm font-bold">{{ $inmueble->banos }} <span class="text-[10px] uppercase font-medium text-slate-400">Baño</span></span>
+                                <span class="text-base font-bold text-slate-700">{{ $inmueble->banos }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Baño</span></span>
                             </div>
-                            <div class="flex items-center gap-1.5 text-slate-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                            <div class="flex items-center gap-1.5 text-slate-500" title="Superficie">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/>
                                 </svg>
-                                <span class="text-sm font-bold">{{ number_format($inmueble->metros, 0) }} <span class="text-[10px] uppercase font-medium text-slate-400">m²</span></span>
+                                <span class="text-base font-bold text-slate-700">{{ number_format($inmueble->metros ?? 0, 0) }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">M²</span></span>
                             </div>
                         </div>
 
@@ -341,7 +368,9 @@
                         @else
                             <button onclick="window.location.href='{{ route('login') }}'"
                                 class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 text-xs font-black text-slate-400 transition-all hover:bg-slate-100 uppercase tracking-widest gap-2">
-                                🔒 Inicia Sesión para Ver
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                                    <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
+                                </svg> Inicia Sesión para Ver
                             </button>
                         @endauth
                     </div>

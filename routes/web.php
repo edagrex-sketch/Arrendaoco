@@ -125,7 +125,7 @@ Route::match(['get', 'post'], '/logout', function (Request $request) {
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect()->route('login');
+    return redirect()->route('welcome')->with('logged_out', true);
 })->name('logout');
 
 

@@ -44,9 +44,15 @@
                     overlay.style.display = 'none';
                 @endif
             @else
-                setTimeout(() => {
-                    overlay.classList.add('overlay-hidden');
-                }, 3000);
+                @if (session('logged_out'))
+                    setTimeout(() => {
+                        overlay.classList.add('overlay-hidden');
+                    }, 3000);
+                @else
+                    setTimeout(() => {
+                        overlay.classList.add('overlay-hidden');
+                    }, 3000);
+                @endif
             @endif
         }
 
@@ -66,15 +72,15 @@
             let message = "";
 
             if (currentPath === '/inicio') {
-                message = `¡Guau! Soy <b>${mascotName}</b>. ¿Buscamos una casa con jardín hoy? 🏡🐶`;
+                message = `¡Hola! Soy <b>${mascotName}</b>. ¿Buscamos una casa con jardín hoy?`;
             } else if (currentPath.includes('/inmuebles/')) {
-                message = "¡Qué lugar tan acogedor! 🐶 ¿Exploramos juntos este hogar?";
+                message = "¡Qué lugar tan acogedor! ¿Exploramos juntos este hogar?";
             } else if (currentPath === '/favoritos') {
-                message = "¡Tus favoritos son geniales! Los guardo como mis huesos favoritos. 🦴❤️";
+                message = "¡Tus favoritos son geniales! Los guardo con cuidado.";
             } else if (currentPath === '/perfil') {
-                message = "¡Hola amigo! Actualiza tus datos para conocerte mejor. 🐾";
+                message = "¡Hola amigo! Actualiza tus datos para conocerte mejor.";
             } else {
-                message = `¡Guau! Soy <b>${mascotName}</b>, tu compañero leal. ¿En qué te ayudo?`;
+                message = `¡Hola! Soy <b>${mascotName}</b>, tu compañero leal. ¿En qué te ayudo?`;
             }
             triggerMascotMessage(message);
         }, 2000);
@@ -179,7 +185,7 @@
                 if (data.success) {
                     aiMsgDiv.innerHTML = data.response;
                 } else {
-                    aiMsgDiv.innerHTML = "⚠️ " + data.response;
+                    aiMsgDiv.innerHTML = data.response;
                 }
 
                 container.appendChild(aiMsgDiv);
@@ -192,7 +198,7 @@
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'msg-ai';
                 errorDiv.innerHTML =
-                    '¡Guau! 🐾 Tuve un pequeño problema al procesar tu mensaje. ¿Podrías intentar de nuevo?';
+                    'Lo siento, tuve un problema al procesar tu mensaje. ¿Podrías intentar de nuevo?';
                 container.appendChild(errorDiv);
             })
             .finally(() => {
@@ -240,12 +246,12 @@
 
     const placeholders = [
         "Pregúntame sobre inmuebles...",
-        "¿Buscas algo en particular? 🔍",
-        "¿Cuál es tu presupuesto? 💰",
-        "¿Qué zona te interesa? 📍",
-        "Cuéntame qué necesitas 🏠",
-        "¿Cerca de la UTS? 🎓",
-        "¿Casa, depa o cuarto? 🏡"
+        "¿Buscas algo en particular?",
+        "¿Cuál es tu presupuesto?",
+        "¿Qué zona te interesa?",
+        "Cuéntame qué necesitas.",
+        "¿Cerca de la UTS?",
+        "¿Casa, depa o cuarto?"
     ];
     let placeholderIndex = 0;
 
@@ -267,12 +273,12 @@
     function renameMascot() {
         const currentName = localStorage.getItem('rocoName') || 'ROCO';
         Swal.fire({
-            title: '🐶 ¡Ponle nombre a tu compañero Beagle!',
+            title: '¡Ponle nombre a tu asistente!',
             text: 'Tu asistente te acompañará en toda tu búsqueda',
             input: 'text',
             inputValue: currentName,
             showCancelButton: true,
-            confirmButtonText: '¡Listo! 🎉',
+            confirmButtonText: '¡Listo!',
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#1F3A5F',
             cancelButtonColor: '#94a3b8',
@@ -291,8 +297,8 @@
                     updateMascotNameUI(newName);
 
                     Swal.fire({
-                        title: '¡Guau! 🐶',
-                        text: `Ahora me llamo ${newName}. ¡Qué bonito nombre!`,
+                        title: '¡Listo!',
+                        text: `Ahora me llamo ${newName}.`,
                         icon: 'success',
                         confirmButtonColor: '#1F3A5F',
                         timer: 2500,
@@ -325,19 +331,19 @@
     function startMiniGuide() {
         toggleMascotMenu();
         Swal.fire({
-            title: '🐶 Guía Rápida de ArrendaOco',
+            title: 'Guía Rápida de ArrendaOco',
             html: `
                 <div style="text-align: left; font-size: 14px; line-height: 1.8; color: #334155;">
-                    <p><b>1.</b> 🔍 Explora los inmuebles disponibles</p>
-                    <p><b>2.</b> ❤️ Guarda tus favoritos</p>
-                    <p><b>3.</b> 💬 Pregúntame por zona, precio o tipo</p>
-                    <p><b>4.</b> 📞 Contacta al propietario</p>
-                    <p><b>5.</b> 📝 ¡Renta tu nuevo hogar!</p>
+                    <p><b>1.</b> Explora los inmuebles disponibles</p>
+                    <p><b>2.</b> Guarda tus favoritos</p>
+                    <p><b>3.</b> Pregúntame por zona, precio o tipo</p>
+                    <p><b>4.</b> Contacta al propietario</p>
+                    <p><b>5.</b> ¡Renta tu nuevo hogar!</p>
                 </div>
             `,
             icon: 'info',
             confirmButtonColor: '#1F3A5F',
-            confirmButtonText: '¡Entendido! 🏠',
+            confirmButtonText: '¡Entendido!',
             customClass: {
                 popup: 'rounded-2xl',
             }
