@@ -1,5 +1,11 @@
 {{-- HTML DEL OVERLAY (CASA) --}}
-<div id="lock-overlay">
+@php
+    $displayOverlay = true;
+    if (auth()->check() && !session('login_success')) {
+        $displayOverlay = false;
+    }
+@endphp
+<div id="lock-overlay" style="{{ $displayOverlay ? '' : 'display: none;' }}">
     <div class="w-64 h-64 relative">
         <lottie-player id="lottie-house" src="https://assets3.lottiefiles.com/packages/lf20_yr6zz3wv.json"
             background="transparent" speed="1" style="width: 100%; height: 100%;" loop autoplay renderer="svg">
