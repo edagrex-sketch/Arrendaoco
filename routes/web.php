@@ -18,38 +18,7 @@ use App\Http\Controllers\Auth\SocialAuthController;
 Route::get('/auth/{provider}', [SocialAuthController::class, 'redirectToProvider'])->name('social.login');
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])->name('social.callback');
 
-// Test Gemini API
-Route::get('/test-gemini', function () {
-    $apiKey = env('GEMINI_API_KEY');
-
-    if (!$apiKey) {
-        return response()->json(['error' => 'No API key found']);
-    }
-
-    try {
-        $response = Http::timeout(10)->withHeaders([
-            'Content-Type' => 'application/json',
-        ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}", [
-                    'contents' => [
-                        [
-                            'parts' => [
-                                ['text' => 'Say hello in one word']
-                            ]
-                        ]
-                    ]
-                ]);
-
-        return response()->json([
-            'status' => $response->status(),
-            'successful' => $response->successful(),
-            'body' => $response->json()
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => $e->getMessage()
-        ]);
-    }
-});
+// Ruta /test-gemini ELIMINADA por seguridad (exponía API Key públicamente)
 
 
 // 1. Mostrar formulario
@@ -267,8 +236,8 @@ Route::post('/reset-password', function (\Illuminate\Http\Request $request) {
 })->name('password.update');
 
 
-// Rutas de Test para Vistas de Pagos
-Route::prefix('test-pagos')->group(function () {
+// Rutas de Test para Vistas de Pagos (protegidas con auth)
+Route::middleware('auth')->prefix('test-pagos')->group(function () {
     Route::get('/', function () {
         return view('pagos.index');
     })->name('pagos.test.index');

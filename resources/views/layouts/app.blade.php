@@ -439,6 +439,7 @@
             })
         }
     </script>
+    @stack('scripts')
     @auth
         <x-arrendito />
     @endauth
