@@ -42,7 +42,8 @@
                         <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Renta Mensual
                             ($)</label>
                         <input type="number" name="precio" id="precio-input" value="{{ $inmueble->renta_mensual }}" required
-                            min="{{ $inmueble->tipo === 'Cuarto' ? 300 : 500 }}" oninput="if(this.value < 0) this.value = '';"
+                            min="{{ $inmueble->tipo === 'Cuarto' ? 300 : 500 }}"
+                            oninput="if(this.value < 0) this.value = '';"
                             class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                     </div>
 
@@ -51,7 +52,8 @@
                         <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Depósito
                             ($) <span class="text-xs font-normal text-muted-foreground">(Opcional)</span></label>
                         <input type="number" name="deposito" id="deposito-input" value="{{ $inmueble->deposito }}"
-                            min="{{ $inmueble->tipo === 'Cuarto' ? 300 : 500 }}" oninput="if(this.value < 0) this.value = '';"
+                            min="{{ $inmueble->tipo === 'Cuarto' ? 300 : 500 }}"
+                            oninput="if(this.value < 0) this.value = '';"
                             class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                     </div>
                 </div>
@@ -60,13 +62,14 @@
                 <div>
                     <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Dirección</label>
                     <div class="flex gap-2 mb-4">
-                        <input type="text" name="direccion" id="direccion-input" value="{{ $inmueble->direccion }}"
-                            required
+                        <input type="text" name="direccion" id="direccion-input" value="{{ $inmueble->direccion }}" required
                             class="flex-1 px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                         <button type="button" onclick="buscarDireccion()"
                             class="bg-[#003049] text-white px-6 py-3 rounded-xl hover:bg-[#003049]/90 transition-all font-bold flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd"
+                                    d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                                    clip-rule="evenodd" />
                             </svg> Buscar en mapa
                         </button>
                     </div>
@@ -88,7 +91,7 @@
                 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
                 <script>
                     var map, marker;
-                    document.addEventListener('DOMContentLoaded', function() {
+                    document.addEventListener('DOMContentLoaded', function () {
                         var initialLat = {{ $inmueble->latitud ?? 16.9068 }};
                         var initialLng = {{ $inmueble->longitud ?? -92.0941 }};
 
@@ -118,12 +121,12 @@
                             draggable: true
                         }).addTo(map);
 
-                        marker.on('dragend', function(event) {
+                        marker.on('dragend', function (event) {
                             var position = marker.getLatLng();
                             actualizarCampos(position.lat, position.lng);
                         });
 
-                        map.on('click', function(e) {
+                        map.on('click', function (e) {
                             actualizarCampos(e.latlng.lat, e.latlng.lng, true);
                         });
 
@@ -175,15 +178,15 @@
                     <div>
                         <label
                             class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Habitaciones</label>
-                        <input type="number" name="habitaciones" value="{{ $inmueble->habitaciones }}" required
-                            min="0" oninput="if(this.value < 0) this.value = '';"
+                        <input type="number" name="habitaciones" value="{{ $inmueble->habitaciones }}" required min="0"
+                            oninput="if(this.value < 0) this.value = '';"
                             class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Metros
                             (m²)</label>
-                        <input type="number" name="metros" value="{{ $inmueble->metros }}" required
-                            min="0" oninput="if(this.value < 0) this.value = '';"
+                        <input type="number" name="metros" value="{{ $inmueble->metros }}" required min="0"
+                            oninput="if(this.value < 0) this.value = '';"
                             class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                     </div>
                 </div>
@@ -192,20 +195,25 @@
                     <div>
                         <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Baños</label>
                         @php $banoCombo = $inmueble->banos . ',' . $inmueble->medios_banos; @endphp
-                        <select id="banos-casa-input" name="banos_casa" required class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
+                        <select id="banos-casa-input" name="banos_casa" required
+                            class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                             <option value="0,1" {{ $banoCombo === '0,1' ? 'selected' : '' }}>Medio Baño</option>
                             <option value="1,0" {{ $banoCombo === '1,0' ? 'selected' : '' }}>1 Baño Completo</option>
-                            <option value="1,1" {{ $banoCombo === '1,1' ? 'selected' : '' }}>1 Baño Completo y Medio Baño</option>
+                            <option value="1,1" {{ $banoCombo === '1,1' ? 'selected' : '' }}>1 Baño Completo y Medio Baño
+                            </option>
                             <option value="2,0" {{ $banoCombo === '2,0' ? 'selected' : '' }}>2 Baños Completos</option>
-                            <option value="2,1" {{ $banoCombo === '2,1' ? 'selected' : '' }}>2 Baños Completos y Medio Baño</option>
+                            <option value="2,1" {{ $banoCombo === '2,1' ? 'selected' : '' }}>2 Baños Completos y Medio Baño
+                            </option>
                             <option value="3,0" {{ $banoCombo === '3,0' ? 'selected' : '' }}>3 Baños Completos</option>
-                            <option value="3,1" {{ $banoCombo === '3,1' ? 'selected' : '' }}>3 Baños Completos y Medio Baño</option>
+                            <option value="3,1" {{ $banoCombo === '3,1' ? 'selected' : '' }}>3 Baños Completos y Medio Baño
+                            </option>
                             <option value="4,0" {{ $banoCombo === '4,0' ? 'selected' : '' }}>4 Baños o más</option>
                         </select>
                     </div>
                 </div>
 
-                <div id="bano-compartido-wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2 mb-6" style="display: {{ $inmueble->tipo === 'Cuarto' ? 'grid' : 'none' }};">
+                <div id="bano-compartido-wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2 mb-6"
+                    style="display: {{ $inmueble->tipo === 'Cuarto' ? 'grid' : 'none' }};">
                     <div class="hidden md:block"></div>
                     <div class="flex items-center sm:-mt-3">
                         <label class="flex items-center gap-2 text-sm font-medium text-slate-500 cursor-pointer">
@@ -214,6 +222,32 @@
                             ¿El baño es compartido?
                         </label>
                     </div>
+                </div>
+
+                {{-- Contrato (Opcional) --}}
+                <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+                    <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Contrato de
+                        Arrendamiento (Opcional)</label>
+                    @if($inmueble->contrato_documento)
+                        <div class="mb-3 flex items-center gap-3">
+                            <span class="text-sm font-medium text-slate-600">Documento actual:</span>
+                            <a href="{{ asset($inmueble->contrato_documento) }}" target="_blank"
+                                class="text-blue-600 text-sm hover:underline font-bold flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Ver archivo actual
+                            </a>
+                        </div>
+                    @endif
+                    <p class="text-xs text-slate-500 mb-3">Sube un nuevo contrato en formato PDF para reemplazar el actual o
+                        definir uno general para este inmueble.</p>
+                    <input type="file" name="contrato_documento" accept=".pdf"
+                        class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#003049] file:text-white hover:file:bg-[#003049]/90 transition-all cursor-pointer">
                 </div>
 
                 {{-- Descripción --}}
@@ -240,56 +274,56 @@
 @endsection
 
 @push('scripts')
-<script>
-    function extractYouTubeIdEdit(url) {
-        const patterns = [
-            /youtu\.be\/([a-zA-Z0-9_-]{11})/,
-            /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
-            /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
-            /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
-            /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
-        ];
-        for (const pattern of patterns) {
-            const match = url.match(pattern);
-            if (match) return match[1];
-        }
-        return null;
-    }
-
-    function previewYoutubeEdit(url) {
-        const preview = document.getElementById('yt-preview-edit');
-        const error   = document.getElementById('yt-error-edit');
-        const iframe  = document.getElementById('yt-iframe-edit');
-
-        if (!url) {
-            preview.classList.add('hidden');
-            error.classList.add('hidden');
-            return;
+    <script>
+        function extractYouTubeIdEdit(url) {
+            const patterns = [
+                /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+            ];
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) return match[1];
+            }
+            return null;
         }
 
-        const id = extractYouTubeIdEdit(url);
-        if (id) {
-            iframe.src = `https://www.youtube.com/embed/${id}`;
-            preview.classList.remove('hidden');
-            error.classList.add('hidden');
-        } else {
-            preview.classList.add('hidden');
-            error.classList.remove('hidden');
-        }
-    }
+        function previewYoutubeEdit(url) {
+            const preview = document.getElementById('yt-preview-edit');
+            const error = document.getElementById('yt-error-edit');
+            const iframe = document.getElementById('yt-iframe-edit');
 
-    function updateMinVal() {
-        const tipo = document.getElementById('tipo-select').value;
-        const minVal = tipo === 'Cuarto' ? 300 : 500;
-        document.getElementById('precio-input').min = minVal;
-        document.getElementById('deposito-input').min = minVal;
-        const banoCompartidoWrapper = document.getElementById('bano-compartido-wrapper');
-        
-        if (tipo === 'Cuarto') {
-            if (banoCompartidoWrapper) banoCompartidoWrapper.style.display = 'grid';
-        } else {
-            if (banoCompartidoWrapper) banoCompartidoWrapper.style.display = 'none';
+            if (!url) {
+                preview.classList.add('hidden');
+                error.classList.add('hidden');
+                return;
+            }
+
+            const id = extractYouTubeIdEdit(url);
+            if (id) {
+                iframe.src = `https://www.youtube.com/embed/${id}`;
+                preview.classList.remove('hidden');
+                error.classList.add('hidden');
+            } else {
+                preview.classList.add('hidden');
+                error.classList.remove('hidden');
+            }
         }
-    }
-</script>
+
+        function updateMinVal() {
+            const tipo = document.getElementById('tipo-select').value;
+            const minVal = tipo === 'Cuarto' ? 300 : 500;
+            document.getElementById('precio-input').min = minVal;
+            document.getElementById('deposito-input').min = minVal;
+            const banoCompartidoWrapper = document.getElementById('bano-compartido-wrapper');
+
+            if (tipo === 'Cuarto') {
+                if (banoCompartidoWrapper) banoCompartidoWrapper.style.display = 'grid';
+            } else {
+                if (banoCompartidoWrapper) banoCompartidoWrapper.style.display = 'none';
+            }
+        }
+    </script>
 @endpush

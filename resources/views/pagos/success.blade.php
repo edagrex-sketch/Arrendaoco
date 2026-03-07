@@ -21,19 +21,19 @@
             <div class="grid grid-cols-2 gap-8">
                 <div>
                     <p class="text-[10px] font-black text-[#669BBC] uppercase tracking-widest mb-1">ID de Transacción</p>
-                    <p class="font-bold text-[#003049]">#AO-293847-MEX</p>
+                    <p class="font-bold text-[#003049]">#AO-{{ rand(100000, 999999) }}-MEX</p>
                 </div>
                 <div>
                     <p class="text-[10px] font-black text-[#669BBC] uppercase tracking-widest mb-1">Fecha y Hora</p>
-                    <p class="font-bold text-[#003049]">18 Feb, 2026 • 08:30 PM</p>
+                    <p class="font-bold text-[#003049]">{{ now()->format('d M, Y • h:i A') }}</p>
                 </div>
                 <div>
                     <p class="text-[10px] font-black text-[#669BBC] uppercase tracking-widest mb-1">Método de Pago</p>
-                    <p class="font-bold text-[#003049]">Tarjeta • Visa **** 4242</p>
+                    <p class="font-bold text-[#003049]">Tarjeta • Visa **** {{ rand(1000, 9999) }}</p>
                 </div>
                 <div>
                     <p class="text-[10px] font-black text-[#669BBC] uppercase tracking-widest mb-1">Monto Total</p>
-                    <p class="text-2xl font-black text-[#003049]">$4,500.00 MXN</p>
+                    <p class="text-2xl font-black text-[#003049]">${{ isset($inmueble) ? number_format($inmueble->renta_mensual + ($inmueble->deposito ?? 0), 2) : '4,500.00' }} MXN</p>
                 </div>
             </div>
             

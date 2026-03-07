@@ -56,10 +56,15 @@
                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                             {{-- Badge de Estatus --}}
                             <div class="absolute top-4 right-4">
-                                <span
-                                    class="bg-white/95 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg text-[#003049] border border-white/50">
-                                    {{ $inmueble->estatus }}
-                                </span>
+                                @if($inmueble->estatus === 'rentado')
+                                    <span class="bg-[#003049]/95 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg text-white border border-white/20">
+                                        Rentado
+                                    </span>
+                                @else
+                                    <span class="bg-emerald-500/95 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg text-white border border-white/20">
+                                        Disponible
+                                    </span>
+                                @endif
                             </div>
                         </div>
 
@@ -89,6 +94,28 @@
                                     <span class="text-xs font-medium text-muted-foreground lowercase">/mes</span>
                                 </div>
                             </div>
+                            
+                            @if($inmueble->estatus === 'rentado' && $inmueble->contratos->isNotEmpty())
+                                @php
+                                    $contratoActivo = $inmueble->contratos->first();
+                                    $inquilino = $contratoActivo ? $contratoActivo->inquilino : null;
+                                @endphp
+                                @if($inquilino)
+                                    <div class="mt-2 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-white border border-blue-200 flex items-center justify-center text-blue-600 font-bold uppercase overflow-hidden shrink-0 shadow-sm">
+                                            @if($inquilino->foto_perfil)
+                                                <img src="{{ str_starts_with($inquilino->foto_perfil, 'http') ? $inquilino->foto_perfil : asset('storage/'.$inquilino->foto_perfil) }}" alt="Inquilino" class="w-full h-full object-cover">
+                                            @else
+                                                {{ substr($inquilino->nombre, 0, 2) }}
+                                            @endif
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-[10px] font-black uppercase tracking-widest text-[#669BBC] mb-0.5">Rentado por</p>
+                                            <p class="text-sm font-bold text-[#003049] truncate">{{ $inquilino->nombre }}</p>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endif
                         </div>
 
                         {{-- Footer con Botones --}}

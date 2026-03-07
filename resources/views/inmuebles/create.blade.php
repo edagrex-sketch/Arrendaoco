@@ -26,14 +26,15 @@
                     <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold border-4 transition-colors bg-white z-10"
                         :class="step >= 3 ? 'border-primary text-primary' : 'border-gray-300 text-gray-400'">3</div>
                     <span class="text-xs font-medium mt-1 bg-background px-1"
-                        :class="step >= 3 ? 'text-primary' : 'text-gray-400'">Fotos</span>
+                        :class="step >= 3 ? 'text-primary' : 'text-gray-400'">Archivos</span>
                 </div>
             </div>
         </div>
 
         {{-- Formulario --}}
         <div class="bg-card border border-border rounded-2xl shadow-lg p-6 sm:p-8">
-            <form method="POST" action="{{ route('inmuebles.guardar') }}" class="space-y-6" enctype="multipart/form-data" novalidate>
+            <form method="POST" action="{{ route('inmuebles.guardar') }}" class="space-y-6" enctype="multipart/form-data"
+                novalidate>
                 @csrf
 
                 {{-- PASO 1 --}}
@@ -42,7 +43,9 @@
                     x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
                     <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd"
+                                d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z"
+                                clip-rule="evenodd" />
                         </svg> ¿Qué vas a rentar?
                     </h2>
                     <div class="grid grid-cols-1 gap-6">
@@ -53,7 +56,7 @@
                                 placeholder="Ej. Depa moderno cerca de la UTC" required
                                 class="w-full rounded-lg border-input bg-background/50 border py-3 px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                         </div>
-                    
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium mb-1">Tipo <span
@@ -92,8 +95,11 @@
                 {{-- PASO 2 --}}
                 <div x-show="step === 2" x-ref="step2" x-transition style="display: none;">
                     <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-yellow-500">
-                            <path fill-rule="evenodd" d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM13.636 5.864a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM7.485 11.485a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM14.696 14.696a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM7.485 7.485a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM15 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0115 10zM6.5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 016.5 10zM10 7a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd" />
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                            class="w-5 h-5 text-yellow-500">
+                            <path fill-rule="evenodd"
+                                d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM13.636 5.864a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM7.485 11.485a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM14.696 14.696a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM7.485 7.485a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM15 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0115 10zM6.5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 016.5 10zM10 7a3 3 0 100 6 3 3 0 000-6z"
+                                clip-rule="evenodd" />
                         </svg> Características y Ubicación
                     </h2>
 
@@ -134,31 +140,39 @@
                         <div>
                             <label class="block text-xs font-medium mb-1 uppercase text-muted-foreground">Habitaciones <span
                                     class="text-red-500">*</span></label>
-                            <input type="number" name="habitaciones" value="{{ old('habitaciones') }}" required
-                                min="0" step="any" oninput="if(this.value < 0) this.value = '';"
+                            <input type="number" name="habitaciones" value="{{ old('habitaciones') }}" required min="0"
+                                step="any" oninput="if(this.value < 0) this.value = '';"
                                 class="w-full rounded-lg border-input bg-background/50 border py-2 px-3">
                         </div>
-                        
+
                         <!-- Baños (Igual para todas las categorías) -->
                         <div>
                             <label class="block text-xs font-medium mb-1 uppercase text-muted-foreground">Baños <span
                                     class="text-red-500">*</span></label>
-                            <select name="banos_casa" required class="w-full rounded-lg border-input bg-background/50 border py-2 px-3">
+                            <select name="banos_casa" required
+                                class="w-full rounded-lg border-input bg-background/50 border py-2 px-3">
                                 <option value="0,1" {{ old('banos_casa') === '0,1' ? 'selected' : '' }}>Medio Baño</option>
-                                <option value="1,0" {{ old('banos_casa') === '1,0' ? 'selected' : '' }}>1 Baño Completo</option>
-                                <option value="1,1" {{ old('banos_casa') === '1,1' ? 'selected' : '' }}>1 Baño Completo y Medio Baño</option>
-                                <option value="2,0" {{ old('banos_casa') === '2,0' ? 'selected' : '' }}>2 Baños Completos</option>
-                                <option value="2,1" {{ old('banos_casa') === '2,1' ? 'selected' : '' }}>2 Baños Completos y Medio Baño</option>
-                                <option value="3,0" {{ old('banos_casa') === '3,0' ? 'selected' : '' }}>3 Baños Completos</option>
-                                <option value="3,1" {{ old('banos_casa') === '3,1' ? 'selected' : '' }}>3 Baños Completos y Medio Baño</option>
+                                <option value="1,0" {{ old('banos_casa') === '1,0' ? 'selected' : '' }}>1 Baño Completo
+                                </option>
+                                <option value="1,1" {{ old('banos_casa') === '1,1' ? 'selected' : '' }}>1 Baño Completo y
+                                    Medio Baño</option>
+                                <option value="2,0" {{ old('banos_casa') === '2,0' ? 'selected' : '' }}>2 Baños Completos
+                                </option>
+                                <option value="2,1" {{ old('banos_casa') === '2,1' ? 'selected' : '' }}>2 Baños Completos y
+                                    Medio Baño</option>
+                                <option value="3,0" {{ old('banos_casa') === '3,0' ? 'selected' : '' }}>3 Baños Completos
+                                </option>
+                                <option value="3,1" {{ old('banos_casa') === '3,1' ? 'selected' : '' }}>3 Baños Completos y
+                                    Medio Baño</option>
                                 <option value="4,0" {{ old('banos_casa') === '4,0' ? 'selected' : '' }}>4 Baños o más</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 sm:-mt-2" x-show="tipo === 'Cuarto'" style="display: none;">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 sm:-mt-2" x-show="tipo === 'Cuarto'"
+                        style="display: none;">
                         <!-- Columna vacía para alinear a la derecha -->
-                        <div class="hidden sm:block"></div> 
+                        <div class="hidden sm:block"></div>
 
                         <!-- ¿Baño Compartido? (Para todas las categorías) -->
                         <div class="flex items-center">
@@ -174,18 +188,20 @@
                     <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-6">
                         <div class="flex items-center gap-2 mb-3">
                             <span class="text-blue-600 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                 </svg>
                             </span>
                             <label class="text-sm font-bold text-slate-700">Dimensiones (Opcional)</label>
                         </div>
-                        
+
                         <div class="grid grid-cols-3 gap-4 items-end">
                             <div>
                                 <label class="block text-xs text-muted-foreground mb-1">Largo (m)</label>
-                                <input type="number" x-model="largo" @input="calcularm2()" placeholder="0"
-                                    min="0" step="any" oninput="if(this.value < 0) this.value = '';"
+                                <input type="number" x-model="largo" @input="calcularm2()" placeholder="0" min="0"
+                                    step="any" oninput="if(this.value < 0) this.value = '';"
                                     class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
                             </div>
                             <div class="flex items-center justify-center pb-2 text-muted-foreground">
@@ -193,8 +209,8 @@
                             </div>
                             <div>
                                 <label class="block text-xs text-muted-foreground mb-1">Ancho (m)</label>
-                                <input type="number" x-model="ancho" @input="calcularm2()" placeholder="0"
-                                    min="0" step="any" oninput="if(this.value < 0) this.value = '';"
+                                <input type="number" x-model="ancho" @input="calcularm2()" placeholder="0" min="0"
+                                    step="any" oninput="if(this.value < 0) this.value = '';"
                                     class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
                             </div>
                         </div>
@@ -203,15 +219,19 @@
                             <label class="block text-xs font-bold mb-1 uppercase text-slate-600">Área Total (m²) <span
                                     class="text-red-500">*</span></label>
                             <div class="relative">
-                                <input type="number" name="metros" x-model="metros" required
-                                    min="0" step="any" oninput="if(this.value < 0) this.value = '';"
+                                <input type="number" name="metros" x-model="metros" required min="0" step="any"
+                                    oninput="if(this.value < 0) this.value = '';"
                                     class="w-full rounded-lg border-input bg-white border-2 border-blue-100 py-2 px-3 font-bold text-slate-800 focus:border-blue-400 focus:ring-0">
                                 <span class="absolute right-3 top-2.5 text-xs text-muted-foreground font-bold">M²</span>
                             </div>
                             <p class="text-xs text-blue-600 mt-2 flex items-center gap-1" x-show="largo && ancho">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 text-yellow-500">
-                                    <path fill-rule="evenodd" d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM13.636 5.864a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM7.485 11.485a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM14.696 14.696a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM7.485 7.485a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM15 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0115 10zM6.5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 016.5 10zM10 7a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd" />
-                                </svg> Cálculo automático: <span x-text="largo"></span>m x <span x-text="ancho"></span>m = <span x-text="metros"></span>m²
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                    class="w-3 h-3 text-yellow-500">
+                                    <path fill-rule="evenodd"
+                                        d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM13.636 5.864a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM7.485 11.485a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM14.696 14.696a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM7.485 7.485a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM15 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0115 10zM6.5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 016.5 10zM10 7a3 3 0 100 6 3 3 0 000-6z"
+                                        clip-rule="evenodd" />
+                                </svg> Cálculo automático: <span x-text="largo"></span>m x <span x-text="ancho"></span>m =
+                                <span x-text="metros"></span>m²
                             </p>
                         </div>
                     </div>
@@ -227,10 +247,30 @@
                 {{-- PASO 3: FOTOS ILIMITADAS --}}
                 <div x-show="step === 3" x-ref="step3" x-transition style="display: none;">
                     <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-gray-700">
-                            <path fill-rule="evenodd" d="M1 8a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 018.07 3h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0016.07 6H17a2 2 0 012 2v7a2 2 0 01-2 2H3a2 2 0 01-2-2V8zm13.5 3a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM10 14a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
-                        </svg> Galería de Fotos
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                            class="w-5 h-5 text-gray-700">
+                            <path fill-rule="evenodd"
+                                d="M1 8a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 018.07 3h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0016.07 6H17a2 2 0 012 2v7a2 2 0 01-2 2H3a2 2 0 01-2-2V8zm13.5 3a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM10 14a3 3 0 100-6 3 3 0 000 6z"
+                                clip-rule="evenodd" />
+                        </svg> Archivos de la Propiedad
                     </h2>
+
+                    {{-- Sección de Contrato (Opcional) --}}
+                    <div class="mb-6 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                        <label class="block text-sm font-medium mb-1 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Contrato de Arrendamiento <span class="text-xs text-muted-foreground font-normal">(Opcional,
+                                formato PDF)</span>
+                        </label>
+                        <p class="text-xs text-slate-500 mb-3">Si subes un contrato, el inquilino podrá verlo y aceptarlo
+                            antes de rentar.</p>
+                        <input type="file" name="contrato_documento" accept=".pdf"
+                            class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all">
+                    </div>
 
                     <div class="mb-6">
                         <label class="block text-sm font-medium mb-1">Subir Fotos <span
@@ -289,9 +329,12 @@
 
                     <button type="submit" x-show="step === 3"
                         class="flex items-center justify-center gap-2 bg-[#003049] text-white px-8 py-3 rounded-xl font-bold text-base border-none cursor-pointer shadow-lg shadow-[#003049]/30 hover:bg-[#003049]/90 transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-yellow-500">
-                            <path fill-rule="evenodd" d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM13.636 5.864a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM7.485 11.485a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM14.696 14.696a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM7.485 7.485a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM15 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0115 10zM6.5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 016.5 10zM10 7a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd" />
-                        </svg> 
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                            class="w-5 h-5 text-yellow-500">
+                            <path fill-rule="evenodd"
+                                d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM13.636 5.864a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM7.485 11.485a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM14.696 14.696a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM7.485 7.485a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM15 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0115 10zM6.5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 016.5 10zM10 7a3 3 0 100 6 3 3 0 000-6z"
+                                clip-rule="evenodd" />
+                        </svg>
                         <span>¡Publicar Ahora!</span>
                     </button>
                 </div>
@@ -325,7 +368,7 @@
                 };
                 L.control.layers(baseMaps, null, { collapsed: false, position: 'topright' }).addTo(mapPicker);
 
-                mapPicker.on('click', function(e) {
+                mapPicker.on('click', function (e) {
                     actualizarPin(e.latlng.lat, e.latlng.lng);
                     obtenerDireccionDesdeMapa(e.latlng.lat, e.latlng.lng);
                 });
@@ -383,7 +426,7 @@
         async function obtenerDireccionDesdeMapa(lat, lng) {
             const inputDireccion = document.getElementById('direccion-input');
             const originalPlaceholder = inputDireccion.placeholder;
-            
+
             inputDireccion.value = "Buscando dirección exacta...";
             // Efecto visual de carga
             inputDireccion.classList.add('bg-blue-50', 'animate-pulse');
@@ -492,11 +535,11 @@
                                 span.innerText = input.validationMessage;
                                 input.parentNode.style.position = "relative";
                                 // Remove old errors
-                                Array.from(input.parentNode.querySelectorAll(".text-red-500.absolute")).forEach(e=>e.remove());
+                                Array.from(input.parentNode.querySelectorAll(".text-red-500.absolute")).forEach(e => e.remove());
                                 input.parentNode.appendChild(span);
                                 setTimeout(() => span.remove(), 4000);
                             }
-                            
+
                             input.reportValidity();
                             input.focus();
                             esValido = false;
@@ -516,4 +559,3 @@
     </script>
 
 @endsection
-

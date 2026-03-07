@@ -32,6 +32,7 @@ class Inmueble extends Model
         'longitud',
         'latitud',
         'longitud',
+        'contrato_documento',
     ];
 
     public function propietario()

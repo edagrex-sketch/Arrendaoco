@@ -133,9 +133,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/inicio', [InmuebleController::class, 'home'])->name('inicio');
     Route::get('/buscar', [InmuebleController::class, 'publicSearch'])->name('inmuebles.public_search');
     Route::get('/inmuebles/{inmueble}', [InmuebleController::class, 'show'])->name('inmuebles.show');
+    Route::get('/inmuebles/{inmueble}/rentar', [InmuebleController::class, 'rentar'])->name('inmuebles.rentar');
 
     // Rutas de Inmuebles
     Route::get('/mis-propiedades', [InmuebleController::class, 'index'])->name('inmuebles.index');
+    Route::get('/mis-rentas', [InmuebleController::class, 'misRentas'])->name('inmuebles.mis_rentas');
     Route::get('/publicar', [InmuebleController::class, 'create'])->name('inmuebles.create');
     Route::post('/publicar', [InmuebleController::class, 'store'])->name('inmuebles.guardar');
     Route::get('/inmuebles/{inmueble}/editar', [InmuebleController::class, 'edit'])->name('inmuebles.edit');
@@ -246,4 +248,45 @@ Route::middleware('auth')->prefix('test-pagos')->group(function () {
     Route::get('/success', function () {
         return view('pagos.success');
     })->name('pagos.test.success');
+    Route::post('/success/{inmueble}', function (\Illuminate\Http\Request $request, \App\Models\Inmueble $inmueble) {
+        $inmueble->update(['estatus' => 'rentado']);
+
+        // As a bonus, let's create a basic mock contract so it appears in their payments or contracts profile later if they have one.
+        $contrato = \App\Models\Contrato::create([
+            'inmueble_id' => $inmueble->id,
+            'propietario_id' => $inmueble->propietario_id,
+            'inquilino_id' => Auth::id(),
+            'fecha_inicio' => now(),
+            'renta_mensual' => $inmueble->renta_mensual,
+            'deposito' => $inmueble->deposito,
+            'estatus' => 'activo'
+        ]);
+
+        // Crear evento de calendario para el inquilino (inicio de renta)
+        \App\Models\Evento::create([
+            'usuario_id' => Auth::id(),
+            'renta_id' => $contrato->id,
+            'titulo' => 'Inicio de Renta: ' . $inmueble->titulo,
+            'descripcion' => 'Tu renta del inmueble "' . $inmueble->titulo . '" ha comenzado de forma exitosa.',
+            'fecha' => now()
+        ]);
+
+        // Crear evento de calendario para el propietario (nueva renta confirmada)
+        \App\Models\Evento::create([
+            'usuario_id' => $inmueble->propietario_id,
+            'renta_id' => $contrato->id,
+            'titulo' => 'Inmueble Rentado: ' . $inmueble->titulo,
+            'descripcion' => 'El inmueble ha sido rentado por ' . Auth::user()->nombre . '.',
+            'fecha' => now()
+        ]);
+
+        $metodo = $request->input('metodo_pago', 'card');
+
+        if ($metodo === 'oxxo') {
+            $referencia = implode(' - ', str_split(rand(100000000000000, 999999999999999), 4));
+            return view('pagos.oxxo', ['inmueble' => $inmueble, 'referencia' => $referencia, 'contrato' => $contrato]);
+        }
+
+        return view('pagos.success', ['inmueble' => $inmueble]);
+    })->name('pagos.test.success.process');
 });
