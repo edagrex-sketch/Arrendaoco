@@ -52,7 +52,7 @@
                             </a>
                             <a href="{{ route('inmuebles.mis_rentas') }}"
                                 class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
-                                Mis Rentas y Pagos
+                                Mi renta
                             </a>
                         @endunless
                     @endauth
@@ -195,7 +195,7 @@
                             </a>
                             <a href="{{ route('inmuebles.mis_rentas') }}"
                                 class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
-                                Mis Rentas y Pagos
+                                Mi renta
                             </a>
                         @endunless
                     @endauth
