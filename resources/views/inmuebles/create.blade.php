@@ -256,20 +256,24 @@
                     </h2>
 
                     {{-- Sección de Contrato (Opcional) --}}
-                    <div class="mb-6 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                        <label class="block text-sm font-medium mb-1 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600" fill="none"
+                    <div class="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <label class="block text-sm font-medium text-[#003049] mb-1 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#003049]" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            Contrato de Arrendamiento <span class="text-xs text-muted-foreground font-normal">(Opcional,
-                                formato PDF)</span>
+                            Contrato de Arrendamiento <span class="text-xs text-muted-foreground font-normal">(Opcional, formato PDF)</span>
                         </label>
-                        <p class="text-xs text-slate-500 mb-3">Si subes un contrato, el inquilino podrá verlo y aceptarlo
-                            antes de rentar.</p>
-                        <input type="file" name="contrato_documento" accept=".pdf"
-                            class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all">
+                        <p class="text-xs text-slate-500 mb-4">Si subes un contrato, el inquilino podrá verlo y aceptarlo antes de rentar.</p>
+                        
+                        <div class="flex justify-between items-center bg-white border border-gray-300 rounded-lg p-1.5" x-data="{ fileName: '' }">
+                            <span class="text-sm text-slate-500 px-3 truncate max-w-[70%]" x-text="fileName ? fileName : 'Ningún archivo seleccionado'"></span>
+                            <label class="cursor-pointer bg-[#003049] hover:bg-[#003049]/90 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors m-0 flex-shrink-0">
+                                Elegir archivo
+                                <input type="file" name="contrato_documento" accept=".pdf" class="hidden" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                            </label>
+                        </div>
                     </div>
 
                     <div class="mb-6">
@@ -322,7 +326,8 @@
                     <button type="button" @click="step--" x-show="step > 1"
                         class="text-muted-foreground hover:text-foreground font-medium px-4 py-2 transition-colors">←
                         Atrás</button>
-                    <div x-show="step === 1"></div>
+                    <a href="{{ route('inmuebles.index') }}" x-show="step === 1"
+                        class="bg-gray-400 text-white font-bold py-2 px-6 rounded-xl hover:bg-gray-500 transition-all shadow-md">Cancelar</a>
                     <button type="button" @click="nextStep()" x-show="step < 3"
                         class="bg-primary text-primary-foreground font-bold py-2 px-6 rounded-xl hover:bg-primary/90 transition-all shadow-md shadow-primary/20">Siguiente
                         Paso →</button>
@@ -527,18 +532,6 @@
                             console.error("Validación fallida en campo:", input.name);
                             console.error("Valor actual:", input.value);
                             console.error("Mensaje de error:", input.validationMessage);
-                            // Creamos un fake popup si no puede reportar visualmente (por si el navegador estricto no lo muestra bien)
-                            if (input.validationMessage) {
-                                let span = document.createElement("span");
-                                span.classList.add("text-sm", "text-red-500", "absolute", "mt-16", "z-50");
-                                span.style.top = "100%";
-                                span.innerText = input.validationMessage;
-                                input.parentNode.style.position = "relative";
-                                // Remove old errors
-                                Array.from(input.parentNode.querySelectorAll(".text-red-500.absolute")).forEach(e => e.remove());
-                                input.parentNode.appendChild(span);
-                                setTimeout(() => span.remove(), 4000);
-                            }
 
                             input.reportValidity();
                             input.focus();

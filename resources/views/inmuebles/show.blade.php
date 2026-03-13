@@ -186,9 +186,9 @@
                             </ul>
                         </div>
 
-                        {{-- Superficie -> Normas --}}
+                        {{-- Superficie -> Medidas --}}
                         <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3">Normas</h4>
+                            <h4 class="text-base font-bold text-slate-700 mb-3">Medidas</h4>
                             <ul class="space-y-3">
                                 <li class="flex flex-col text-sm font-bold text-slate-600">
                                     <div class="flex items-center">
