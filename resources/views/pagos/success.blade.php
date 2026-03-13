@@ -55,7 +55,7 @@
     </div>
 
     <div class="flex flex-col md:flex-row items-center justify-center gap-6">
-        <a href="{{ route('pagos.test.index') }}" class="text-[#669BBC] font-black hover:underline uppercase tracking-widest text-sm">Ir al panel de pagos</a>
+        <a href="{{ route('inmuebles.mis_rentas') }}" class="text-[#669BBC] font-black hover:underline uppercase tracking-widest text-sm">Ir a Mis Rentas y Pagos</a>
         <span class="hidden md:block h-1 w-1 bg-gray-300 rounded-full"></span>
         <a href="{{ route('inicio') }}" class="text-[#003049] font-black hover:underline uppercase tracking-widest text-sm">Volver al Inicio</a>
     </div>

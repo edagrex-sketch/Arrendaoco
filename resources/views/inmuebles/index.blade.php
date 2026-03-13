@@ -61,7 +61,7 @@
                                         Rentado
                                     </span>
                                 @else
-                                    <span class="bg-emerald-500/95 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg text-white border border-white/20">
+                                    <span class="bg-[#669BBC]/95 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg text-white border border-white/20">
                                         Disponible
                                     </span>
                                 @endif
@@ -124,18 +124,35 @@
                                 class="flex-1 bg-white text-[#003049] font-bold py-3 rounded-xl border border-slate-200 hover:bg-[#003049] hover:text-white transition-all text-center">
                                 Ver
                             </a>
-                            <a href="{{ route('inmuebles.edit', $inmueble) }}"
-                                class="flex-1 bg-white text-[#669BBC] font-bold py-3 rounded-xl border border-slate-200 hover:bg-[#669BBC] hover:text-white transition-all text-center">
-                                Editar
-                            </a>
-                            <button onclick="confirmDelete({{ $inmueble->id }})"
-                                class="w-12 h-12 flex items-center justify-center rounded-xl bg-white text-[#C1121F] border border-slate-200 hover:bg-[#C1121F] hover:text-white transition-all">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
+                            @if($inmueble->estatus !== 'rentado')
+                                <a href="{{ route('inmuebles.edit', $inmueble) }}"
+                                    class="flex-1 bg-white text-[#669BBC] font-bold py-3 rounded-xl border border-slate-200 hover:bg-[#669BBC] hover:text-white transition-all text-center">
+                                    Editar
+                                </a>
+                            @else
+                                <span class="flex-1 bg-slate-100 text-slate-400 font-bold py-3 rounded-xl border border-slate-200 cursor-not-allowed text-center" title="No se puede editar un inmueble rentado">
+                                    Editar
+                                </span>
+                            @endif
+                            @if($inmueble->estatus !== 'rentado')
+                                <button onclick="confirmDelete({{ $inmueble->id }})" title="Eliminar propiedad"
+                                    class="w-12 h-12 flex items-center justify-center rounded-xl bg-white text-[#C1121F] border border-slate-200 hover:bg-[#C1121F] hover:text-white transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            @else
+                                <button disabled title="No se puede eliminar un inmueble rentado"
+                                    class="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            @endif
                             <form id="delete-form-{{ $inmueble->id }}"
                                 action="{{ route('inmuebles.destroy', $inmueble) }}" method="POST" class="hidden">
                                 @csrf

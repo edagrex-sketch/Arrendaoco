@@ -218,11 +218,12 @@
                                     class="bg-[#003049] text-white px-6 py-3 rounded-xl text-sm font-black shadow-md uppercase tracking-widest border border-[#003049]">
                                     Rentado
                                 </span>
+                            @else
+                                <a href="{{ route('inmuebles.edit', $inmueble) }}"
+                                    class="bg-[#729CB2] text-white px-6 py-3 rounded-xl text-sm font-bold shadow-md hover:bg-[#5C869C] transition-colors border border-[#5C869C]">
+                                    Editar Propiedad
+                                </a>
                             @endif
-                            <a href="{{ route('inmuebles.edit', $inmueble) }}"
-                                class="bg-[#729CB2] text-white px-6 py-3 rounded-xl text-sm font-bold shadow-md hover:bg-[#5C869C] transition-colors border border-[#5C869C]">
-                                Editar Propiedad
-                            </a>
                         @else
                             <a href="mailto:{{ $inmueble->propietario->email }}"
                                 class="bg-white text-[#729CB2] px-4 sm:px-6 py-3 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition-colors border border-[#729CB2]">

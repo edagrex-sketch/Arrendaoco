@@ -66,7 +66,7 @@
                         <span class="text-xs text-gray-400">{{ $inmueble->propietario->email ?? '' }}</span>
                     </td>
                     <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded-full text-xs font-bold {{ $inmueble->estatus === 'disponible' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                        <span class="px-2 py-1 rounded-full text-xs font-bold {{ $inmueble->estatus === 'disponible' ? 'bg-[#669BBC]/20 text-[#003049]' : 'bg-[#C1121F]/20 text-[#C1121F]' }}">
                             {{ ucfirst($inmueble->estatus) }}
                         </span>
                     </td>
@@ -75,9 +75,15 @@
                             <a href="{{ route('inmuebles.edit', $inmueble->id) }}" class="text-[#669BBC] hover:text-[#003049]">
                                 Editar
                             </a>
-                            <button onclick="confirmDelete({{ $inmueble->id }})" class="text-[#C1121F] hover:text-[#780000]">
-                                Eliminar
-                            </button>
+                            @if($inmueble->estatus !== 'rentado')
+                                <button onclick="confirmDelete({{ $inmueble->id }})" class="text-[#C1121F] hover:text-[#780000]">
+                                    Eliminar
+                                </button>
+                            @else
+                                <button disabled class="text-gray-400 cursor-not-allowed" title="No se puede eliminar un inmueble rentado">
+                                    Eliminar
+                                </button>
+                            @endif
                         </div>
                         <form id="delete-form-{{ $inmueble->id }}" action="{{ route('inmuebles.destroy', $inmueble->id) }}" method="POST" class="hidden">
                             @csrf

@@ -167,6 +167,10 @@ class InmuebleController extends Controller
             abort(403);
         }
 
+        if ($inmueble->estatus === 'rentado' || \App\Models\Contrato::where('inmueble_id', $inmueble->id)->where('estatus', 'activo')->exists()) {
+            return redirect()->route('inmuebles.index')->with('error', 'No puedes editar un inmueble que ya está rentado.');
+        }
+
         $imagenes = DB::table('imagenes_inmuebles')->where('inmueble_id', $inmueble->id)->get();
         return view('inmuebles.edit', compact('inmueble', 'imagenes'));
     }
@@ -278,6 +282,10 @@ class InmuebleController extends Controller
             abort(403);
         }
 
+        if ($inmueble->estatus === 'rentado' || \App\Models\Contrato::where('inmueble_id', $inmueble->id)->where('estatus', 'activo')->exists()) {
+            return redirect()->route('inmuebles.index')->with('error', 'No puedes editar un inmueble que ya está rentado.');
+        }
+
         $request->validate([
             'nombre' => 'required|string|max:255',
             'tipo' => 'required|string',
@@ -360,6 +368,10 @@ class InmuebleController extends Controller
     {
         if ($inmueble->propietario_id !== auth()->id() && !auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
             abort(403);
+        }
+
+        if ($inmueble->estatus === 'rentado' || \App\Models\Contrato::where('inmueble_id', $inmueble->id)->where('estatus', 'activo')->exists()) {
+            return redirect()->route('inmuebles.index')->with('error', 'No puedes eliminar un inmueble que ya está rentado.');
         }
 
         $inmueble->delete();
