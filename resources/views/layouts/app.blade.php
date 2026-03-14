@@ -26,13 +26,11 @@
     <div class="min-h-screen flex flex-col">
 
         <!-- Barra de Navegación -->
-        <nav class="bg-[#003049] border-b border-[#003049] sticky top-0 z-50 shadow-lg"
-            x-data="{ mobileMenuOpen: false }">
+        <nav class="bg-[#003049] border-b border-[#003049] sticky top-0 z-50 shadow-lg" x-data="{ mobileMenuOpen: false }">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <!-- 1. Logo y Nombre -->
                 <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
                     class="flex items-center gap-2 group hover:opacity-90 transition-opacity">
-                    <!-- Cuadrado del logo en un azul más claro para resaltar -->
                     <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco" class="h-10 w-auto object-contain">
                     <span class="text-xl font-bold text-white tracking-tight">
                         ArrendaOco<span class="text-[#669BBC]"></span>
@@ -45,7 +43,7 @@
                         Inicio
                     </a>
                     @auth
-                        @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
+                        @unless (Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
                             <a href="{{ route('favoritos.index') }}"
                                 class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
                                 Favoritos
@@ -78,7 +76,8 @@
                                     class="flex items-center gap-2 font-bold text-white hover:underline">
                                     @if (Auth::user()->foto_perfil)
                                         <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : (str_contains(Auth::user()->foto_perfil, 'storage/') ? asset(Auth::user()->foto_perfil) : asset('storage/' . Auth::user()->foto_perfil)) }}"
-                                            alt="Perfil" class="h-8 w-8 rounded-full object-cover border-2 border-white/20">
+                                            alt="Perfil"
+                                            class="h-8 w-8 rounded-full object-cover border-2 border-white/20">
                                     @else
                                         <div
                                             class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-xs border-2 border-white/20">
@@ -188,7 +187,7 @@
                         Inicio
                     </a>
                     @auth
-                        @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
+                        @unless (Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
                             <a href="{{ route('favoritos.index') }}"
                                 class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
                                 Favoritos
@@ -217,7 +216,8 @@
                                     <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : (str_contains(Auth::user()->foto_perfil, 'storage/') ? asset(Auth::user()->foto_perfil) : asset('storage/' . Auth::user()->foto_perfil)) }}"
                                         alt="Perfil" class="h-12 w-12 rounded-full border-2 border-[#669BBC]">
                                 @else
-                                    <div class="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center text-xl">
+                                    <div
+                                        class="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center text-xl">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                                             class="w-6 h-6 text-white">
                                             <path fill-rule="evenodd"
@@ -317,8 +317,8 @@
                                     <span>Ocosingo, Chiapas.<br></span>
                                 </li>
                                 <li class="flex items-center gap-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#669BBC]" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#669BBC]"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
@@ -351,7 +351,8 @@
                                     <!-- Nuevo Icono: Estilo minimalista (Outline) -->
                                     <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor" stroke-width="2">
-                                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                        <rect x="2" y="2" width="20" height="20" rx="5"
+                                            ry="5"></rect>
                                         <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"></path>
                                         <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                                     </svg>
@@ -410,30 +411,30 @@
                     @foreach ($errors->all() as $error)
                         '<li>{{ $error }}</li>' +
                     @endforeach
-                    '</ul>',
+                '</ul>',
                 icon: 'warning',
                 confirmButtonColor: '#003049',
                 borderRadius: '1.5rem',
             });
         @endif
 
-            function confirmLogout() {
-                Swal.fire({
-                    title: '¿Cerrar sesión?',
-                    text: "¿Desea salir de su cuenta?",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#003049',
-                    cancelButtonColor: '#C1121F',
-                    confirmButtonText: 'Sí, salir',
-                    cancelButtonText: 'Cancelar',
-                    borderRadius: '1.5rem',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('logout-form').submit();
-                    }
-                })
-            }
+        function confirmLogout() {
+            Swal.fire({
+                title: '¿Cerrar sesión?',
+                text: "¿Desea salir de su cuenta?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#003049',
+                cancelButtonColor: '#C1121F',
+                confirmButtonText: 'Sí, salir',
+                cancelButtonText: 'Cancelar',
+                borderRadius: '1.5rem',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form').submit();
+                }
+            })
+        }
 
         function confirmDelete(id) {
             Swal.fire({
@@ -455,7 +456,7 @@
     </script>
     @stack('scripts')
     @auth
-    <x-arrendito />
+        <x-arrendito />
     @endunless
 </body>
 

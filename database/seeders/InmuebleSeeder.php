@@ -94,6 +94,8 @@ class InmuebleSeeder extends Seeder
                 'tipo' => $data['tipo'],
                 'habitaciones' => $data['habitaciones'],
                 'banos' => $data['banos'],
+                'medios_banos' => ($index % 3 == 0) ? 1 : 0,
+                'bano_compartido' => ($data['tipo'] == 'Cuarto'),
                 'metros' => $data['metros'],
                 'propietario_id' => $propietario->id,
                 'imagen' => $stockImages[array_rand($stockImages)],

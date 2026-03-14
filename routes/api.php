@@ -73,6 +73,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Contratos
     Route::get('/contratos', [ContratoController::class, 'index']);
+    Route::get('/contratos/{contrato}', [ContratoController::class, 'show']);
+    Route::put('/contratos/{contrato}', [ContratoController::class, 'update']);
     Route::post('/inmuebles/{inmueble}/rentar', [ContratoController::class, 'rentar']);
     Route::post('/contratos/{contrato}/renovar', [ContratoController::class, 'renovar']);
     Route::post('/contratos/{contrato}/cancelar', [ContratoController::class, 'cancelar']);

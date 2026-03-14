@@ -29,6 +29,8 @@ class InmuebleResource extends JsonResource
             'tipo' => $this->tipo,
             'habitaciones' => $this->habitaciones,
             'banos' => $this->banos,
+            'medios_banos' => $this->medios_banos ?? 0,
+            'bano_compartido' => (bool)($this->bano_compartido ?? false),
             'metros' => $this->metros,
             'imagen_portada' => MediaUrl::fromStoragePath($this->imagen),
             'latitud' => $this->latitud,
@@ -48,10 +50,13 @@ class InmuebleResource extends JsonResource
             'resenas' => $this->resenas->map(function ($res) {
                 return [
                     'id' => $res->id,
+                    'usuario_id' => $res->usuario_id,
                     'usuario' => $res->usuario->nombre,
+                    'foto_perfil' => MediaUrl::fromStoragePath($res->usuario->foto_perfil),
                     'puntuacion' => $res->puntuacion,
                     'comentario' => $res->comentario,
                     'fecha' => $res->created_at->diffForHumans(),
+                    'created_at' => $res->created_at->toDateTimeString(),
                 ];
             }),
             'promedio_calificacion' => $this->resenas->avg('puntuacion') ?? 0,

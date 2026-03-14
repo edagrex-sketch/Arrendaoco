@@ -34,22 +34,38 @@ class ContratoController extends Controller
 
         return response()->json([
             'data' => $contratos->map(function($c) {
-                return [
-                    'id' => $c->id,
-                    'inmueble_id' => $c->inmueble_id,
-                    'inmueble_titulo' => $c->inmueble->titulo,
-                    'rutas_imagen' => $c->inmueble->rutas_imagen,
-                    'arrendador_id' => $c->propietario_id,
-                    'arrendador_nombre' => $c->propietario->nombre,
-                    'inquilino_id' => $c->inquilino_id,
-                    'inquilino_nombre' => $c->inquilino->nombre,
-                    'fecha_inicio' => $c->fecha_inicio,
-                    'fecha_fin' => $c->fecha_fin,
-                    'monto_mensual' => $c->renta_mensual,
-                    'deposito' => $c->deposito,
-                    'estado' => $c->estatus,
-                ];
+                return $this->serializeContrato($c);
             })
+        ]);
+    }
+
+    protected function serializeContrato($c) {
+        return [
+            'id' => $c->id,
+            'inmueble_id' => $c->inmueble_id,
+            'inmueble_titulo' => $c->inmueble->titulo,
+            'rutas_imagen' => \App\Support\MediaUrl::fromStoragePath($c->inmueble->imagen),
+            'arrendador_id' => $c->propietario_id,
+            'arrendador_nombre' => $c->propietario->nombre,
+            'inquilino_id' => $c->inquilino_id,
+            'inquilino_nombre' => $c->inquilino->nombre,
+            'fecha_inicio' => $c->fecha_inicio,
+            'fecha_fin' => $c->fecha_fin,
+            'monto_mensual' => $c->renta_mensual,
+            'deposito' => $c->deposito,
+            'dia_pago' => 5, // Default day
+            'estado' => ($c->estatus === 'activo' || $c->estatus === 'activa') ? 'activa' : $c->estatus,
+        ];
+    }
+
+    public function show(Contrato $contrato, Request $request)
+    {
+        if ($contrato->propietario_id !== $request->user()->id && $contrato->inquilino_id !== $request->user()->id) {
+            abort(403);
+        }
+        $contrato->load(['inmueble', 'propietario', 'inquilino']);
+        return response()->json([
+            'data' => $this->serializeContrato($contrato)
         ]);
     }
 
@@ -237,5 +253,41 @@ class ContratoController extends Controller
             $estadoCuenta->ruta_pdf,
             basename($estadoCuenta->ruta_pdf)
         );
+    }
+
+    public function update(Request $request, Contrato $contrato)
+    {
+        $usuario = $request->user();
+        if ($contrato->propietario_id !== $usuario->id && $contrato->inquilino_id !== $usuario->id) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'estado' => 'required|string'
+        ]);
+
+        $nuevoEstado = $data['estado'];
+        // Normalización para la DB
+        if (in_array($nuevoEstado, ['activa', 'activo'])) $nuevoEstado = 'activo';
+        if (in_array($nuevoEstado, ['finalizada', 'cancelada', 'finalizado'])) $nuevoEstado = 'finalizado';
+        if (in_array($nuevoEstado, ['rechazada', 'rechazado'])) $nuevoEstado = 'rechazado';
+
+        $contrato->update(['estatus' => $nuevoEstado]);
+
+        if (in_array($nuevoEstado, ['finalizado', 'rechazado'])) {
+            $contrato->inmueble->update(['estatus' => 'disponible']);
+        }
+
+        return response()->json(['success' => true, 'data' => $contrato]);
+    }
+
+    public function cancelar(Contrato $contrato, Request $request)
+    {
+        return $this->update($request->merge(['estado' => 'finalizado']), $contrato);
+    }
+
+    public function renovar(Contrato $contrato, Request $request)
+    {
+        return $this->update($request->merge(['estado' => 'activo']), $contrato);
     }
 }

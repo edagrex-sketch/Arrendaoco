@@ -28,6 +28,8 @@ class Inmueble extends Model
         'tipo',
         'habitaciones',
         'banos',
+        'medios_banos',
+        'bano_compartido',
         'metros',
         'imagen',
         'latitud',
