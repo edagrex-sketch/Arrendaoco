@@ -77,7 +77,7 @@
                                 <a href="{{ route('perfil.index') }}"
                                     class="flex items-center gap-2 font-bold text-white hover:underline">
                                     @if (Auth::user()->foto_perfil)
-                                        <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}"
+                                        <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : (str_contains(Auth::user()->foto_perfil, 'storage/') ? asset(Auth::user()->foto_perfil) : asset('storage/' . Auth::user()->foto_perfil)) }}"
                                             alt="Perfil" class="h-8 w-8 rounded-full object-cover border-2 border-white/20">
                                     @else
                                         <div
@@ -214,7 +214,7 @@
                         @auth
                             <div class="flex items-center gap-3 px-4 py-2">
                                 @if (Auth::user()->foto_perfil)
-                                    <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}"
+                                    <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : (str_contains(Auth::user()->foto_perfil, 'storage/') ? asset(Auth::user()->foto_perfil) : asset('storage/' . Auth::user()->foto_perfil)) }}"
                                         alt="Perfil" class="h-12 w-12 rounded-full border-2 border-[#669BBC]">
                                 @else
                                     <div class="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center text-xl">

@@ -7,10 +7,10 @@
                         active: 0, 
                         showFullscreen: false,
                         images: [
-                            '{{ str_starts_with($inmueble->imagen, 'http') ? $inmueble->imagen : asset('storage/' . $inmueble->imagen) }}',
+                            '{{ $inmueble->imagen_url }}',
                             @foreach($imagenes as $img)
                                 @if($img->ruta_imagen !== $inmueble->imagen)
-                                    '{{ str_starts_with($img->ruta_imagen, 'http') ? $img->ruta_imagen : asset('storage/' . $img->ruta_imagen) }}',
+                                    '{{ $img->ruta_imagen_url }}',
                                 @endif
                             @endforeach
                         ],

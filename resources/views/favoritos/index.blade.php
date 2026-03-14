@@ -90,7 +90,7 @@
                         {{-- Imagen con Overlay --}}
                         <div class="relative h-64 overflow-hidden">
                             @if ($inmueble->imagen)
-                                <img src="{{ $inmueble->imagen }}" alt="{{ $inmueble->titulo }}"
+                                <img src="{{ $inmueble->imagen_url }}" alt="{{ $inmueble->titulo }}"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                             @else
                                 <div class="w-full h-full bg-secondary/30 flex items-center justify-center">

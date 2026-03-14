@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Support\MediaUrl;
 
 class ImagenInmueble extends Model
 {
@@ -19,5 +20,10 @@ class ImagenInmueble extends Model
     public function inmueble()
     {
         return $this->belongsTo(Inmueble::class);
+    }
+
+    public function getRutaImagenUrlAttribute(): ?string
+    {
+        return MediaUrl::fromStoragePath($this->attributes['ruta_imagen'] ?? null);
     }
 }

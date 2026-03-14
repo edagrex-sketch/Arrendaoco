@@ -10,6 +10,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Resources\InmuebleResource;
 use Illuminate\Support\Facades\Storage;
 use App\Models\ImagenInmueble;
+use App\Support\MediaUrl;
 
 class InmuebleController extends Controller
 {
@@ -81,6 +82,7 @@ class InmuebleController extends Controller
         if ($request->hasFile('imagenes')) {
             foreach ($request->file('imagenes') as $index => $file) {
                 $path = $file->store('inmuebles', 'public');
+                MediaUrl::ensurePublicStorageCopy($path);
                 $ruta = 'storage/' . $path;
                 
                 if ($index === 0) {
@@ -134,6 +136,7 @@ class InmuebleController extends Controller
             // Por ahora agregamos nuevas
             foreach ($request->file('imagenes') as $index => $file) {
                 $path = $file->store('inmuebles', 'public');
+                MediaUrl::ensurePublicStorageCopy($path);
                 $ruta = 'storage/' . $path;
                 
                 if ($index === 0 && !$inmueble->imagen) {
@@ -160,3 +163,5 @@ class InmuebleController extends Controller
         return response()->json(['message' => 'Inmueble eliminado']);
     }
 }
+
+

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Api\ContratoController;
 use App\Http\Controllers\InmuebleController;
 use App\Http\Controllers\Admin\UsuarioController;
@@ -87,6 +88,22 @@ Route::get('/', function () {
     $inmuebles = \App\Models\Inmueble::where('estatus', 'disponible')->latest()->paginate(15);
     return view('welcome', compact('inmuebles'));
 })->name('welcome');
+
+Route::get('/storage/{path}', function (string $path) {
+    $normalizedPath = ltrim(str_replace('\\', '/', $path), '/');
+
+    abort_if($normalizedPath === '' || str_contains($normalizedPath, '..'), 404);
+
+    $legacyPath = public_path('storage/' . $normalizedPath);
+    if (is_file($legacyPath)) {
+        return response()->file($legacyPath);
+    }
+
+    $disk = Storage::disk('public');
+    abort_unless($disk->exists($normalizedPath), 404);
+
+    return response()->file($disk->path($normalizedPath));
+})->where('path', '.*')->name('storage.public');
 
 
 

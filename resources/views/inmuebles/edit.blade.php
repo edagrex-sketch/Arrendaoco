@@ -231,7 +231,7 @@
                     @if($inmueble->contrato_documento)
                         <div class="mb-3 flex items-center gap-3">
                             <span class="text-sm font-medium text-slate-600">Documento actual:</span>
-                            <a href="{{ asset($inmueble->contrato_documento) }}" target="_blank"
+                            <a href="{{ str_contains($inmueble->contrato_documento, 'storage/') ? asset($inmueble->contrato_documento) : asset('storage/' . $inmueble->contrato_documento) }}" target="_blank"
                                 class="text-blue-600 text-sm hover:underline font-bold flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                                     stroke="currentColor">

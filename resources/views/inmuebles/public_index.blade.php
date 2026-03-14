@@ -168,7 +168,7 @@
                         {{-- Imagen --}}
                         <div class="relative h-56 overflow-hidden">
                             @if ($inmueble->imagen)
-                                <img src="{{ $inmueble->imagen }}" alt="{{ $inmueble->titulo }}"
+                                <img src="{{ $inmueble->imagen_url }}" alt="{{ $inmueble->titulo }}"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                             @else
                                 <div class="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300">

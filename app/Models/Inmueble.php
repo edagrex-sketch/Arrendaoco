@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Contrato;
 use App\Models\Usuario;
+use App\Support\MediaUrl;
+
 class Inmueble extends Model
 {
     use HasFactory;
@@ -57,5 +59,10 @@ class Inmueble extends Model
     public function imagenes()
     {
         return $this->hasMany(ImagenInmueble::class, 'inmueble_id');
+    }
+
+    public function getImagenUrlAttribute(): ?string
+    {
+        return MediaUrl::fromStoragePath($this->attributes['imagen'] ?? null);
     }
 }

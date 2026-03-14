@@ -11,7 +11,7 @@
                 <div class="bg-white rounded-lg shadow-lg p-6 text-center">
                     <div class="w-32 h-32 rounded-full mx-auto flex items-center justify-center mb-4 overflow-hidden border-4 border-gray-100 shadow-sm relative group">
                         @if($usuario->foto_perfil)
-                            <img src="{{ str_starts_with($usuario->foto_perfil, 'http') ? $usuario->foto_perfil : asset('storage/' . $usuario->foto_perfil) }}" alt="Foto de perfil" class="w-full h-full object-cover">
+                            <img src="{{ str_starts_with($usuario->foto_perfil, 'http') ? $usuario->foto_perfil : (str_contains($usuario->foto_perfil, 'storage/') ? asset($usuario->foto_perfil) : asset('storage/' . $usuario->foto_perfil)) }}" alt="Foto de perfil" class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full bg-[#003049] flex items-center justify-center text-4xl text-white font-bold">
                                 {{ substr($usuario->nombre, 0, 1) }}

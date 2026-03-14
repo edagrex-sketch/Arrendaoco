@@ -67,7 +67,7 @@
                         class="bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-100 transition-all hover:-translate-y-2 hover:shadow-xl group flex flex-col">
                         <div class="relative h-48 bg-slate-200">
                             @if ($inmueble && $inmueble->imagen)
-                                <img src="{{ asset($inmueble->imagen) }}" alt="{{ $inmueble->titulo }}"
+                                <img src="{{ str_starts_with($inmueble->imagen, 'http') ? $inmueble->imagen : (str_contains($inmueble->imagen, 'storage/') ? asset($inmueble->imagen) : asset('storage/' . $inmueble->imagen)) }}" alt="{{ $inmueble->titulo }}"
                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-slate-400">
@@ -121,7 +121,7 @@
                                         <div
                                             class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs uppercase overflow-hidden shrink-0">
                                             @if($inmueble->propietario->foto_perfil)
-                                                <img src="{{ str_starts_with($inmueble->propietario->foto_perfil, 'http') ? $inmueble->propietario->foto_perfil : asset('storage/' . $inmueble->propietario->foto_perfil) }}"
+                                                <img src="{{ str_starts_with($inmueble->propietario->foto_perfil, 'http') ? $inmueble->propietario->foto_perfil : (str_contains($inmueble->propietario->foto_perfil, 'storage/') ? asset($inmueble->propietario->foto_perfil) : asset('storage/' . $inmueble->propietario->foto_perfil)) }}"
                                                     alt="Propietario" class="w-full h-full object-cover">
                                             @else
                                                 {{ substr($inmueble->propietario->nombre, 0, 2) }}
@@ -142,7 +142,7 @@
                                         Ver Propiedad
                                     </a>
                                     @if($inmueble->contrato_documento)
-                                        <a href="{{ asset($inmueble->contrato_documento) }}" target="_blank"
+                                        <a href="{{ str_contains($inmueble->contrato_documento, 'storage/') ? asset($inmueble->contrato_documento) : asset('storage/' . $inmueble->contrato_documento) }}" target="_blank"
                                             class="w-full bg-[#FDF0D5] text-[#003049] text-center font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-[#FDF0D5]/80 transition-colors shadow-sm">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                                                 stroke="currentColor">

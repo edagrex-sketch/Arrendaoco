@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Support\MediaUrl;
 
 class InmuebleResource extends JsonResource
 {
@@ -29,22 +30,22 @@ class InmuebleResource extends JsonResource
             'habitaciones' => $this->habitaciones,
             'banos' => $this->banos,
             'metros' => $this->metros,
-            'imagen_portada' => $this->imagen ? url($this->imagen) : null,
+            'imagen_portada' => MediaUrl::fromStoragePath($this->imagen),
             'latitud' => $this->latitud,
             'longitud' => $this->longitud,
             'propietario' => [
                 'id' => $this->propietario->id,
                 'nombre' => $this->propietario->nombre,
                 'email' => $this->propietario->email,
-                'foto_perfil' => $this->propietario->foto_perfil ? url('storage/' . $this->propietario->foto_perfil) : null,
+                'foto_perfil' => MediaUrl::fromStoragePath($this->propietario->foto_perfil),
             ],
-            'imagenes' => $this->imagenes->map(function($img) {
+            'imagenes' => $this->imagenes->map(function ($img) {
                 return [
                     'id' => $img->id,
-                    'url' => url($img->ruta_imagen),
+                    'url' => MediaUrl::fromStoragePath($img->ruta_imagen),
                 ];
             }),
-            'resenas' => $this->resenas->map(function($res) {
+            'resenas' => $this->resenas->map(function ($res) {
                 return [
                     'id' => $res->id,
                     'usuario' => $res->usuario->nombre,

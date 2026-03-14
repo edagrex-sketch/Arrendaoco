@@ -52,7 +52,7 @@
                         class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 flex flex-col h-full">
                         {{-- Cabecera con Imagen --}}
                         <div class="relative h-64 overflow-hidden">
-                            <img src="{{ $inmueble->imagen }}" alt="{{ $inmueble->titulo }}"
+                            <img src="{{ $inmueble->imagen_url }}" alt="{{ $inmueble->titulo }}"
                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                             {{-- Badge de Estatus --}}
                             <div class="absolute top-4 right-4">
@@ -104,7 +104,7 @@
                                     <div class="mt-2 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center gap-3">
                                         <div class="w-10 h-10 rounded-full bg-white border border-blue-200 flex items-center justify-center text-blue-600 font-bold uppercase overflow-hidden shrink-0 shadow-sm">
                                             @if($inquilino->foto_perfil)
-                                                <img src="{{ str_starts_with($inquilino->foto_perfil, 'http') ? $inquilino->foto_perfil : asset('storage/'.$inquilino->foto_perfil) }}" alt="Inquilino" class="w-full h-full object-cover">
+                                                <img src="{{ str_starts_with($inquilino->foto_perfil, 'http') ? $inquilino->foto_perfil : (str_contains($inquilino->foto_perfil, 'storage/') ? asset($inquilino->foto_perfil) : asset('storage/'.$inquilino->foto_perfil)) }}" alt="Inquilino" class="w-full h-full object-cover">
                                             @else
                                                 {{ substr($inquilino->nombre, 0, 2) }}
                                             @endif

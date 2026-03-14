@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Inmueble;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Support\MediaUrl;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -134,7 +135,7 @@ class InmuebleController extends Controller
     public function show(Inmueble $inmueble)
     {
         $inmueble->load(['propietario', 'resenas.usuario']);
-        $imagenes = DB::table('imagenes_inmuebles')->where('inmueble_id', $inmueble->id)->get();
+        $imagenes = $inmueble->imagenes()->get();
         return view('inmuebles.show', compact('inmueble', 'imagenes'));
     }
 
@@ -171,7 +172,7 @@ class InmuebleController extends Controller
             return redirect()->route('inmuebles.index')->with('error', 'No puedes editar un inmueble que ya está rentado.');
         }
 
-        $imagenes = DB::table('imagenes_inmuebles')->where('inmueble_id', $inmueble->id)->get();
+        $imagenes = $inmueble->imagenes()->get();
         return view('inmuebles.edit', compact('inmueble', 'imagenes'));
     }
 
@@ -249,20 +250,22 @@ class InmuebleController extends Controller
 
             $primeraImagen = $request->file('imagenes')[0];
             $pathPortada = $primeraImagen->store('inmuebles', 'public');
-            $inmueble->imagen = '/storage/' . $pathPortada;
+            MediaUrl::ensurePublicStorageCopy($pathPortada);
+            $inmueble->imagen = $pathPortada;
 
             if ($request->hasFile('contrato_documento')) {
                 $pathContrato = $request->file('contrato_documento')->store('contratos', 'public');
-                $inmueble->contrato_documento = '/storage/' . $pathContrato;
+                $inmueble->contrato_documento = $pathContrato;
             }
 
             $inmueble->save();
 
             foreach ($request->file('imagenes') as $foto) {
                 $path = $foto->store('inmuebles', 'public');
+                MediaUrl::ensurePublicStorageCopy($path);
                 DB::table('imagenes_inmuebles')->insert([
                     'inmueble_id' => $inmueble->id,
-                    'ruta_imagen' => '/storage/' . $path,
+                    'ruta_imagen' => $path,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -346,15 +349,16 @@ class InmuebleController extends Controller
 
         if ($request->hasFile('contrato_documento')) {
             $pathContrato = $request->file('contrato_documento')->store('contratos', 'public');
-            $inmueble->update(['contrato_documento' => '/storage/' . $pathContrato]);
+            $inmueble->update(['contrato_documento' => $pathContrato]);
         }
 
         if ($request->hasFile('imagenes')) {
             foreach ($request->file('imagenes') as $foto) {
                 $path = $foto->store('inmuebles', 'public');
+                MediaUrl::ensurePublicStorageCopy($path);
                 DB::table('imagenes_inmuebles')->insert([
                     'inmueble_id' => $inmueble->id,
-                    'ruta_imagen' => '/storage/' . $path,
+                    'ruta_imagen' => $path,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -378,3 +382,5 @@ class InmuebleController extends Controller
         return redirect()->route('inmuebles.index')->with('success', 'Propiedad eliminada correctamente.');
     }
 }
+
+

@@ -113,7 +113,7 @@
 
                     <div class="flex items-center gap-4 mb-10 p-4 bg-gray-50 rounded-[2rem] border border-gray-100">
                         <div class="h-24 w-24 bg-gray-200 rounded-2xl shadow-sm overflow-hidden flex-shrink-0">
-                            <img src="{{ str_starts_with($inmueble->imagen, 'http') ? $inmueble->imagen : asset('storage/' . $inmueble->imagen) }}"
+                            <img src="{{ str_starts_with($inmueble->imagen, 'http') ? $inmueble->imagen : (str_contains($inmueble->imagen, 'storage/') ? asset($inmueble->imagen) : asset('storage/' . $inmueble->imagen)) }}"
                                 class="h-full w-full object-cover">
                         </div>
                         <div class="pr-2">
@@ -165,7 +165,7 @@
                             </div>
                             <p class="text-xs text-gray-500 mb-3">Revisa los términos del propietario antes de finalizar tu
                                 reserva.</p>
-                            <a href="{{ asset($inmueble->contrato_documento) }}" target="_blank"
+                            <a href="{{ str_contains($inmueble->contrato_documento, 'storage/') ? asset($inmueble->contrato_documento) : asset('storage/' . $inmueble->contrato_documento) }}" target="_blank"
                                 class="flex items-center justify-center gap-2 w-full bg-white border-2 border-[#003049]/10 text-[#003049] font-bold text-sm py-2 rounded-xl hover:bg-[#003049]/5 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                                     stroke="currentColor">
