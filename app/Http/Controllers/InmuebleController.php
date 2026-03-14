@@ -124,6 +124,10 @@ class InmuebleController extends Controller
             $favoritosIds = auth()->user()->favoritos()->pluck('inmueble_id')->toArray();
         }
 
+        if ($request->ajax() || $request->wantsJson()) {
+            return view('inmuebles.partials.list_inicio', compact('inmuebles', 'favoritosIds'))->render();
+        }
+
         return view('inmuebles.public_index', compact('inmuebles', 'favoritosIds'));
     }
 
