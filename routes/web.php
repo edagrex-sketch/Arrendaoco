@@ -49,6 +49,7 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
     $path = null;
     if ($request->hasFile('foto_perfil')) {
         $path = $request->file('foto_perfil')->store('perfil', 'public');
+        \App\Support\MediaUrl::ensurePublicStorageCopy($path);
     }
 
     // Crear usuario en base de datos

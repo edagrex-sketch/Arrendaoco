@@ -25,7 +25,7 @@
                 Encuentra tu próximo hogar en Ocosingo
             </h2>
             @auth
-                <form action="{{ route('inmuebles.public_search') }}" method="GET"
+                <form id="form-busqueda" action="{{ route('inmuebles.public_search') }}" method="GET"
                     class="flex flex-col gap-4 md:flex-row items-end">
                     <div class="relative flex-1 w-full">
                         <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Ubicación</label>
@@ -134,7 +134,7 @@
     </section>
 
     {{-- 2. SECCIÓN DE PROPIEDADES --}}
-    <section class="container mx-auto px-4 mb-16">
+    <section class="container mx-auto px-4 mb-16" id="resultados-busqueda">
         <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl font-bold text-foreground">Propiedades Disponibles</h2>
             <span class="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full">
@@ -267,6 +267,74 @@
                     confirmButtonColor: '#5D4037'
                 });
             @endif
+
+            // Buscador en tiempo real
+            const form = document.getElementById('form-busqueda');
+            const resultados = document.getElementById('resultados-busqueda');
+            let timeout = null;
+
+            if (form && resultados) {
+                function realizarBusqueda(url) {
+                    resultados.style.opacity = '0.5';
+                    resultados.style.pointerEvents = 'none';
+
+                    fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'text/html'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        resultados.innerHTML = html;
+                    })
+                    .catch(error => console.error('Error en la búsqueda:', error))
+                    .finally(() => {
+                        resultados.style.opacity = '1';
+                        resultados.style.pointerEvents = 'auto';
+                    });
+                }
+
+                function triggerBusqueda() {
+                    const url = new URL(form.action);
+                    const formData = new FormData(form);
+                    const params = new URLSearchParams();
+                    
+                    for(let [key, value] of Object.entries(Object.fromEntries(formData))) {
+                        if (value) {
+                             params.append(key, value);
+                        }
+                    }
+
+                    url.search = params.toString();
+                    realizarBusqueda(url.href);
+                }
+
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    triggerBusqueda();
+                });
+
+                form.querySelectorAll('input, select').forEach(input => {
+                    input.addEventListener(input.tagName === 'INPUT' ? 'input' : 'change', function() {
+                        clearTimeout(timeout);
+                        timeout = setTimeout(triggerBusqueda, 400);
+                    });
+                });
+
+                // Interceptar clics en la paginación dentro de #resultados-busqueda
+                resultados.addEventListener('click', function(e) {
+                    const link = e.target.closest('nav[role="navigation"] a, .pagination a');
+                    if (link && link.href) {
+                        e.preventDefault();
+                        realizarBusqueda(link.href);
+                        
+                        // Scrollear hacia los resultados suavemente
+                        const offsetTop = resultados.getBoundingClientRect().top + window.scrollY - 100;
+                        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                    }
+                });
+            }
         });
     </script>
 @endsection

@@ -39,6 +39,7 @@ class PerfilController extends Controller
             }
 
             $path = $request->file('foto_perfil')->store('perfil', 'public');
+            \App\Support\MediaUrl::ensurePublicStorageCopy($path);
             $usuario->update(['foto_perfil' => $path]);
         }
 

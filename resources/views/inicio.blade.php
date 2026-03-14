@@ -12,7 +12,7 @@
             <h2 class="mb-6 text-center text-3xl font-semibold text-card-foreground">
                 Encuentra tu próximo hogar en Ocosingo
             </h2>
-            <form action="{{ route('inmuebles.public_search') }}" method="GET"
+            <form id="form-busqueda" action="{{ route('inmuebles.public_search') }}" method="GET"
                 class="flex flex-col gap-4 lg:flex-row items-end">
                 <div class="relative flex-1 w-full">
                     <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Ubicación</label>
@@ -235,7 +235,7 @@
     </script>
 
     {{-- 3. SECCIÓN DE RESULTADOS --}}
-    <section class="container mx-auto px-4 mb-20 -mt-8">
+    <section class="container mx-auto px-4 mb-20 -mt-8" id="resultados-busqueda">
         <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl font-bold text-[#003049]">Propiedades Disponibles</h2>
             <div class="flex items-center gap-4">
@@ -384,4 +384,76 @@
         </div>
     </section>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('form-busqueda');
+            const resultados = document.getElementById('resultados-busqueda');
+            let timeout = null;
+
+            if (!form || !resultados) return;
+
+            function realizarBusqueda(url) {
+                resultados.style.opacity = '0.5';
+                resultados.style.pointerEvents = 'none';
+
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    // Reemplazar el contenedor interior si la vista enviada no contiene el outer wrapper
+                    // Pero la vista de public_search retorna partials.list_inicio
+                    // list_inicio no incluye un wrapper <section>
+                    resultados.innerHTML = html;
+                })
+                .catch(error => console.error('Error en la búsqueda:', error))
+                .finally(() => {
+                    resultados.style.opacity = '1';
+                    resultados.style.pointerEvents = 'auto';
+                });
+            }
+
+            function triggerBusqueda() {
+                const url = new URL(form.action);
+                const formData = new FormData(form);
+                const params = new URLSearchParams();
+                
+                for(let [key, value] of Object.entries(Object.fromEntries(formData))) {
+                    if (value) {
+                         params.append(key, value);
+                    }
+                }
+
+                url.search = params.toString();
+                realizarBusqueda(url.href);
+            }
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                triggerBusqueda();
+            });
+
+            form.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener(input.tagName === 'INPUT' ? 'input' : 'change', function() {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(triggerBusqueda, 400);
+                });
+            });
+
+            // Interceptar clics en la paginación dentro de #resultados-busqueda
+            resultados.addEventListener('click', function(e) {
+                const link = e.target.closest('nav[role="navigation"] a, .pagination a');
+                if (link && link.href) {
+                    e.preventDefault();
+                    realizarBusqueda(link.href);
+                    // Opcional: scrollear hacia los resultados
+                    const offsetTop = resultados.getBoundingClientRect().top + window.scrollY - 100;
+                    window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
 @endsection
