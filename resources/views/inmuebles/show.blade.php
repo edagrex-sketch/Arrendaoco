@@ -225,7 +225,7 @@
                                 </a>
                             @endif
                         @else
-                            <a href="mailto:{{ $inmueble->propietario->email }}"
+                            <a href="https://mail.google.com/mail/?view=cm&fs=1&to={{ $inmueble->propietario->email }}" target="_blank"
                                 class="bg-white text-[#729CB2] px-4 sm:px-6 py-3 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition-colors border border-[#729CB2]">
                                 Contactar
                             </a>
