@@ -58,9 +58,9 @@ class ResenaController extends Controller
     {
         $data = $request->validate([
             'puntuacion' => 'required|integer|min:1|max:5',
-            'comentario' => ['required', 'string', 'max:1000', 'regex:/^[a-zA-Z0-9\s.,?!*\-áéíóúÁÉÍÓÚñÑ]+$/u'],
+            'comentario' => ['required', 'string', 'max:1000', 'regex:/^[a-zA-Z0-9\s.,?!*\-áéíóúÁÉÍÓÚñÑ()":;]+$/u'],
         ], [
-            'comentario.regex' => 'El comentario contiene caracteres no válidos. Solo se permiten letras, números y los símbolos: . , ? ! * -'
+            'comentario.regex' => 'El comentario contiene caracteres no válidos. Solo se permiten letras, números y los símbolos: . , ? ! * - ( ) " : ;'
         ]);
 
         $resena = Resena::updateOrCreate(
