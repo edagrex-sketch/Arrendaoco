@@ -138,7 +138,7 @@ class InmuebleController extends Controller
 
     public function show(Inmueble $inmueble)
     {
-        $inmueble->load(['propietario', 'resenas.usuario']);
+        $inmueble->load(['propietario', 'resenas.usuario', 'contratos.inquilino']);
         $imagenes = $inmueble->imagenes()->get();
         return view('inmuebles.show', compact('inmueble', 'imagenes'));
     }

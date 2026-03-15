@@ -536,6 +536,102 @@
 
 
 
+            {{-- Finanzas y Pagos (solo para el propietario del inmueble) --}}
+            @if(Auth::check() && Auth::id() === $inmueble->propietario_id && !empty($inmueble->contratos) && $inmueble->contratos->isNotEmpty())
+            @php
+                $contratoActivo = $inmueble->contratos->firstWhere('estatus', 'activo') ?? $inmueble->contratos->first();
+            @endphp
+            @if($contratoActivo)
+            <div class="mt-8 pt-8 border-t border-slate-100/80">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="h-8 w-1 bg-[#C1121F] rounded-full"></div>
+                    <h2 class="text-3xl font-black text-[#003049] tracking-tight">Finanzas y Pagos</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Vista de Próximo Pago -->
+                    <div class="bg-white rounded-[2rem] p-6 shadow-md border border-gray-100 flex flex-col justify-center gap-4">
+                        <h3 class="font-bold text-slate-400 uppercase tracking-widest text-[10px]">Próximo Cobro Esperado</h3>
+                        @php
+                            $diaPago = \Carbon\Carbon::parse($contratoActivo->fecha_inicio)->day;
+                            $vence = now()->setDay($diaPago);
+                            if (now()->day >= $diaPago) $vence->addMonth();
+                        @endphp
+                        <div class="flex flex-wrap items-center justify-between gap-y-5 gap-x-6 mt-4">
+                            <div class="flex items-center gap-4 flex-1 min-w-[240px]">
+                                <div class="h-14 w-14 rounded-2xl bg-[#FDF0D5] flex items-center justify-center text-xl shadow-inner shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6 text-[#003049]">
+                                        <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xl font-black text-[#003049] truncate" title="Renta de {{ $vence->translatedFormat('F') }}">Renta de {{ $vence->translatedFormat('F') }}</p>
+                                    <p class="text-[11px] font-bold text-gray-400 mt-1 truncate">Inquilino: {{ $contratoActivo->inquilino->nombre ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                            <div class="shrink-0 text-left sm:text-right bg-slate-50/50 sm:bg-transparent p-3 sm:p-0 rounded-xl w-full sm:w-auto border border-slate-100 sm:border-none">
+                                <p class="text-3xl font-black text-[#003049]">${{ number_format($contratoActivo->renta_mensual, 2) }} <span class="text-xs text-gray-400 font-bold">MXN</span></p>
+                                <p class="text-[10px] font-bold text-gray-400 mt-1">Vence: {{ $vence->format('d/m/Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen del Contrato -->
+                     <div class="bg-[#FDF0D5]/40 rounded-[2rem] p-6 shadow-sm border border-[#FDF0D5] flex flex-col justify-center gap-4">
+                        <h3 class="font-bold text-slate-500 uppercase tracking-widest text-[10px]">Detalles del Contrato Vigente</h3>
+                        <div class="grid grid-cols-2 gap-4 h-full items-center text-center">
+                            <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Inicio</p>
+                                <p class="text-lg font-black text-[#003049] mt-1">{{ \Carbon\Carbon::parse($contratoActivo->fecha_inicio)->format('d/m/Y') }}</p>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Fin</p>
+                                <p class="text-lg font-black text-[#003049] mt-1">{{ $contratoActivo->fecha_fin ? \Carbon\Carbon::parse($contratoActivo->fecha_fin)->format('d/m/Y') : 'Indefinido' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historial (Demostrativo / Simple) -->
+                <div class="bg-white rounded-[2rem] shadow-md border border-gray-100 overflow-hidden overflow-x-auto w-full mb-10">
+                    <table class="w-full text-left min-w-[600px]">
+                        <thead>
+                            <tr class="bg-[#FDF0D5]/30 border-b border-gray-100">
+                                <th class="px-6 py-4 text-[10px] font-black text-[#669BBC] uppercase tracking-widest">Concepto</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-[#669BBC] uppercase tracking-widest">Fecha de Pago</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-[#669BBC] uppercase tracking-widest">Monto</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-[#669BBC] uppercase tracking-widest text-right">Estatus</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-6 py-5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-8 w-8 rounded-lg bg-[#669BBC]/10 flex items-center justify-center shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-[#669BBC]">
+                                                <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-[#003049] text-sm whitespace-nowrap">Depósito y 1er Mes</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-5 text-sm font-medium text-gray-500">{{ \Carbon\Carbon::parse($contratoActivo->fecha_inicio)->format('d/m/Y') }}</td>
+                                <td class="px-6 py-5 text-sm font-black text-[#003049]">${{ number_format($contratoActivo->renta_mensual + ($contratoActivo->deposito ?? 0), 2) }}</td>
+                                <td class="px-6 py-5 text-right">
+                                    <span class="px-3 py-1 bg-[#669BBC]/20 text-[#003049] text-[8px] font-black uppercase tracking-widest rounded-full">Recibido</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
+            @endif
+
+
+
             {{-- Sección de Reseñas --}}
             <div class="mt-8 pt-8 border-t border-slate-100/80">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
@@ -909,5 +1005,71 @@
                     }
                 </script>
             @endif
-        </div>
+        {{-- ==== SECCIÓN PARA PROPIETARIOS: HISTORIAL DE PAGOS ==== --}}
+        @if(auth()->check() && auth()->id() === $inmueble->propietario_id && isset($inmueble->contratos) && $inmueble->contratos->isNotEmpty())
+            <div class="mt-12 bg-white rounded-3xl p-6 lg:p-8 shadow-sm border border-slate-200">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="h-8 w-1 bg-[#669BBC] rounded-full"></div>
+                    <h2 class="text-3xl font-black text-[#003049] tracking-tight">Historial de Inquilinos y Pagos</h2>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/40 border border-gray-100 overflow-hidden overflow-x-auto">
+                    <table class="w-full text-left min-w-[700px]">
+                        <thead>
+                            <tr class="bg-[#FDF0D5]/30 border-b border-gray-100">
+                                <th class="px-8 py-5 text-xs font-black text-[#669BBC] uppercase tracking-widest">Inquilino</th>
+                                <th class="px-8 py-5 text-xs font-black text-[#669BBC] uppercase tracking-widest">Contrato / Concepto</th>
+                                <th class="px-8 py-5 text-xs font-black text-[#669BBC] uppercase tracking-widest">Fecha Ingreso</th>
+                                <th class="px-8 py-5 text-xs font-black text-[#669BBC] uppercase tracking-widest">Monto Mensual</th>
+                                <th class="px-8 py-5 text-xs font-black text-[#669BBC] uppercase tracking-widest text-right">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            @foreach($inmueble->contratos as $contrato)
+                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center gap-4">
+                                            <div class="h-10 w-10 rounded-xl bg-[#669BBC]/10 flex items-center justify-center text-lg shrink-0 font-bold text-[#669BBC]">
+                                                {{ substr($contrato->inquilino->nombre ?? 'N/A', 0, 1) }}
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-[#003049] whitespace-nowrap">{{ $contrato->inquilino->nombre ?? 'Usuario Eliminado' }}</p>
+                                                <p class="text-xs text-gray-400">{{ $contrato->inquilino->email ?? 'N/A' }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <p class="font-bold text-[#003049] whitespace-nowrap">Renta + Depósito Inicial</p>
+                                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Depósito: ${{ number_format($contrato->deposito ?? 0, 2) }}</p>
+                                    </td>
+                                    <td class="px-8 py-6 text-sm font-medium text-gray-600 whitespace-nowrap">
+                                        {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d/m/Y') }}
+                                    </td>
+                                    <td class="px-8 py-6 text-lg font-black text-[#003049] whitespace-nowrap">
+                                        ${{ number_format($contrato->renta_mensual, 2) }}
+                                    </td>
+                                    <td class="px-8 py-6 text-right">
+                                        <div class="flex items-center justify-end gap-3">
+                                            @if($contrato->estatus === 'activo')
+                                                <span class="px-3 py-1 bg-[#669BBC]/20 text-[#003049] text-[10px] font-black uppercase tracking-widest rounded-full">Activo</span>
+                                            @else
+                                                <span class="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-black uppercase tracking-widest rounded-full">{{ ucfirst($contrato->estatus) }}</span>
+                                            @endif
+                                            <button class="p-2 hover:bg-[#669BBC]/10 rounded-lg text-[#669BBC] transition-colors" title="Detalles del Contrato">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+        {{-- ==== FIN SECCIÓN PARA PROPIETARIOS ==== --}}
+
+    </div> <!-- ESTE ES EL CORRESPONDIENTE AL max-w-4xl mx-auto DE LINEA 6 PERO CUIDADO SI FALTABA DIV -->
 @endsection
