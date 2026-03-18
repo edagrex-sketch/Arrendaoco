@@ -25,6 +25,13 @@ class AuthController extends Controller
 
         /** @var Usuario $usuario */
         $usuario = Auth::user();
+
+        if ($usuario->estatus !== 'activo') {
+            $usuario->tokens()->delete();
+            return response()->json([
+                'message' => 'Tu cuenta ha sido desactivada. Contacta al administrador.'
+            ], 403);
+        }
         $usuario->load('roles');
 
         $token = $usuario->createToken('arrendaoco-token')->plainTextToken;

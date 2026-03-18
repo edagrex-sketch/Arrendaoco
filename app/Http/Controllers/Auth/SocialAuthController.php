@@ -69,6 +69,10 @@ class SocialAuthController extends Controller
                 $user->asignarRol('inquilino');
             }
 
+            if ($user && $user->estatus !== 'activo') {
+                return redirect()->route('login')->withErrors(['error' => 'Tu cuenta ha sido desactivada. Contacta al administrador para más información.']);
+            }
+
             // Iniciar sesión
             Auth::login($user, true); // true = remember me
 

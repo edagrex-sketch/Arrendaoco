@@ -54,6 +54,10 @@
                                 class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
                                 Mi renta
                             </a>
+                            <a href="{{ route('chats.index') }}"
+                                class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
+                                Mensajes
+                            </a>
                         @endunless
                     @endauth
                     @if (Auth::check() && Auth::user()->tieneRol('propietario'))
@@ -196,6 +200,10 @@
                             <a href="{{ route('inmuebles.mis_rentas') }}"
                                 class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
                                 Mi renta
+                            </a>
+                            <a href="{{ route('chats.index') }}"
+                                class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
+                                Mensajes
                             </a>
                         @endunless
                     @endauth
@@ -453,6 +461,45 @@
             })
         }
     </script>
+    @auth
+        <script>
+            window.addEventListener('load', () => {
+                if (window.Echo) {
+                    // Escuchar eventos globales para notificaciones
+                    @php
+                        $userChats = Auth::user()->chats()->get();
+                    @endphp
+                    
+                    @foreach($userChats as $userChat)
+                        window.Echo.private(`chat.{{ $userChat->id }}`)
+                            .listen('MessageSent', (e) => {
+                                // Solo mostrar si NO estamos en la página de ese chat específico
+                                // O si el contenedor de mensajes no existe (no estamos en la vista de chat)
+                                if (e.sender_id != {{ Auth::id() }} && !document.getElementById('mensajes-container')) {
+                                    Swal.fire({
+                                        title: 'Nuevo Mensaje',
+                                        text: e.contenido,
+                                        icon: 'info',
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 4000,
+                                        timerProgressBar: true,
+                                        didOpen: (toast) => {
+                                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                            toast.addEventListener('click', () => {
+                                                window.location.href = `/chats/${e.chat_id}`;
+                                            })
+                                        }
+                                    });
+                                }
+                            });
+                    @endforeach
+                }
+            });
+        </script>
+    @endauth
     @stack('scripts')
     @auth
     <x-arrendito />

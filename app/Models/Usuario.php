@@ -85,4 +85,19 @@ class Usuario extends Authenticatable
                     ->withPivot('nota')
                     ->withTimestamps();
     }
+
+    public function chats()
+    {
+        return Chat::where(function($query) {
+            $query->where('usuario_1', $this->id)
+                  ->orWhere('usuario_2', $this->id);
+        })
+            ->with(['usuario1', 'usuario2', 'inmueble'])
+            ->orderByDesc('last_message_at');
+    }
+
+    public function mensajesEnviados()
+    {
+        return $this->hasMany(Mensaje::class, 'sender_id');
+    }
 }

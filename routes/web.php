@@ -13,6 +13,7 @@ use App\Http\Controllers\ArrenditoController;
 use App\Http\Controllers\ResenaController;
 use App\Http\Controllers\FavoritoController;
 use App\Http\Controllers\ArrenditoChatController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Auth\SocialAuthController;
 
 // Social Login Routes
@@ -125,16 +126,23 @@ Route::post('/login', function (Request $request) {
         'password.required' => 'La contraseña es obligatoria.',
     ]);
 
-    if (!Auth::attempt($credentials)) {
-        return back()
-            ->withErrors(['email' => 'Credenciales incorrectas'])
-            ->onlyInput('email');
+    if (Auth::attempt($credentials)) {
+        if (Auth::user()->estatus !== 'activo') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return back()->withErrors(['email' => 'Tu cuenta ha sido desactivada. Contacta al administrador para más información.'])->onlyInput('email');
+        }
+
+        $request->session()->regenerate();
+        $request->session()->flash('login_success', true);
+
+        return redirect()->route('inicio');
     }
 
-    $request->session()->regenerate();
-    $request->session()->flash('login_success', true);
-
-    return redirect()->route('inicio');
+    return back()
+        ->withErrors(['email' => 'Credenciales incorrectas'])
+        ->onlyInput('email');
 });
 
 // Logout
@@ -193,6 +201,12 @@ Route::middleware('auth')->group(function () {
     // Arrendito Mascot Routes
     Route::post('/arrendito/actualizar', [ArrenditoController::class, 'updateName'])->name('arrendito.update');
     Route::get('/arrendito/nombre', [ArrenditoController::class, 'getName'])->name('arrendito.name');
+
+    // Chat Nativo Routes
+    Route::get('/chats', [ChatController::class, 'index'])->name('chats.index');
+    Route::get('/chats/{chat}', [ChatController::class, 'show'])->name('chats.show');
+    Route::post('/chats/{chat}/mensaje', [ChatController::class, 'sendMessage'])->name('chats.message.send');
+    Route::get('/chats/iniciar/{otroUsuarioId}/{inmuebleId?}', [ChatController::class, 'startChat'])->name('chats.start');
 });
 
 // Chat route must be public for visitors
