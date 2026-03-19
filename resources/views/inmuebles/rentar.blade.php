@@ -184,7 +184,7 @@
                         <input type="hidden" name="metodo_pago" :value="method">
                         <button type="submit"
                             class="flex items-center justify-center gap-3 w-full text-center bg-[#C1121F] text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-[#C1121F]/30 hover:bg-[#780000] hover:-translate-y-1 transition-all active:scale-95 border border-[#780000]">
-                            Pagar y Reservar
+                            Llenar contrato
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
