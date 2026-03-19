@@ -9,9 +9,9 @@
         <p class="text-gray-500 mt-2">Gestiona tus dudas y acuerdos con arrendadores e inquilinos.</p>
     </div>
 
-    <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 min-h-[600px] flex flex-col md:flex-row">
+    <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 h-[650px] flex flex-col md:flex-row">
         <!-- Sidebar: Lista de Chats -->
-        <div class="w-full md:w-80 border-r border-gray-100 bg-gray-50/50">
+        <div class="w-full md:w-80 border-r border-gray-100 bg-gray-50/50 flex flex-col h-full">
             <div class="p-6 border-b border-gray-100 bg-white">
                 <div class="relative">
                     <input type="text" placeholder="Buscar chat..." 
@@ -22,7 +22,7 @@
                 </div>
             </div>
 
-            <div class="overflow-y-auto max-h-[500px]">
+            <div class="flex-1 overflow-y-auto">
                 @forelse($chats as $chat)
                     @php 
                         $otroUsuario = $chat->getOtroUsuario(Auth::id()); 
@@ -39,26 +39,34 @@
                                     {{ substr($otroUsuario->nombre, 0, 1) }}
                                 </div>
                             @endif
-                            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                            
+                            {{-- Miniatura de la Propiedad (Identificador de Contexto) --}}
+                            @if($chat->inmueble && $chat->inmueble->imagen)
+                                <div class="absolute -bottom-1 -left-2 w-7 h-7 rounded-lg border-2 border-white shadow-lg overflow-hidden ring-1 ring-[#003049]/10 hover:scale-125 transition-transform z-10" title="Negociando para: {{ $chat->inmueble->titulo }}">
+                                    <img src="{{ \App\Support\MediaUrl::fromStoragePath($chat->inmueble->imagen) }}" class="w-full h-full object-cover">
+                                </div>
+                            @endif
+
+                            {{-- Burbuja de Notificación del Chat --}}
+                            <div id="badge-chat-{{ $chat->id }}" class="{{ $chat->unread_count > 0 ? '' : 'hidden' }} absolute -top-2 -left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md z-20 animate-pulse">
+                                {{ $chat->unread_count }}
+                            </div>
+
+                            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full z-10"></div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-baseline">
-                                <h3 class="font-bold text-[#003049] truncate">{{ $otroUsuario->nombre }}</h3>
-                                <span class="text-[10px] text-gray-400 font-medium">
+                            @if($chat->inmueble)
+                                <p class="text-[9px] text-[#669BBC] font-extrabold uppercase tracking-widest mb-0.5 leading-none">{{ $chat->inmueble->titulo }}</p>
+                            @endif
+                            <div class="flex justify-between items-baseline mb-0.5">
+                                <h3 class="font-bold text-[#003049] truncate leading-none">{{ $otroUsuario->nombre }}</h3>
+                                <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">
                                     {{ $chat->last_message_at ? $chat->last_message_at->diffForHumans(null, true) : '' }}
                                 </span>
                             </div>
-                            <p class="text-xs text-gray-500 truncate mt-0.5">
+                            <p class="text-xs text-gray-500 truncate">
                                 {{ $chat->last_message ?? 'Inicia una conversación...' }}
                             </p>
-                            @if($chat->inmueble)
-                                <div class="mt-1 flex items-center gap-1">
-                                    <svg class="w-3 h-3 text-[#669BBC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                                    </svg>
-                                    <span class="text-[10px] text-[#669BBC] font-bold truncate">{{ $chat->inmueble->titulo }}</span>
-                                </div>
-                            @endif
                         </div>
                     </a>
                 @empty

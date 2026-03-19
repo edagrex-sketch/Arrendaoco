@@ -16,11 +16,14 @@ class Mensaje extends Model
         'sender_id',
         'contenido',
         'leido',
-        'tipo'
+        'parent_id',
+        'tipo',
+        'metadata',
     ];
 
     protected $casts = [
         'leido' => 'boolean',
+        'metadata' => 'array',
     ];
 
     public function chat()
@@ -31,5 +34,15 @@ class Mensaje extends Model
     public function sender()
     {
         return $this->belongsTo(Usuario::class, 'sender_id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Mensaje::class, 'parent_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Mensaje::class, 'parent_id');
     }
 }
