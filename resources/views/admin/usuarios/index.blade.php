@@ -95,13 +95,13 @@
                                 Editar
                             </a>
                             @if($usuario->id != auth()->id())
-                                <button onclick="confirmDeleteUser({{ $usuario->id }}, '{{ addslashes($usuario->nombre) }}', '{{ $usuario->email }}', {{ $usuario->roles->count() }}, {{ $usuario->inmuebles()->count() }}, {{ ($usuario->contratosComoPropietario()->where('estatus', 'activo')->count() + $usuario->contratosComoInquilino()->where('estatus', 'activo')->count()) }}, {{ $usuario->tieneRol('admin') || $usuario->es_admin ? 'true' : 'false' }})" 
-                                    class="text-[#C1121F] hover:text-[#780000] font-medium text-sm transition-colors">
-                                    Eliminar
+                                <button onclick="confirmToggleStatus({{ $usuario->id }}, '{{ addslashes($usuario->nombre) }}', '{{ $usuario->estatus }}', {{ $usuario->inmuebles()->count() }}, {{ ($usuario->contratosComoPropietario()->whereIn('estatus', ['activo', 'vigente'])->count() + $usuario->contratosComoInquilino()->whereIn('estatus', ['activo', 'vigente'])->count()) }}, {{ $usuario->tieneRol('admin') || $usuario->es_admin ? 'true' : 'false' }})" 
+                                    class="{{ $usuario->estatus === 'activo' ? 'text-[#C1121F] hover:text-[#780000]' : 'text-green-600 hover:text-green-800' }} font-medium text-sm transition-colors">
+                                    {{ $usuario->estatus === 'activo' ? 'Desactivar' : 'Activar' }}
                                 </button>
                             @else
-                                <span class="text-slate-300 text-sm cursor-not-allowed" title="No puedes eliminarte a ti mismo">
-                                    Eliminar
+                                <span class="text-slate-300 text-sm cursor-not-allowed" title="No puedes cambiar tu propio estatus">
+                                    {{ $usuario->estatus === 'activo' ? 'Desactivar' : 'Activar' }}
                                 </span>
                             @endif
                         </div>
@@ -145,12 +145,12 @@
 
 @push('scripts')
 <script>
-function confirmDeleteUser(id, nombre, email, rolesCount, inmueblesCount, contratosActivos, esAdmin) {
+function confirmToggleStatus(id, nombre, estatusActual, inmueblesCount, contratosActivos, esAdmin) {
     // Bloquear si es admin
     if (esAdmin) {
         Swal.fire({
             title: 'Acción no permitida',
-            html: `<p>No puedes eliminar al administrador <strong>${nombre}</strong>.</p>
+            html: `<p>No puedes desactivar al administrador <strong>${nombre}</strong>.</p>
                    <p style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">Primero quítale el rol de administrador desde la edición del usuario.</p>`,
             icon: 'error',
             confirmButtonColor: '#003049',
@@ -159,12 +159,11 @@ function confirmDeleteUser(id, nombre, email, rolesCount, inmueblesCount, contra
         return;
     }
 
-    // Verificar si tiene datos que impiden eliminación
-    if (contratosActivos > 0) {
+    // Checking constraints when deactivating
+    if (estatusActual === 'activo' && (contratosActivos > 0 || inmueblesCount > 0)) {
         Swal.fire({
-            title: 'No se puede eliminar',
-            html: `<p>El usuario <strong>${nombre}</strong> tiene <strong>${contratosActivos} contrato(s) activo(s)</strong>.</p>
-                   <p style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">Finaliza los contratos antes de eliminar al usuario.</p>`,
+            title: 'Acción no permitida',
+            html: `<p>El usuario <strong>${nombre}</strong> no puede ser desactivado porque tiene propiedades publicadas o contratos vigentes.</p>`,
             icon: 'error',
             confirmButtonColor: '#003049',
             confirmButtonText: 'Entendido'
@@ -172,61 +171,31 @@ function confirmDeleteUser(id, nombre, email, rolesCount, inmueblesCount, contra
         return;
     }
 
-    if (inmueblesCount > 0) {
-        Swal.fire({
-            title: 'No se puede eliminar',
-            html: `<p>El usuario <strong>${nombre}</strong> tiene <strong>${inmueblesCount} propiedad(es)</strong> registrada(s).</p>
-                   <p style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">Elimina o transfiere las propiedades antes de borrar al usuario.</p>`,
-            icon: 'error',
-            confirmButtonColor: '#003049',
-            confirmButtonText: 'Entendido'
-        });
-        return;
-    }
+    let nuevoEstatus = estatusActual === 'activo' ? 'inactivo' : 'activo';
+    let accionTexto = estatusActual === 'activo' ? 'Desactivar' : 'Activar';
 
     // Confirmación con información detallada
     Swal.fire({
-        title: '¿Eliminar este usuario?',
+        title: `¿${accionTexto} este usuario?`,
         html: `
             <div style="text-align: left; padding: 0.5rem; background: #fef2f2; border-radius: 0.75rem; margin-top: 0.5rem;">
                 <p style="margin-bottom: 0.25rem;"><strong>👤 Nombre:</strong> ${nombre}</p>
-                <p style="margin-bottom: 0.25rem;"><strong>📧 Email:</strong> ${email}</p>
-                <p><strong>🏷️ Roles:</strong> ${rolesCount} rol(es)</p>
+                <p style="margin-bottom: 0.25rem;"><strong>Estatus actual:</strong> ${estatusActual.toUpperCase()}</p>
             </div>
-            <p style="font-size: 0.8rem; color: #dc2626; margin-top: 1rem; font-weight: bold;">
-                ⚠️ Esta acción eliminará permanentemente al usuario, sus reseñas y favoritos.
+            <p style="font-size: 0.8rem; color: #003049; margin-top: 1rem; font-weight: bold;">
+                El usuario pasará a estar ${nuevoEstatus.toUpperCase()}.
             </p>
         `,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#C1121F',
+        confirmButtonColor: estatusActual === 'activo' ? '#C1121F' : '#22c55e',
         cancelButtonColor: '#003049',
-        confirmButtonText: 'Sí, eliminar usuario',
+        confirmButtonText: `Sí, ${accionTexto.toLowerCase()}`,
         cancelButtonText: 'Cancelar',
         focusCancel: true,
     }).then((result) => {
         if (result.isConfirmed) {
-            // Segunda confirmación para seguridad extra
-            Swal.fire({
-                title: '⚠️ Confirmación final',
-                text: `Escribe "ELIMINAR" para confirmar la eliminación de ${nombre}`,
-                input: 'text',
-                inputPlaceholder: 'Escribe ELIMINAR',
-                showCancelButton: true,
-                confirmButtonColor: '#C1121F',
-                cancelButtonColor: '#003049',
-                confirmButtonText: 'Confirmar eliminación',
-                cancelButtonText: 'Cancelar',
-                inputValidator: (value) => {
-                    if (value !== 'ELIMINAR') {
-                        return 'Debes escribir "ELIMINAR" exactamente para confirmar';
-                    }
-                }
-            }).then((result2) => {
-                if (result2.isConfirmed) {
-                    document.getElementById('delete-form-' + id).submit();
-                }
-            });
+            document.getElementById('delete-form-' + id).submit();
         }
     });
 }

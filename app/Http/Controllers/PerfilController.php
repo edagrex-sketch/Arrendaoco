@@ -21,15 +21,8 @@ class PerfilController extends Controller
         /** @var Usuario $usuario */
 
         $request->validate([
-            'nombre' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:usuarios,email,'.$usuario->id,
             'password' => 'nullable|string|min:8|confirmed',
             'foto_perfil' => 'nullable|image|max:2048', // Max 2MB
-        ]);
-
-        $usuario->update([
-            'nombre' => $request->nombre,
-            'email' => $request->email,
         ]);
 
         if ($request->hasFile('foto_perfil')) {

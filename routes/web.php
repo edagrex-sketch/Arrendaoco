@@ -164,6 +164,7 @@ Route::middleware('auth')->group(function () {
     // Rutas de Inmuebles
     Route::get('/mis-propiedades', [InmuebleController::class, 'index'])->name('inmuebles.index');
     Route::get('/mis-rentas', [InmuebleController::class, 'misRentas'])->name('inmuebles.mis_rentas');
+    Route::post('/rentas/{contrato}/cancelar', [InmuebleController::class, 'cancelarRenta'])->name('rentas.cancelar');
     Route::get('/publicar', [InmuebleController::class, 'create'])->name('inmuebles.create');
     Route::post('/publicar', [InmuebleController::class, 'store'])->name('inmuebles.guardar');
     Route::get('/inmuebles/{inmueble}/editar', [InmuebleController::class, 'edit'])->name('inmuebles.edit');
@@ -269,21 +270,60 @@ Route::post('/reset-password', function (\Illuminate\Http\Request $request) {
 })->name('password.update');
 
 
-// Rutas de Test para Vistas de Pagos (protegidas con auth)
-Route::middleware('auth')->prefix('test-pagos')->group(function () {
-    Route::get('/', function () {
-        return view('pagos.index');
-    })->name('pagos.test.index');
-    Route::get('/checkout', function () {
-        return view('pagos.checkout');
-    })->name('pagos.test.checkout');
-    Route::get('/success', function () {
-        return view('pagos.success');
-    })->name('pagos.test.success');
-    Route::post('/success/{inmueble}', function (\Illuminate\Http\Request $request, \App\Models\Inmueble $inmueble) {
+// Rutas de Pago (Protegidas con Auth)
+Route::middleware('auth')->prefix('pagos')->group(function () {
+    Route::post('/checkout/{inmueble}', function (\Illuminate\Http\Request $request, \App\Models\Inmueble $inmueble) {
+        $metodo = $request->input('metodo_pago', 'card');
+        $montoTotal = $inmueble->renta_mensual + ($inmueble->deposito ?? 0);
+
+        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        try {
+            // Determine payment methods based on selection
+            $paymentMethodTypes = $metodo === 'oxxo' ? ['oxxo'] : ['card'];
+
+            $session = \Stripe\Checkout\Session::create([
+                'payment_method_types' => $paymentMethodTypes,
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'mxn',
+                        'product_data' => [
+                            'name' => 'Renta Inicial: ' . $inmueble->titulo,
+                            'description' => 'Pago de 1er mes y depósito.',
+                        ],
+                        'unit_amount' => (int) ($montoTotal * 100), // Stripes uses cents
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => route('pagos.test.success.process', ['inmueble' => $inmueble->id]) . '?session_id={CHECKOUT_SESSION_ID}&metodo_pago=' . $metodo,
+                'cancel_url' => route('inmuebles.rentar', $inmueble->id),
+            ]);
+
+            return redirect()->away($session->url);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al procesar el pago con Stripe: ' . $e->getMessage());
+        }
+    })->name('pagos.stripe.checkout');
+
+    Route::match(['get', 'post'], '/success/{inmueble}', function (\Illuminate\Http\Request $request, \App\Models\Inmueble $inmueble) {
+        // Prevent double processing if already rented by them (or anyone)
+        if ($inmueble->estatus === 'rentado' && \App\Models\Contrato::where('inmueble_id', $inmueble->id)->exists()) {
+            // If we just got redirected from Stripe, but contract is already there, just show success
+            return view('pagos.success', ['inmueble' => $inmueble]);
+        }
+
+        // Validate via Stripe Session if needed
+        if ($request->has('session_id')) {
+            \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+            $session = \Stripe\Checkout\Session::retrieve($request->session_id);
+            if ($session->payment_status !== 'paid' && $session->payment_status !== 'unpaid') {
+                return redirect()->route('inicio')->with('error', 'El pago no fue completado.');
+            }
+        }
+
         $inmueble->update(['estatus' => 'rentado']);
 
-        // As a bonus, let's create a basic mock contract so it appears in their payments or contracts profile later if they have one.
         $contrato = \App\Models\Contrato::create([
             'inmueble_id' => $inmueble->id,
             'propietario_id' => $inmueble->propietario_id,
@@ -294,25 +334,40 @@ Route::middleware('auth')->prefix('test-pagos')->group(function () {
             'estatus' => 'activo'
         ]);
 
-        // Crear evento de calendario para el inquilino (inicio de renta)
+        // Crear evento de calendario para el inquilino
         \App\Models\Evento::create([
             'usuario_id' => Auth::id(),
             'renta_id' => $contrato->id,
             'titulo' => 'Inicio de Renta: ' . $inmueble->titulo,
-            'descripcion' => 'Tu renta del inmueble "' . $inmueble->titulo . '" ha comenzado de forma exitosa.',
+            'descripcion' => 'Tu renta del inmueble "' . $inmueble->titulo . '" ha comenzado.',
             'fecha' => now()
         ]);
 
-        // Crear evento de calendario para el propietario (nueva renta confirmada)
+        // Crear evento de calendario para el propietario
         \App\Models\Evento::create([
             'usuario_id' => $inmueble->propietario_id,
             'renta_id' => $contrato->id,
             'titulo' => 'Inmueble Rentado: ' . $inmueble->titulo,
-            'descripcion' => 'El inmueble ha sido rentado por ' . Auth::user()->nombre . '.',
+            'descripcion' => 'Tu propiedad ha sido rentada por ' . Auth::user()->nombre . '.',
             'fecha' => now()
         ]);
 
         $metodo = $request->input('metodo_pago', 'card');
+
+        // Create an initial Pago record to reflect the transaction
+        \App\Models\Pago::create([
+            'contrato_id' => $contrato->id,
+            'mes' => now()->month,
+            'anio' => now()->year,
+            'monto' => $contrato->renta_mensual + ($contrato->deposito ?? 0),
+            // For oxxo it might be pending, but we'll mark it pending if OXXO, or Pagado if card
+            'estatus' => $metodo === 'oxxo' ? 'pendiente' : 'pagado',
+            'fecha_pago' => now(),
+            'dias_atraso' => 0,
+            'recargo' => 0,
+            'total_con_recargo' => $contrato->renta_mensual + ($contrato->deposito ?? 0),
+            'concepto' => 'Depósito y 1er Mes',
+        ]);
 
         if ($metodo === 'oxxo') {
             $referencia = implode(' - ', str_split(rand(100000000000000, 999999999999999), 4));
@@ -321,4 +376,59 @@ Route::middleware('auth')->prefix('test-pagos')->group(function () {
 
         return view('pagos.success', ['inmueble' => $inmueble]);
     })->name('pagos.test.success.process');
+
+    Route::post('/pagar-mensualidad/{contrato}', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
+        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        try {
+            $session = \Stripe\Checkout\Session::create([
+                'payment_method_types' => ['card', 'oxxo'], // Providing both to allow selection
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'mxn',
+                        'product_data' => [
+                            'name' => 'Renta Mensual',
+                            'description' => 'Propiedad: ' . ($contrato->inmueble->titulo ?? 'N/A'),
+                        ],
+                        'unit_amount' => (int) ($contrato->renta_mensual * 100),
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => route('pagos.stripe.mensualidad.success', ['contrato' => $contrato->id]) . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('inmuebles.mis_rentas'),
+            ]);
+
+            return redirect()->away($session->url);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al procesar el pago con Stripe: ' . $e->getMessage());
+        }
+    })->name('pagos.stripe.mensualidad');
+
+    Route::match(['get', 'post'], '/mensualidad/success/{contrato}', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
+        if ($request->has('session_id')) {
+            \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+            $session = \Stripe\Checkout\Session::retrieve($request->session_id);
+            if ($session->payment_status !== 'paid' && $session->payment_status !== 'unpaid') {
+                return redirect()->route('inmuebles.mis_rentas')->with('error', 'El pago mensual no fue completado.');
+            }
+        }
+
+        // To avoid duplicate payments, check if a payment for this month/year already exists recently (last few minutes or status pending)
+        // Here we just record it assuming Stripe is source of truth
+        \App\Models\Pago::create([
+            'contrato_id' => $contrato->id,
+            'mes' => now()->month,
+            'anio' => now()->year,
+            'monto' => $contrato->renta_mensual,
+            'estatus' => 'pagado',
+            'fecha_pago' => now(),
+            'dias_atraso' => 0,
+            'recargo' => 0,
+            'total_con_recargo' => $contrato->renta_mensual,
+            'concepto' => 'Mensualidad ' . now()->month . '/' . now()->year,
+        ]);
+
+        return redirect()->route('inmuebles.mis_rentas')->with('success', 'Pago de mensualidad registrado exitosamente.');
+    })->name('pagos.stripe.mensualidad.success');
 });

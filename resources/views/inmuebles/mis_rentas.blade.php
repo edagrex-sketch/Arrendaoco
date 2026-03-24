@@ -102,34 +102,54 @@
                                 </p>
 
                                 <div
-                                    class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex items-center justify-between mb-4">
-                                    <div>
-                                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Renta Mensual</p>
-                                        <p class="text-[#003049] font-black text-lg">
-                                            ${{ number_format($contrato->renta_mensual, 2) }}</p>
+                                    class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex flex-col justify-between mb-4 gap-2">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Renta Mensual</p>
+                                            <p class="text-[#003049] font-black text-lg">
+                                                ${{ number_format($contrato->renta_mensual, 2) }}</p>
+                                        </div>
+                                        <div class="w-px h-10 bg-slate-200 mx-2"></div>
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-right">Día de Pago</p>
+                                            <p class="text-[#003049] font-black text-lg text-right">
+                                                {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d') }}</p>
+                                        </div>
                                     </div>
-                                    <div class="w-px h-10 bg-slate-200"></div>
-                                    <div>
-                                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Día de Pago</p>
-                                        <p class="text-[#003049] font-black text-lg text-right">
-                                            {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d') }}</p>
+                                    <div class="border-t border-slate-200 pt-2 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Inicio Renta</p>
+                                            <p class="text-xs text-slate-600 font-bold">
+                                                {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d/m/Y') }}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-right">Fin Renta</p>
+                                            <p class="text-xs text-slate-600 font-bold text-right">
+                                                {{ $contrato->fecha_fin ? \Carbon\Carbon::parse($contrato->fecha_fin)->format('d/m/Y') : 'Indefinido' }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div class="flex items-center gap-3 text-sm text-slate-600 border-t border-slate-100 pt-4">
-                                    @if($inmueble && $inmueble->propietario)
+                                    @php
+                                        $esPropietario = $contrato->propietario_id === auth()->id();
+                                        $otraParte = $esPropietario ? $contrato->inquilino : ($inmueble ? $inmueble->propietario : null);
+                                    @endphp
+                                    @if($otraParte)
                                         <div
                                             class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs uppercase overflow-hidden shrink-0">
-                                            @if($inmueble->propietario->foto_perfil)
-                                                <img src="{{ str_starts_with($inmueble->propietario->foto_perfil, 'http') ? $inmueble->propietario->foto_perfil : (str_contains($inmueble->propietario->foto_perfil, 'storage/') ? asset($inmueble->propietario->foto_perfil) : asset('storage/' . $inmueble->propietario->foto_perfil)) }}"
-                                                    alt="Propietario" class="w-full h-full object-cover">
+                                            @if($otraParte->foto_perfil)
+                                                <img src="{{ str_starts_with($otraParte->foto_perfil, 'http') ? $otraParte->foto_perfil : (str_contains($otraParte->foto_perfil, 'storage/') ? asset($otraParte->foto_perfil) : asset('storage/' . $otraParte->foto_perfil)) }}"
+                                                    alt="Usuario" class="w-full h-full object-cover">
                                             @else
-                                                {{ substr($inmueble->propietario->nombre, 0, 2) }}
+                                                {{ substr($otraParte->nombre, 0, 2) }}
                                             @endif
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-xs text-slate-400 font-medium leading-none mb-1">Propietario</p>
-                                            <p class="font-bold text-slate-800 truncate">{{ $inmueble->propietario->nombre }}</p>
+                                            <p class="text-xs text-slate-400 font-medium leading-none mb-1">{{ $esPropietario ? 'Inquilino' : 'Propietario' }}</p>
+                                            <p class="font-bold text-slate-800 truncate">{{ $otraParte->nombre }}</p>
                                         </div>
                                     @endif
                                 </div>
@@ -151,16 +171,23 @@
                                             </svg>
                                             Ver Contrato
                                         </a>
+                                    @endif
+
+                                    @if($contrato->estatus === 'activo')
+                                        <form action="{{ route('rentas.cancelar', $contrato) }}" method="POST" class="w-full">
+                                            @csrf
+                                            <button type="submit" onclick="return confirm('¿Estás seguro de que deseas cancelar esta renta? Esta acción limitará el acceso a pagos y liberará la propiedad.');"
+                                                class="w-full bg-red-50 text-red-500 hover:text-white hover:bg-red-500 text-center font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                Cancelar mi renta
+                                            </button>
+                                        </form>
                                     @else
-                                        <button disabled
-                                            class="w-full bg-slate-100 text-slate-400 text-center font-bold py-3 rounded-xl cursor-not-allowed text-sm flex items-center justify-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                                                stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            Cancelar mi renta
-                                        </button>
+                                        <div class="w-full bg-slate-100 text-slate-400 text-center font-bold py-3 rounded-xl cursor-not-allowed text-sm flex items-center justify-center gap-2">
+                                            Renta cancelada/finalizada
+                                        </div>
                                     @endif
                                 @endif
                             </div>
@@ -207,9 +234,12 @@
                                         $vence->addMonth();
                                 @endphp
                                 <p class="text-xs text-gray-400 font-bold mb-4">Vence el {{ $vence->format('d/m/Y') }}</p>
-                                <a href="#" class="w-full md:w-auto text-center px-10 py-4 bg-[#003049] text-white font-black rounded-2xl shadow-lg shadow-[#003049]/20 hover:bg-[#002538] hover:-translate-y-1 transition-all active:scale-95">
-                                    Pagar Ahora
-                                </a>
+                                <form action="{{ route('pagos.stripe.mensualidad', $contrato) }}" method="POST" class="w-full md:w-auto">
+                                    @csrf
+                                    <button type="submit" class="w-full text-center px-10 py-4 bg-[#003049] text-white font-black rounded-2xl shadow-lg shadow-[#003049]/20 hover:bg-[#002538] hover:-translate-y-1 transition-all active:scale-95">
+                                        Pagar Ahora
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     @endforeach
@@ -236,7 +266,35 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
-                            <!-- Datos Demostrativos Historial -->
+                            @php
+                                $todosLosPagos = collect();
+                                foreach($contratos as $c) {
+                                    // 1. Pago Inicial mock (basado en el inicio del contrato)
+                                    $todosLosPagos->push((object)[
+                                        'concepto' => 'Depósito y 1er Mes',
+                                        'subconcepto' => 'Propiedad: ' . ($c->inmueble->titulo ?? 'N/A'),
+                                        'fecha' => \Carbon\Carbon::parse($c->fecha_inicio),
+                                        'monto' => $c->renta_mensual + ($c->deposito ?? 0),
+                                        'estatus' => 'Pagado'
+                                    ]);
+                                    
+                                    // 2. Pagos reales
+                                    if ($c->pagos) {
+                                        foreach($c->pagos as $p) {
+                                            $todosLosPagos->push((object)[
+                                                'concepto' => current(explode(' ', $p->concepto ?? 'Mensualidad')) . ' ' . ($p->mes ?? '') . '/' . ($p->anio ?? ''),
+                                                'subconcepto' => 'Propiedad: ' . ($c->inmueble->titulo ?? 'N/A'),
+                                                'fecha' => \Carbon\Carbon::parse($p->fecha_pago ?? $p->created_at),
+                                                'monto' => $p->total_con_recargo ?? $p->monto,
+                                                'estatus' => $p->estatus
+                                            ]);
+                                        }
+                                    }
+                                }
+                                $todosLosPagos = $todosLosPagos->sortByDesc('fecha');
+                            @endphp
+
+                            @forelse($todosLosPagos as $pago)
                             <tr class="hover:bg-gray-50/50 transition-colors">
                                 <td class="px-8 py-6">
                                     <div class="flex items-center gap-4">
@@ -246,16 +304,16 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="font-bold text-[#003049] whitespace-nowrap">Depósito y 1er Mes</p>
-                                            <p class="text-xs text-gray-400">Pago Inicial</p>
+                                            <p class="font-bold text-[#003049] whitespace-nowrap">{{ $pago->concepto }}</p>
+                                            <p class="text-xs text-gray-400">{{ $pago->subconcepto }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-8 py-6 text-sm font-medium text-gray-600 whitespace-nowrap">{{ $contratos->first()->fecha_inicio ?? now()->format('d/m/Y') }}</td>
-                                <td class="px-8 py-6 text-lg font-black text-[#003049] whitespace-nowrap">${{ number_format($contratos->first()->renta_mensual + ($contratos->first()->deposito ?? 0), 2) }}</td>
+                                <td class="px-8 py-6 text-sm font-medium text-gray-600 whitespace-nowrap">{{ $pago->fecha->format('d/m/Y') }}</td>
+                                <td class="px-8 py-6 text-lg font-black text-[#003049] whitespace-nowrap">${{ number_format($pago->monto, 2) }}</td>
                                 <td class="px-8 py-6 text-right">
                                     <div class="flex items-center justify-end gap-3">
-                                        <span class="px-3 py-1 bg-[#669BBC]/20 text-[#003049] text-[10px] font-black uppercase tracking-widest rounded-full">Pagado</span>
+                                        <span class="px-3 py-1 {{ strtolower($pago->estatus) === 'pagado' ? 'bg-[#669BBC]/20 text-[#003049]' : 'bg-yellow-100 text-yellow-700' }} text-[10px] font-black uppercase tracking-widest rounded-full">{{ ucfirst($pago->estatus) }}</span>
                                         <button class="p-2 hover:bg-[#669BBC]/10 rounded-lg text-[#669BBC] transition-colors" title="Ver Recibo">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -264,6 +322,11 @@
                                     </div>
                                 </td>
                             </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="px-8 py-6 text-center text-sm font-medium text-gray-500">No hay transacciones todavía.</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

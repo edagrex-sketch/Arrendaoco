@@ -115,37 +115,30 @@ class UsuarioController extends Controller
     public function edit($id)
     {
         $usuario = Usuario::with('roles')->findOrFail($id);
+
+        // Verificar si tiene inmuebles o rentas
+        $tieneInmuebles = $usuario->inmuebles()->count() > 0;
+        $esInquilino = $usuario->contratosComoInquilino()->whereIn('estatus', ['activo', 'vigente'])->count() > 0;
+        $puedeDesactivar = !($tieneInmuebles || $esInquilino);
+
         $roles = Role::all();
-        return view('admin.usuarios.edit', compact('usuario', 'roles'));
+        return view('admin.usuarios.edit', compact('usuario', 'roles', 'puedeDesactivar'));
     }
 
     public function update(Request $request, $id)
     {
         $usuario = Usuario::with('roles')->findOrFail($id);
 
-        // Sanitizar nombre: eliminar espacios extra
-        $request->merge([
-            'nombre' => preg_replace('/\s+/', ' ', trim($request->nombre ?? '')),
-            'email' => strtolower(trim($request->email ?? '')),
-        ]);
+        // Verificar si tiene inmuebles o rentas
+        $tieneInmuebles = $usuario->inmuebles()->count() > 0;
+        $esInquilino = $usuario->contratosComoInquilino()->whereIn('estatus', ['activo', 'vigente'])->count() > 0;
 
-        // Reglas base
+        if (($tieneInmuebles || $esInquilino) && $request->estatus === 'inactivo' && $usuario->estatus === 'activo') {
+            return redirect()->back()->with('error', 'No se puede desactivar el usuario "' . $usuario->nombre . '" porque tiene propiedades publicadas o contratos vigentes.');
+        }
+
+        // Reglas base (nombre y email ya no se editan)
         $rules = [
-            'nombre' => [
-                'required',
-                'string',
-                'min:3',
-                'max:100',
-                'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/',
-            ],
-            'email' => [
-                'required',
-                'string',
-                'email:rfc,dns',
-                'max:255',
-                'unique:usuarios,email,' . $id,
-                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
-            ],
             'estatus' => 'required|in:activo,inactivo',
             'roles' => 'required|array|min:1',
             'roles.*' => 'exists:roles,id',
@@ -166,14 +159,6 @@ class UsuarioController extends Controller
         }
 
         $messages = [
-            'nombre.required' => 'El nombre completo es obligatorio.',
-            'nombre.min' => 'El nombre debe tener al menos 3 caracteres.',
-            'nombre.max' => 'El nombre no puede exceder los 100 caracteres.',
-            'nombre.regex' => 'El nombre solo puede contener letras y espacios.',
-            'email.required' => 'El correo electrónico es obligatorio.',
-            'email.email' => 'Ingresa un correo electrónico válido.',
-            'email.unique' => 'Este correo ya está registrado por otro usuario.',
-            'email.regex' => 'El formato del correo electrónico no es válido.',
             'password.min' => 'La nueva contraseña debe tener al menos 8 caracteres.',
             'password.max' => 'La contraseña no puede exceder los 64 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
@@ -207,10 +192,6 @@ class UsuarioController extends Controller
 
         // Detectar cambios realizados
         $cambios = [];
-        if ($usuario->nombre !== $request->nombre)
-            $cambios[] = 'nombre';
-        if ($usuario->email !== $request->email)
-            $cambios[] = 'email';
         if ($usuario->estatus !== $request->estatus)
             $cambios[] = 'estatus';
         if ($request->filled('password'))
@@ -222,8 +203,6 @@ class UsuarioController extends Controller
             $cambios[] = 'roles';
 
         $usuario->fill([
-            'nombre' => $request->nombre,
-            'email' => $request->email,
             'estatus' => $request->estatus,
         ]);
 
@@ -249,47 +228,29 @@ class UsuarioController extends Controller
     {
         $usuario = Usuario::with('roles')->findOrFail($id);
 
-        // 1. Evitar que el admin se elimine a sí mismo
+        // 1. Evitar que el admin se desactive a sí mismo
         if ($id == auth()->id()) {
-            return redirect()->back()->with('error', 'No puedes eliminar tu propia cuenta de administrador. Pide a otro administrador que realice esta acción.');
+            return redirect()->back()->with('error', 'No puedes desactivar tu propia cuenta de administrador.');
         }
 
-        // 2. No permitir eliminar a otros admins (protección extra)
-        if ($usuario->tieneRol('admin') || $usuario->es_admin) {
-            return redirect()->back()->with('error', 'No se puede eliminar a otro administrador. Primero quítale el rol de administrador desde la edición.');
+        $nuevoEstatus = $usuario->estatus === 'activo' ? 'inactivo' : 'activo';
+
+        // 2. Verificar si tiene inmuebles o rentas al intentar desactivar
+        if ($nuevoEstatus === 'inactivo') {
+            $tieneInmuebles = $usuario->inmuebles()->count() > 0;
+            $esInquilino = $usuario->contratosComoInquilino()->whereIn('estatus', ['activo', 'vigente'])->count() > 0;
+
+            if ($tieneInmuebles || $esInquilino) {
+                return redirect()->back()->with('error', 'No se puede desactivar el usuario "' . $usuario->nombre . '" porque tiene propiedades publicadas o contratos vigentes.');
+            }
         }
 
-        // 3. Verificar si tiene contratos activos (como dueño o inquilino)
-        $contratosActivosPropietario = $usuario->contratosComoPropietario()->where('estatus', 'activo')->count();
-        $contratosActivosInquilino = $usuario->contratosComoInquilino()->where('estatus', 'activo')->count();
-        $totalContratos = $contratosActivosPropietario + $contratosActivosInquilino;
+        $nuevoEstatus = $usuario->estatus === 'activo' ? 'inactivo' : 'activo';
+        $usuario->estatus = $nuevoEstatus;
+        $usuario->save();
 
-        if ($totalContratos > 0) {
-            return redirect()->back()->with('error', 'No se puede eliminar al usuario "' . $usuario->nombre . '": tiene ' . $totalContratos . ' contrato(s) vigente(s). Finalice los contratos primero.');
-        }
-
-        // 4. Verificar si tiene inmuebles publicados
-        $cantidadInmuebles = $usuario->inmuebles()->count();
-        if ($cantidadInmuebles > 0) {
-            return redirect()->back()->with('error', 'El usuario "' . $usuario->nombre . '" tiene ' . $cantidadInmuebles . ' propiedad(es) registrada(s). Elimine o transfiera las propiedades antes de borrar al usuario.');
-        }
-
-        // 5. Verificar si tiene reseñas
-        if ($usuario->resenas()->exists()) {
-            // Eliminar reseñas asociadas (soft delete o aviso)
-            $usuario->resenas()->delete();
-        }
-
-        // 6. Eliminar favoritos
-        if ($usuario->favoritos()->exists()) {
-            $usuario->favoritos()->delete();
-        }
-
-        $nombreUsuario = $usuario->nombre;
-        $usuario->roles()->detach(); // Limpiar tabla pivot de roles
-        $usuario->delete();
-
-        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario "' . $nombreUsuario . '" eliminado correctamente junto con sus datos asociados.');
+        $texto = $nuevoEstatus === 'activo' ? 'activado' : 'desactivado';
+        return redirect()->route('admin.usuarios.index')->with('success', 'Usuario "' . $usuario->nombre . '" ' . $texto . ' correctamente.');
     }
 
     public function reporte()

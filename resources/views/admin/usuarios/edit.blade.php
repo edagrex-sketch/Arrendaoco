@@ -61,43 +61,30 @@
                     @method('PUT')
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {{-- Campo: Nombre --}}
+                        {{-- Campo: Nombre (Solo lectura) --}}
                         <div class="space-y-2">
                             <label for="nombre"
                                 class="text-sm font-black text-[#003049] uppercase tracking-widest ml-1">Nombre
-                                Completo <span class="text-red-500">*</span></label>
+                                Completo</label>
                             <div class="relative">
                                 <input type="text" name="nombre" id="nombre"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-blue-100 focus:border-[#669BBC] focus:bg-white transition-all outline-none"
-                                    value="{{ old('nombre', $usuario->nombre) }}" placeholder="Ej: Juan Pérez" required
-                                    minlength="3" maxlength="100"
-                                    pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$"
-                                    data-original="{{ $usuario->nombre }}">
+                                    class="w-full bg-slate-100 border border-slate-200 rounded-2xl px-5 py-3.5 text-slate-500 cursor-not-allowed outline-none"
+                                    value="{{ $usuario->nombre }}" readonly disabled>
                             </div>
-                            <p class="text-[10px] text-slate-400 ml-1">Solo letras y espacios. Mínimo 3, máximo 100 caracteres.</p>
-                            <p id="nombre-error" class="text-red-500 text-xs mt-1 ml-1 hidden"></p>
-                            @error('nombre')
-                                <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
-                            @enderror
+                            <p class="text-[10px] text-slate-400 ml-1">El nombre no puede ser modificado.</p>
                         </div>
 
-                        {{-- Campo: Email --}}
+                        {{-- Campo: Email (Solo lectura) --}}
                         <div class="space-y-2">
                             <label for="email"
                                 class="text-sm font-black text-[#003049] uppercase tracking-widest ml-1">Correo
-                                Electrónico <span class="text-red-500">*</span></label>
+                                Electrónico</label>
                             <div class="relative">
                                 <input type="email" name="email" id="email"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-blue-100 focus:border-[#669BBC] focus:bg-white transition-all outline-none"
-                                    value="{{ old('email', $usuario->email) }}" placeholder="ejemplo@arrendaoco.com"
-                                    required maxlength="255"
-                                    data-original="{{ $usuario->email }}">
+                                    class="w-full bg-slate-100 border border-slate-200 rounded-2xl px-5 py-3.5 text-slate-500 cursor-not-allowed outline-none"
+                                    value="{{ $usuario->email }}" readonly disabled>
                             </div>
-                            <p class="text-[10px] text-slate-400 ml-1">Debe ser un correo real y no registrado por otro usuario.</p>
-                            <p id="email-error" class="text-red-500 text-xs mt-1 ml-1 hidden"></p>
-                            @error('email')
-                                <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
-                            @enderror
+                            <p class="text-[10px] text-slate-400 ml-1">El correo no puede ser modificado.</p>
                         </div>
                     </div>
 
@@ -198,7 +185,7 @@
                                     @if($usuario->id == auth()->id()) title="No puedes desactivarte a ti mismo" @endif>
                                     <option value="activo" {{ old('estatus', $usuario->estatus) == 'activo' ? 'selected' : '' }}>🟢 Activo</option>
                                     <option value="inactivo" {{ old('estatus', $usuario->estatus) == 'inactivo' ? 'selected' : '' }}
-                                        @if($usuario->id == auth()->id()) disabled @endif>🔴 Inactivo @if($usuario->id == auth()->id()) (no disponible para tu cuenta) @endif</option>
+                                        @if($usuario->id == auth()->id() || !$puedeDesactivar) disabled @endif>🔴 Inactivo @if($usuario->id == auth()->id()) (no disponible para tu cuenta) @elseif(!$puedeDesactivar) (tiene contratos/propiedades) @endif</option>
                                 </select>
                                 <div
                                     class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
@@ -210,6 +197,8 @@
                             </div>
                             @if($usuario->id == auth()->id())
                                 <p class="text-[10px] text-amber-500 ml-1 font-bold">⚠️ No puedes desactivar tu propia cuenta.</p>
+                            @elseif(!$puedeDesactivar)
+                                <p class="text-[10px] text-amber-500 ml-1 font-bold">⚠️ Este usuario no puede ser desactivado (tiene propiedades o contratos vigentes).</p>
                             @endif
                         </div>
                     </div>
@@ -288,49 +277,9 @@
 
         // Valores originales para detectar cambios
         const originals = {
-            nombre: nombreInput.dataset.original || '',
-            email: emailInput.dataset.original || '',
             estatus: document.getElementById('estatus').dataset.original || '',
             roles: @json($usuario->roles->pluck('id')->toArray())
         };
-
-        // Validación de nombre en tiempo real
-        nombreInput.addEventListener('input', function() {
-            const value = this.value;
-            const errorEl = document.getElementById('nombre-error');
-            
-            this.value = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
-            
-            if (this.value.length > 0 && this.value.length < 3) {
-                showError(errorEl, 'El nombre necesita al menos 3 caracteres.');
-                setFieldState(this, 'error');
-            } else if (this.value.length >= 3) {
-                hideError(errorEl);
-                setFieldState(this, this.value !== originals.nombre ? 'changed' : 'success');
-            } else {
-                hideError(errorEl);
-                setFieldState(this, 'neutral');
-            }
-            detectChanges();
-        });
-
-        // Validación de email en tiempo real
-        emailInput.addEventListener('input', function() {
-            const errorEl = document.getElementById('email-error');
-            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            
-            if (this.value.length > 0 && !emailRegex.test(this.value)) {
-                showError(errorEl, 'Formato de correo inválido.');
-                setFieldState(this, 'error');
-            } else if (this.value.length > 0 && emailRegex.test(this.value)) {
-                hideError(errorEl);
-                setFieldState(this, this.value !== originals.email ? 'changed' : 'success');
-            } else {
-                hideError(errorEl);
-                setFieldState(this, 'neutral');
-            }
-            detectChanges();
-        });
 
         // Contraseña: mostrar/ocultar campo de confirmación y fortaleza
         passwordInput.addEventListener('input', function() {
@@ -377,21 +326,6 @@
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             let hasErrors = false;
-
-            // Validar nombre
-            if (nombreInput.value.trim().length < 3) {
-                showError(document.getElementById('nombre-error'), 'El nombre es obligatorio (mínimo 3 caracteres).');
-                setFieldState(nombreInput, 'error');
-                hasErrors = true;
-            }
-
-            // Validar email
-            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            if (!emailRegex.test(emailInput.value)) {
-                showError(document.getElementById('email-error'), 'Ingresa un correo electrónico válido.');
-                setFieldState(emailInput, 'error');
-                hasErrors = true;
-            }
 
             // Validar contraseña si se proporcionó
             if (passwordInput.value.length > 0) {
@@ -463,12 +397,6 @@
         function getChanges() {
             const changes = [];
             
-            if (nombreInput.value.trim() !== originals.nombre) {
-                changes.push(`<strong>Nombre:</strong> "${originals.nombre}" → "${nombreInput.value.trim()}"`);
-            }
-            if (emailInput.value.trim() !== originals.email) {
-                changes.push(`<strong>Email:</strong> "${originals.email}" → "${emailInput.value.trim()}"`);
-            }
             if (document.getElementById('estatus').value !== originals.estatus) {
                 changes.push(`<strong>Estatus:</strong> "${originals.estatus}" → "${document.getElementById('estatus').value}"`);
             }

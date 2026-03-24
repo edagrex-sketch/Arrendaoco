@@ -63,8 +63,47 @@ class InmuebleController extends Controller
 
     public function misRentas()
     {
-        $contratos = \App\Models\Contrato::with('inmueble.propietario')->where('inquilino_id', auth()->id())->latest()->get();
+        $userId = auth()->id();
+        $contratos = \App\Models\Contrato::with(['inmueble.propietario', 'inquilino', 'pagos'])
+            ->where('inquilino_id', $userId)
+            ->orWhere('propietario_id', $userId)
+            ->latest()
+            ->get();
         return view('inmuebles.mis_rentas', compact('contratos'));
+    }
+
+    public function cancelarRenta(\App\Models\Contrato $contrato)
+    {
+        if ($contrato->inquilino_id !== auth()->id() && $contrato->propietario_id !== auth()->id() && !auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
+            abort(403, 'No tienes permiso para cancelar esta renta.');
+        }
+
+        if ($contrato->estatus !== 'activo') {
+            return back()->with('error', 'Esta renta ya no está activa.');
+        }
+
+        try {
+            DB::beginTransaction();
+            $contrato->estatus = 'cancelado';
+            
+            // Set end date to now if it isn't set, otherwise maybe it already has one.
+            if (!$contrato->fecha_fin) {
+                // If the user wants to keep a history of what the intended end date was, they might not zero it out. But typically cancelling happens now.
+                $contrato->fecha_fin = now();
+            }
+            $contrato->save();
+
+            if ($contrato->inmueble) {
+                $contrato->inmueble->estatus = 'disponible';
+                $contrato->inmueble->save();
+            }
+            DB::commit();
+
+            return back()->with('success', 'Renta (contrato) cancelada exitosamente y la propiedad está disponible de nuevo.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Ocurrió un error al cancelar la renta: ' . $e->getMessage());
+        }
     }
 
     //cargar las ultimas 9 casas disponibles

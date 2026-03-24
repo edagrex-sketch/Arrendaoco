@@ -179,7 +179,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('pagos.test.success.process', $inmueble->id) }}" method="POST">
+                    <form action="{{ route('pagos.stripe.checkout', $inmueble->id) }}" method="POST">
                         @csrf
                         <input type="hidden" name="metodo_pago" :value="method">
                         <button type="submit"
