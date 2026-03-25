@@ -64,7 +64,21 @@ class InmuebleController extends Controller
     public function misRentas()
     {
         $contratos = \App\Models\Contrato::with('inmueble.propietario')->where('inquilino_id', auth()->id())->latest()->get();
-        return view('inmuebles.mis_rentas', compact('contratos'));
+        
+        $pagosPendientes = \App\Models\Pago::with('contrato.inmueble')
+                            ->whereIn('contrato_id', $contratos->pluck('id'))
+                            ->where('estatus', 'pendiente')
+                            ->orderBy('anio', 'asc')
+                            ->orderBy('mes', 'asc')
+                            ->get();
+
+        $historialPagos = \App\Models\Pago::with('contrato.inmueble')
+                            ->whereIn('contrato_id', $contratos->pluck('id'))
+                            ->where('estatus', 'pagado')
+                            ->orderBy('fecha_pago', 'desc')
+                            ->get();
+
+        return view('inmuebles.mis_rentas', compact('contratos', 'pagosPendientes', 'historialPagos'));
     }
 
     //cargar las ultimas 9 casas disponibles
@@ -473,6 +487,26 @@ class InmuebleController extends Controller
 
         $inmueble->delete();
         return redirect()->route('inmuebles.index')->with('success', 'Propiedad eliminada correctamente.');
+    }
+
+    public function descargarContratoPdf(\App\Models\Contrato $contrato)
+    {
+        if ($contrato->inquilino_id !== auth()->id() && $contrato->propietario_id !== auth()->id() && !auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
+            abort(403);
+        }
+        $contrato->load('inmueble.propietario', 'inquilino');
+        $pdf = Pdf::loadView('pdf.contrato', compact('contrato'));
+        return $pdf->download('Contrato_Arrendo_' . $contrato->id . '.pdf');
+    }
+
+    public function descargarComprobantePdf(\App\Models\Pago $pago)
+    {
+        $pago->load('contrato.inmueble.propietario', 'contrato.inquilino');
+        if ($pago->contrato->inquilino_id !== auth()->id() && $pago->contrato->propietario_id !== auth()->id() && !auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
+            abort(403);
+        }
+        $pdf = Pdf::loadView('pdf.comprobante', compact('pago'));
+        return $pdf->download('Recibo_Pago_' . $pago->id . '.pdf');
     }
 }
 

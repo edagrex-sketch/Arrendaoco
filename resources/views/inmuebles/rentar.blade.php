@@ -179,8 +179,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('pagos.test.success.process', $inmueble->id) }}" method="POST">
-                        @csrf
+                    <form action="{{ route('inmuebles.contrato_wizard', $inmueble->id) }}" method="GET">
                         <input type="hidden" name="metodo_pago" :value="method">
                         <button type="submit"
                             class="flex items-center justify-center gap-3 w-full text-center bg-[#C1121F] text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-[#C1121F]/30 hover:bg-[#780000] hover:-translate-y-1 transition-all active:scale-95 border border-[#780000]">

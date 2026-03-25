@@ -164,6 +164,36 @@ Route::middleware('auth')->group(function () {
     // Rutas de Inmuebles
     Route::get('/mis-propiedades', [InmuebleController::class, 'index'])->name('inmuebles.index');
     Route::get('/mis-rentas', [InmuebleController::class, 'misRentas'])->name('inmuebles.mis_rentas');
+
+    // PDF Downloads
+    Route::get('/contratos/{contrato}/descargar', [InmuebleController::class, 'descargarContratoPdf'])->name('contratos.descargar');
+    Route::get('/pagos/{pago}/descargar', [InmuebleController::class, 'descargarComprobantePdf'])->name('pagos.descargar_recibo');
+    
+    // Ruta solo para pruebas: cancelar renta y desvincular
+    Route::delete('/mis-rentas/cancelar/{contrato}', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
+        if ($contrato->inquilino_id === \Illuminate\Support\Facades\Auth::id()) {
+            $inmueble = $contrato->inmueble;
+            if ($inmueble) {
+                $inmueble->update(['estatus' => 'disponible']);
+                
+                // Buscar todos los contratos de este usuario para este inmueble (por si hay duplicados de prueba)
+                $contratosIds = \App\Models\Contrato::where('inquilino_id', \Illuminate\Support\Facades\Auth::id())
+                                ->where('inmueble_id', $inmueble->id)
+                                ->pluck('id');
+                
+                // Borrar pagos y eventos asociados a estos contratos para limpiar el UI
+                \App\Models\Pago::whereIn('contrato_id', $contratosIds)->delete();
+                \App\Models\Evento::whereIn('renta_id', $contratosIds)->delete();
+                
+                // Borrar los contratos
+                \App\Models\Contrato::whereIn('id', $contratosIds)->delete();
+            } else {
+                $contrato->delete();
+            }
+        }
+        return back()->with('success', 'Renta cancelada y desvinculada (Modo de prueba).');
+    })->name('rentas.cancelar_prueba');
+
     Route::get('/publicar', [InmuebleController::class, 'create'])->name('inmuebles.create');
     Route::post('/publicar', [InmuebleController::class, 'store'])->name('inmuebles.guardar');
     Route::get('/inmuebles/{inmueble}/editar', [InmuebleController::class, 'edit'])->name('inmuebles.edit');
@@ -280,6 +310,10 @@ Route::middleware('auth')->prefix('test-pagos')->group(function () {
     Route::get('/success', function () {
         return view('pagos.success');
     })->name('pagos.test.success');
+    Route::get('/checkout/wizard/{inmueble}', function (\App\Models\Inmueble $inmueble) {
+        return view('contrato-pago', compact('inmueble'));
+    })->name('inmuebles.contrato_wizard');
+
     Route::post('/success/{inmueble}', function (\Illuminate\Http\Request $request, \App\Models\Inmueble $inmueble) {
         $inmueble->update(['estatus' => 'rentado']);
 
@@ -288,10 +322,29 @@ Route::middleware('auth')->prefix('test-pagos')->group(function () {
             'inmueble_id' => $inmueble->id,
             'propietario_id' => $inmueble->propietario_id,
             'inquilino_id' => Auth::id(),
-            'fecha_inicio' => now(),
+            'fecha_inicio' => $request->input('fecha_inicio', now()),
+            'plazo' => $request->input('plazo', '1 año'),
+            'firma_digital' => request('firma_digital', null),
             'renta_mensual' => $inmueble->renta_mensual,
-            'deposito' => $inmueble->deposito,
-            'estatus' => 'activo'
+            'deposito' => $inmueble->deposito ?? ($inmueble->renta_mensual),
+            'estatus' => 'activo',
+        ]);
+        $montoTotal = $inmueble->renta_mensual;
+        $conceptoPago = 'Renta 1er Mes';
+
+        if (isset($inmueble->deposito) && $inmueble->deposito > 0) {
+            $montoTotal += $inmueble->deposito;
+            $conceptoPago = 'Renta 1er Mes + Depósito';
+        }
+
+        $pago = \App\Models\Pago::create([
+           'contrato_id' => $contrato->id,
+           'mes' => now()->month,
+           'anio' => now()->year,
+           'monto' => $montoTotal,
+           'concepto' => $conceptoPago,
+           'estatus' => 'pagado',
+           'fecha_pago' => now()
         ]);
 
         // Crear evento de calendario para el inquilino (inicio de renta)
@@ -319,6 +372,6 @@ Route::middleware('auth')->prefix('test-pagos')->group(function () {
             return view('pagos.oxxo', ['inmueble' => $inmueble, 'referencia' => $referencia, 'contrato' => $contrato]);
         }
 
-        return view('pagos.success', ['inmueble' => $inmueble]);
+        return view('pagos.success', compact('inmueble', 'contrato', 'pago'));
     })->name('pagos.test.success.process');
 });

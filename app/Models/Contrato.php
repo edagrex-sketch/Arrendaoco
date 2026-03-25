@@ -20,9 +20,11 @@ class Contrato extends Model
         'inquilino_id',
         'fecha_inicio',
         'fecha_fin',
+        'plazo',
         'renta_mensual',
         'deposito',
         'estatus',
+        'firma_digital',
     ];
 
     /*

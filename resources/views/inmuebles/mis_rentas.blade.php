@@ -61,7 +61,7 @@
                 <!-- Columna Izquierda / Propiedades Rentadas -->
                 <div class="lg:w-1/3 mb-10 lg:mb-0">
                     <div class="grid grid-cols-1 gap-8">
-                @foreach($contratos as $contrato)
+                @foreach($contratos->unique('inmueble_id') as $contrato)
                     @php $inmueble = $contrato->inmueble; @endphp
                     <div
                         class="bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-100 transition-all hover:-translate-y-2 hover:shadow-xl group flex flex-col">
@@ -78,10 +78,16 @@
                                     </svg>
                                 </div>
                             @endif
-                            <div
-                                class="absolute top-4 right-4 bg-white/90 backdrop-blur text-[#003049] text-sm font-black px-3 py-1 rounded-full shadow-md">
-                                Activa
-                            </div>
+                            @if(isset($contrato) && !$contrato->created_at->isToday())
+                                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur text-[#003049] text-sm font-black px-3 py-1 rounded-full shadow-md">
+                                    Activa
+                                </div>
+                            @else
+                                <div class="absolute top-4 right-4 bg-amber-100/90 backdrop-blur text-amber-700 text-sm font-black px-3 py-1 rounded-full shadow-md flex items-center gap-1 border border-amber-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415l-2.414-2.414V6z" clip-rule="evenodd" /></svg>
+                                    En proceso
+                                </div>
+                            @endif
                         </div>
 
                         <div class="p-6 flex-1 flex flex-col">
@@ -90,7 +96,7 @@
                                     title="{{ $inmueble ? $inmueble->titulo : 'Propiedad no disponible' }}">
                                     {{ $inmueble ? $inmueble->titulo : 'Propiedad no disponible' }}
                                 </h3>
-                                <p class="text-slate-500 text-sm flex items-start gap-1 mb-4 line-clamp-2">
+                                <p class="text-slate-500 text-sm flex items-start gap-1 mb-2 line-clamp-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500"
                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -100,6 +106,13 @@
                                     </svg>
                                     {{ $inmueble ? $inmueble->direccion : 'Sin dirección' }}
                                 </p>
+                                
+                                @if(isset($contrato) && $contrato->created_at->isToday())
+                                    <p class="text-xs text-amber-600 font-medium mb-4 bg-amber-50 rounded-lg p-2 border border-amber-100 flex items-start gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                        Esperando validación del arrendador. Una vez aprobada, inicia tu estancia.
+                                    </p>
+                                @endif
 
                                 <div
                                     class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex items-center justify-between mb-4">
@@ -152,15 +165,22 @@
                                             Ver Contrato
                                         </a>
                                     @else
-                                        <button disabled
-                                            class="w-full bg-slate-100 text-slate-400 text-center font-bold py-3 rounded-xl cursor-not-allowed text-sm flex items-center justify-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                                                stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            Cancelar mi renta
-                                        </button>
+                                        <!-- Boton de prueba para cancelar renta y desvincular -->
+                                        <form action="{{ route('rentas.cancelar_prueba', $contrato) }}" method="POST" class="w-full">
+                                            @csrf
+                                            @method('DELETE')
+                                            <!-- Solo para pruebas -->
+                                            <button type="submit"
+                                                onclick="return confirm('¿Estás seguro de cancelar esta renta? (Botón funcional solo para pruebas)')"
+                                                class="w-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors text-center font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                                Cancelar mi renta (Prueba)
+                                            </button>
+                                        </form>
                                     @endif
                                 @endif
                             </div>
@@ -180,7 +200,7 @@
                         </div>
                         
                         <div class="grid grid-cols-1 gap-6">
-                    @foreach($contratos as $contrato)
+                    @forelse($pagosPendientes as $pago)
                         <!-- Card de Pago Pendiente (Ejemplo UI) -->
                         <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-8 group hover:border-[#669BBC]/30 transition-all duration-300">
                             <div class="flex items-center gap-6 w-full md:w-auto">
@@ -190,8 +210,8 @@
                                     </svg>
                                 </div>
                                 <div class="min-w-0">
-                                    <h3 class="text-xl font-bold text-[#003049] mb-1 line-clamp-1">Renta {{ now()->translatedFormat('F Y') }}</h3>
-                                    <p class="text-gray-500 text-sm font-medium line-clamp-1">{{ $contrato->inmueble->titulo ?? 'Propiedad' }}</p>
+                                    <h3 class="text-xl font-bold text-[#003049] mb-1 line-clamp-1">{{ $pago->concepto }}</h3>
+                                    <p class="text-gray-500 text-sm font-medium line-clamp-1">{{ $pago->contrato->inmueble->titulo ?? 'Propiedad' }}</p>
                                     <div class="flex items-center gap-2 mt-2">
                                         <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-[10px] font-black uppercase tracking-widest rounded-full">Pendiente</span>
                                     </div>
@@ -199,12 +219,13 @@
                             </div>
 
                             <div class="flex flex-col md:items-end w-full md:w-auto shrink-0 mt-4 md:mt-0">
-                                <p class="text-3xl font-black text-[#003049] mb-1">${{ number_format($contrato->renta_mensual, 2) }} <span class="text-sm font-bold text-gray-400">MXN</span></p>
+                                <p class="text-3xl font-black text-[#003049] mb-1">${{ number_format($pago->monto, 2) }} <span class="text-sm font-bold text-gray-400">MXN</span></p>
                                 @php
-                                    $diaPago = \Carbon\Carbon::parse($contrato->fecha_inicio)->day;
-                                    $vence = now()->setDay($diaPago);
-                                    if (now()->day > $diaPago)
-                                        $vence->addMonth();
+                                    $diaPago = \Carbon\Carbon::parse($pago->contrato->fecha_inicio)->day;
+                                    $vence = \Carbon\Carbon::create($pago->anio, $pago->mes, $diaPago);
+                                    if (now()->day > $diaPago && $pago->mes == now()->month && $pago->anio == now()->year) {
+                                        $vence->addMonth(); // Fallback date if already passed this month
+                                    }
                                 @endphp
                                 <p class="text-xs text-gray-400 font-bold mb-4">Vence el {{ $vence->format('d/m/Y') }}</p>
                                 <a href="#" class="w-full md:w-auto text-center px-10 py-4 bg-[#003049] text-white font-black rounded-2xl shadow-lg shadow-[#003049]/20 hover:bg-[#002538] hover:-translate-y-1 transition-all active:scale-95">
@@ -212,7 +233,11 @@
                                 </a>
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <div class="bg-white rounded-3xl p-8 text-center text-gray-500 border border-gray-100">
+                            ¡Todo al día! No tienes pagos pendientes.
+                        </div>
+                    @endforelse
                 </div>
             </div>
 
@@ -236,7 +261,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
-                            <!-- Datos Demostrativos Historial -->
+                            @forelse($historialPagos as $pago)
                             <tr class="hover:bg-gray-50/50 transition-colors">
                                 <td class="px-8 py-6">
                                     <div class="flex items-center gap-4">
@@ -246,13 +271,13 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="font-bold text-[#003049] whitespace-nowrap">Depósito y 1er Mes</p>
-                                            <p class="text-xs text-gray-400">Pago Inicial</p>
+                                            <p class="font-bold text-[#003049] whitespace-nowrap">{{ $pago->concepto }}</p>
+                                            <p class="text-xs text-gray-400">{{ $pago->contrato->inmueble->titulo ?? 'Propiedad' }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-8 py-6 text-sm font-medium text-gray-600 whitespace-nowrap">{{ $contratos->first()->fecha_inicio ?? now()->format('d/m/Y') }}</td>
-                                <td class="px-8 py-6 text-lg font-black text-[#003049] whitespace-nowrap">${{ number_format($contratos->first()->renta_mensual + ($contratos->first()->deposito ?? 0), 2) }}</td>
+                                <td class="px-8 py-6 text-sm font-medium text-gray-600 whitespace-nowrap">{{ \Carbon\Carbon::parse($pago->fecha_pago)->format('d/m/Y') }}</td>
+                                <td class="px-8 py-6 text-lg font-black text-[#003049] whitespace-nowrap">${{ number_format($pago->monto, 2) }}</td>
                                 <td class="px-8 py-6 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <span class="px-3 py-1 bg-[#669BBC]/20 text-[#003049] text-[10px] font-black uppercase tracking-widest rounded-full">Pagado</span>
@@ -264,6 +289,11 @@
                                     </div>
                                 </td>
                             </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="px-8 py-6 text-center text-gray-500">No hay transacciones previas.</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
