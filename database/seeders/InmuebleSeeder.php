@@ -101,7 +101,40 @@ class InmuebleSeeder extends Seeder
                 'imagen' => $stockImages[array_rand($stockImages)],
                 'latitud' => 16.9068 + (mt_rand(-100, 100) / 10000),
                 'longitud' => -92.0941 + (mt_rand(-100, 100) / 10000),
+                
+                // Nuevos campos extendidos (migración 2)
+                'requiere_deposito' => true,
+                'tiene_cerradura_propia' => mt_rand(0, 1) == 1,
+                'cantidad_llaves' => mt_rand(1, 4),
+                'permite_mascotas' => $permite = mt_rand(0, 1) == 1,
+                'incluir_clausulas' => $incluir = mt_rand(0, 1) == 1,
+                'clausulas_extra' => $incluir ? "1. Respetar el horario de silencio a partir de las 10 PM.\n2. La basura debe sacarse únicamente en los días establecidos por el municipio.\n3. Prohibido subarrendar sin autorización." : null,
+                'estado_mobiliario' => array_rand(array_flip(['amueblada', 'semiamueblada', 'no amueblada'])),
+                'tiene_estacionamiento' => mt_rand(0, 1) == 1,
+                'momento_pago' => mt_rand(0, 1) ? 'adelantado' : 'vencido',
+                'dias_tolerancia' => mt_rand(0, 5),
+                'dias_preaviso' => mt_rand(15, 60),
             ]);
+
+            // Seeding Relationships (Pivots)
+            if ($inmueble->permite_mascotas) {
+                $inmueble->mascotas()->attach(\App\Models\Mascota::inRandomOrder()->take(mt_rand(1, 3))->pluck('id'));
+            }
+
+            if ($inmueble->tipo === 'Cuarto') {
+                $inmueble->zonasComunes()->attach(\App\Models\ZonaComun::inRandomOrder()->take(mt_rand(1, 4))->pluck('id'));
+            }
+
+            // Servicios Relacionales
+            $serviciosNombres = ['Agua', 'Electricidad', 'Internet', 'Gas'];
+            foreach ($serviciosNombres as $srv) {
+                if (mt_rand(0, 1)) {
+                    $inmueble->servicios()->create([
+                        'servicio' => $srv,
+                        'paga' => mt_rand(0, 1) ? 'arrendador' : 'inquilino'
+                    ]);
+                }
+            }
 
             // Generar 5 imágenes adicionales
             for ($i = 0; $i < 5; $i++) {

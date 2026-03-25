@@ -235,7 +235,7 @@ class InmuebleController extends Controller
             $inmueble->direccion = $request->direccion;
             $inmueble->tipo = $request->tipo;
             $inmueble->renta_mensual = $request->precio;
-            $inmueble->deposito = $request->deposito;
+            $inmueble->deposito = $request->deposito ?: 0;
             $inmueble->habitaciones = $request->habitaciones;
 
             $parts = explode(',', $request->banos_casa);
@@ -246,6 +246,21 @@ class InmuebleController extends Controller
             $inmueble->metros = $request->metros;
             $inmueble->latitud = $request->latitud;
             $inmueble->longitud = $request->longitud;
+            
+            // Nuevos campos extendidos
+            $inmueble->requiere_deposito = $request->requiere_deposito === 'si';
+            $inmueble->tiene_cerradura_propia = $request->tiene_cerradura === 'si'; // Fallback if old name comes through
+            $inmueble->cantidad_llaves = $request->cantidad_llaves ?? 0;
+            $inmueble->permite_mascotas = $request->permite_mascotas === 'si';
+            $inmueble->incluir_clausulas = $request->incluir_clausulas === 'si';
+            $inmueble->clausulas_extra = $request->clausulas_extra ?? '';
+
+            $inmueble->estado_mobiliario = $request->estado_mobiliario ?? 'no amueblada';
+            $inmueble->tiene_estacionamiento = $request->tiene_estacionamiento == 1;
+            $inmueble->momento_pago = $request->momento_pago ?? 'adelantado';
+            $inmueble->dias_tolerancia = $request->dias_tolerancia ?? 0;
+            $inmueble->dias_preaviso = $request->dias_preaviso ?? 30;
+
             $inmueble->propietario_id = auth()->id();
 
             $inmueble->ciudad = 'Ocosingo';
@@ -263,6 +278,31 @@ class InmuebleController extends Controller
             }
 
             $inmueble->save();
+
+            // Sincronizar Zonas Comunes
+            if ($request->tiene_zonas_comunes === 'si' && $request->has('zonas_comunes')) {
+                $zonasIds = \App\Models\ZonaComun::whereIn('slug', $request->zonas_comunes)->pluck('id');
+                $inmueble->zonasComunes()->sync($zonasIds);
+            }
+
+            // Sincronizar Mascotas
+            if ($request->permite_mascotas === 'si' && $request->has('tipos_mascotas')) {
+                $mascotasIds = \App\Models\Mascota::whereIn('slug', $request->tipos_mascotas)->pluck('id');
+                $inmueble->mascotas()->sync($mascotasIds);
+            }
+
+            // Sincronizar Servicios
+            if ($request->has('servicios_incluidos')) {
+                foreach ($request->servicios_incluidos as $serv) {
+                    $slug = \Illuminate\Support\Str::slug($serv, '_');
+                    $pago = $request->pago_servicio[$slug] ?? 'inquilino';
+                    \App\Models\InmuebleServicio::create([
+                        'inmueble_id' => $inmueble->id,
+                        'servicio' => $serv,
+                        'paga' => $pago
+                    ]);
+                }
+            }
 
             foreach ($request->file('imagenes') as $foto) {
                 $path = $foto->store('inmuebles', 'public');
@@ -339,7 +379,7 @@ class InmuebleController extends Controller
             'titulo' => $request->nombre,
             'tipo' => $request->tipo,
             'renta_mensual' => $request->precio,
-            'deposito' => $request->deposito,
+            'deposito' => $request->deposito ?: 0,
             'descripcion' => $request->descripcion,
             'direccion' => $request->direccion,
             'habitaciones' => $request->habitaciones,
@@ -349,7 +389,56 @@ class InmuebleController extends Controller
             'metros' => $request->metros,
             'latitud' => $request->latitud,
             'longitud' => $request->longitud,
+            
+            // Nuevos campos extendidos
+            'requiere_deposito' => $request->requiere_deposito === 'si',
+            'tiene_cerradura_propia' => $request->has('tiene_cerradura') ? $request->tiene_cerradura === 'si' : false,
+            'cantidad_llaves' => $request->cantidad_llaves ?? 0,
+            'permite_mascotas' => $request->permite_mascotas === 'si',
+            'incluir_clausulas' => $request->incluir_clausulas === 'si',
+            'clausulas_extra' => $request->clausulas_extra ?? '',
+            'estado_mobiliario' => $request->estado_mobiliario ?? 'no amueblada',
+            'tiene_estacionamiento' => $request->tiene_estacionamiento == 1,
+            'momento_pago' => $request->momento_pago ?? 'adelantado',
+            'dias_tolerancia' => $request->dias_tolerancia ?? 0,
+            'dias_preaviso' => $request->dias_preaviso ?? 30,
         ]);
+
+        // Sincronizar Zonas Comunes
+        if ($request->has('tiene_zonas_comunes')) {
+            if ($request->tiene_zonas_comunes === 'si' && $request->has('zonas_comunes')) {
+                $zonasIds = \App\Models\ZonaComun::whereIn('slug', $request->zonas_comunes)->pluck('id');
+                $inmueble->zonasComunes()->sync($zonasIds);
+            } else {
+                $inmueble->zonasComunes()->detach();
+            }
+        }
+
+        // Sincronizar Mascotas
+        if ($request->has('permite_mascotas')) {
+            if ($request->permite_mascotas === 'si' && $request->has('tipos_mascotas')) {
+                $mascotasIds = \App\Models\Mascota::whereIn('slug', $request->tipos_mascotas)->pluck('id');
+                $inmueble->mascotas()->sync($mascotasIds);
+            } else {
+                $inmueble->mascotas()->detach();
+            }
+        }
+
+        // Sincronizar Servicios
+        if ($request->has('servicios_incluidos')) {
+            $inmueble->servicios()->delete(); // Limpiar viejos
+            foreach ($request->servicios_incluidos as $serv) {
+                $slug = \Illuminate\Support\Str::slug($serv, '_');
+                $pago = isset($request->pago_servicio) && isset($request->pago_servicio[$slug]) ? $request->pago_servicio[$slug] : 'inquilino';
+                \App\Models\InmuebleServicio::create([
+                    'inmueble_id' => $inmueble->id,
+                    'servicio' => $serv,
+                    'paga' => $pago
+                ]);
+            }
+        } else {
+            $inmueble->servicios()->delete();
+        }
 
         if ($request->hasFile('contrato_documento')) {
             $pathContrato = $request->file('contrato_documento')->store('contratos', 'public');

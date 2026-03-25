@@ -244,18 +244,7 @@
                         </div>
                     </div>
 
-                    {{-- Cerradura Propia (Disponible para todas las categorías) --}}
-                    <div class="mt-6 bg-slate-50 p-5 rounded-xl border border-border">
-                        <label class="block text-sm font-medium mb-2">¿El inmueble/habitación dispone de cerradura propia (llaves independientes)?</label>
-                        <div class="flex gap-4 mb-2">
-                            <label class="flex items-center gap-2"><input type="radio" x-model="tieneCerradura" value="si" name="tiene_cerradura"> Sí</label>
-                            <label class="flex items-center gap-2"><input type="radio" x-model="tieneCerradura" value="no" name="tiene_cerradura"> No</label>
-                        </div>
-                        <div x-show="tieneCerradura === 'si'" class="mt-2 flex items-center gap-3">
-                            <label class="text-sm">¿Cuántas llaves se entregarán?</label>
-                            <input type="number" name="cantidad_llaves" min="1" class="w-20 rounded-lg border-input bg-white border py-1 px-2 text-center" x-bind:required="tieneCerradura === 'si'">
-                        </div>
-                    </div>
+
                 </div>
 
                 {{-- ==========================================
