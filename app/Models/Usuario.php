@@ -96,8 +96,14 @@ class Usuario extends Authenticatable
             ->orderByDesc('last_message_at');
     }
 
-    public function mensajesEnviados()
+    public function unreadMessagesCount()
     {
-        return $this->hasMany(Mensaje::class, 'sender_id');
+        return Mensaje::whereHas('chat', function ($query) {
+            $query->where('usuario_1', $this->id)
+                ->orWhere('usuario_2', $this->id);
+        })
+            ->where('sender_id', '!=', $this->id)
+            ->where('leido', false)
+            ->count();
     }
 }

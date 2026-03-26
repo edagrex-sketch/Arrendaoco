@@ -10,7 +10,7 @@ use App\Models\Inmueble;
 
 class ArrenditoController extends Controller
 {
-    private const GEMINI_MODEL = 'gemini-2.5-flash';
+    private const GEMINI_MODEL = 'gemini-2.0-flash';
     private const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
     /**
@@ -18,26 +18,42 @@ class ArrenditoController extends Controller
      */
     public function chat(Request $request)
     {
-        $request->validate(['message' => 'required|string|max:500']);
+        $request->validate([
+            'message' => 'required|string|max:500',
+            'inmueble_id' => 'nullable|exists:inmuebles,id'
+        ]);
+
         $userMessage = $request->message;
         $apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY'));
 
         if (empty($apiKey)) {
             return response()->json([
                 'success' => false,
-                'response' => '🐾 ¡Guau! Mi cerebro perruno necesita una llave API. Contacta al administrador.'
+                'reply' => '🐾 ¡Guau! Mi cerebro perruno necesita una llave API. Contacta al administrador.'
             ]);
         }
 
-        // Búsqueda inteligente de inmuebles
-        $inmuebles = $this->buscarInmueblesInteligente($userMessage);
-        $contexto = $this->construirContextoInmuebles($inmuebles);
+        $contexto = "";
+        
+        // Si hay un inmueble específico, dar contexto detallado
+        if ($request->inmueble_id) {
+            $inmueble = Inmueble::find($request->inmueble_id, ['*']);
+            $contexto = "CONEXTO DE PROPIEDAD ESPECÍFICA:\n" .
+                        "ID: {$inmueble->id}\n" .
+                        "Título: {$inmueble->titulo}\n" .
+                        "Descripción: {$inmueble->descripcion}\n" .
+                        "Precio: \${$inmueble->renta_mensual}\n" .
+                        "Ubicación: {$inmueble->direccion}\n" .
+                        "Características: {$inmueble->habitaciones} hab, {$inmueble->banos} baños, {$inmueble->metros} m2\n" .
+                        "Estatus: {$inmueble->estatus}\n\n";
+        } else {
+            // Búsqueda inteligente general
+            $inmuebles = $this->buscarInmueblesInteligente($userMessage);
+            $contexto = "INMUEBLES QUE 'OLFATEASTE' PARA ESTA PREGUNTA:\n" . $this->construirContextoInmuebles($inmuebles) . "\n\n";
+        }
 
-        // System Instruction (Personalidad de Arrendito/ROCO)
         $systemInstruction = $this->getSystemInstruction();
-
-        // Contenido del usuario (mensaje + contexto de inmuebles)
-        $userContent = "INMUEBLES QUE 'OLFATEASTE' PARA ESTA PREGUNTA:\n{$contexto}\n\nUsuario dice: {$userMessage}";
+        $userContent = "{$contexto}Usuario pregunta: {$userMessage}";
 
         try {
             $url = self::GEMINI_BASE_URL . self::GEMINI_MODEL . ":generateContent?key={$apiKey}";
@@ -55,22 +71,22 @@ class ArrenditoController extends Controller
                         ]
                     ],
                     'generationConfig' => [
-                        'temperature' => 0.8,
-                        'maxOutputTokens' => 1024,
+                        'temperature' => 0.7,
+                        'maxOutputTokens' => 800,
                     ],
                 ]);
 
             if ($response->successful()) {
                 $data = $response->json();
                 $resText = $data['candidates'][0]['content']['parts'][0]['text'] ?? '🦴 ¡Guau! No pude procesar eso, intenta de nuevo.';
-                return response()->json(['success' => true, 'response' => $resText]);
+                return response()->json(['success' => true, 'reply' => $resText]);
             }
 
-            return response()->json(['success' => false, 'response' => '🐾 Tuve un problemita al procesar tu mensaje.']);
+            return response()->json(['success' => false, 'reply' => '🐾 Tuve un problemita al procesar tu mensaje.']);
 
         } catch (\Exception $e) {
             Log::error("ROCO API Chat Error: " . $e->getMessage());
-            return response()->json(['success' => false, 'response' => '🐾 Error inesperado del sistema.']);
+            return response()->json(['success' => false, 'reply' => '🐾 Error inesperado del sistema.']);
         }
     }
 
@@ -105,9 +121,8 @@ class ArrenditoController extends Controller
     {
         $contexto = "";
         foreach ($inmuebles as $i) {
-            // Nota: El prompt maneja el enlace para la App si es necesario.
             $tipo = $i->tipo ? " ({$i->tipo})" : "";
-            $contexto .= "🏠 {$i->titulo}{$tipo} - \${$i->renta_mensual} - Ubicado en {$i->direccion}\n";
+            $contexto .= "🏠 [ID: {$i->id}] {$i->titulo}{$tipo} - \${$i->renta_mensual} - {$i->direccion}\n";
         }
         return $contexto;
     }
@@ -115,7 +130,9 @@ class ArrenditoController extends Controller
     private function getSystemInstruction(): string
     {
         return "Eres ROCO, el amigable asistente Beagle de Arrendaoco en Ocosingo, Chiapas.
-            Si el usuario pregunta por inmuebles, usa la información que te damos. 
-            Responde de forma breve, perruna (🦴, 🐾, 🐶) y usa HTML ligero si es necesario.";
+            - Si el usuario pregunta por un inmueble específico (se te da en el contexto), usa esos detalles.
+            - Sé breve, amigable y usa emojis perrunos (🦴, 🐾, 🐶).
+            - Si te piden buscar, usa la lista que 'olfateaste'.
+            - No inventes precios ni ubicaciones que no estén en el contexto.";
     }
 }

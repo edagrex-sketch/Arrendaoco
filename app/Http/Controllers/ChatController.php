@@ -18,6 +18,10 @@ class ChatController extends Controller
             $query->where('usuario_1', $userId)
                   ->orWhere('usuario_2', $userId);
         })
+            ->withCount(['mensajes as unread_count' => function($query) use ($userId) {
+                $query->where('sender_id', '!=', $userId)
+                      ->where('leido', false);
+            }])
             ->with(['usuario1', 'usuario2', 'inmueble'])
             ->orderByDesc('last_message_at')
             ->get();
@@ -37,6 +41,10 @@ class ChatController extends Controller
             $query->where('usuario_1', $userId)
                   ->orWhere('usuario_2', $userId);
         })
+            ->withCount(['mensajes as unread_count' => function($query) use ($userId) {
+                $query->where('sender_id', '!=', $userId)
+                      ->where('leido', false);
+            }])
             ->with(['usuario1', 'usuario2', 'inmueble'])
             ->orderByDesc('last_message_at')
             ->get();
@@ -44,7 +52,15 @@ class ChatController extends Controller
         $mensajes = $chat->mensajes()->with('sender')->orderBy('created_at', 'asc')->get();
         
         // Marcar mensajes como leídos
-        $chat->mensajes()->where('sender_id', '!=', Auth::id())->update(['leido' => true]);
+        $unredCount = $chat->mensajes()
+            ->where('sender_id', '!=', Auth::id())
+            ->where('leido', false)
+            ->count();
+
+        if ($unredCount > 0) {
+            $chat->mensajes()->where('sender_id', '!=', Auth::id())->update(['leido' => true]);
+            broadcast(new \App\Events\MessagesRead($chat->id, Auth::id()))->toOthers();
+        }
 
         return view('chats.show', compact('chat', 'mensajes', 'chats'));
     }
@@ -52,26 +68,29 @@ class ChatController extends Controller
     public function sendMessage(Request $request, Chat $chat)
     {
         $request->validate([
-            'contenido' => 'required|string'
+            'contenido' => 'required|string',
+            'parent_id' => 'nullable|exists:mensajes,id',
+            'tipo'      => 'nullable|string'
         ]);
-
+ 
         $mensaje = $chat->mensajes()->create([
             'sender_id' => Auth::id(),
             'contenido' => $request->contenido,
-            'tipo' => 'texto'
+            'parent_id' => $request->parent_id,
+            'tipo'      => $request->tipo ?? 'texto',
         ]);
-
+ 
         $chat->update([
             'last_message' => $request->contenido,
             'last_message_at' => now()
         ]);
-
+ 
         // Disparar evento para tiempo real
-        broadcast(new MessageSent($mensaje))->toOthers();
-
+        broadcast(new MessageSent($mensaje->load('parent')))->toOthers();
+ 
         return response()->json([
             'success' => true,
-            'mensaje' => $mensaje->load('sender')
+            'mensaje' => $mensaje->load(['sender', 'parent'])
         ]);
     }
 

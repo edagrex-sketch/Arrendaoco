@@ -138,8 +138,21 @@
         const input = document.getElementById('chat-input');
         const container = document.getElementById('chat-messages');
         const message = input.value.trim();
-
         if (!message) return;
+
+        processMascotMessage(message);
+    }
+
+    let currentInmuebleContext = null;
+
+    function processMascotMessage(message, inmuebleId = null) {
+        const input = document.getElementById('chat-input');
+        const container = document.getElementById('chat-messages');
+        
+        // Si se pasa un inmuebleId, lo guardamos para esta sesión
+        if (inmuebleId) {
+            currentInmuebleContext = inmuebleId;
+        }
 
         // Ocultar quick replies
         const quickReplies = document.getElementById('quick-replies');
@@ -173,7 +186,8 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify({
-                    message: message
+                    message: message,
+                    inmueble_id: currentInmuebleContext
                 })
             })
             .then(response => response.json())
@@ -360,4 +374,22 @@
             }, 500);
         }
     }
+
+    // Función global para abrir ROCO con contexto
+    window.openRocoWithContext = function(inmuebleId, initialMessage) {
+        const chat = document.getElementById('mascot-chat');
+        if (chat && chat.classList.contains('hidden-chat')) {
+            toggleMascotChat();
+        }
+        
+        // Guardar contexto
+        currentInmuebleContext = inmuebleId;
+        
+        // Enviar mensaje inicial
+        if (initialMessage) {
+            const input = document.getElementById('chat-input');
+            input.value = initialMessage;
+            sendMascotMessage();
+        }
+    };
 </script>

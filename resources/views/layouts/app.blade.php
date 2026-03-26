@@ -54,9 +54,13 @@
                                 class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
                                 Mi renta
                             </a>
+                            @php $unreadCount = Auth::user()->unreadMessagesCount(); @endphp
                             <a href="{{ route('chats.index') }}"
-                                class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
+                                class="relative text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
                                 Mensajes
+                                <span id="unread-count" class="{{ $unreadCount > 0 ? '' : 'hidden' }} absolute -top-1 -right-4 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm">
+                                    {{ $unreadCount }}
+                                </span>
                             </a>
                         @endunless
                     @endauth
@@ -202,8 +206,11 @@
                                 Mi renta
                             </a>
                             <a href="{{ route('chats.index') }}"
-                                class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
-                                Mensajes
+                                class="flex items-center justify-between px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
+                                <span>Mensajes</span>
+                                <span id="unread-count-mobile" class="{{ $unreadCount > 0 ? '' : 'hidden' }} bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
+                                    {{ $unreadCount }}
+                                </span>
                             </a>
                         @endunless
                     @endauth
@@ -465,7 +472,7 @@
         <script>
             window.addEventListener('load', () => {
                 if (window.Echo) {
-                    // Escuchar eventos globales para notificaciones
+                    // Escuchar todos los chats del usuario para notificaciones globales
                     @php
                         $userChats = Auth::user()->chats()->get();
                     @endphp
@@ -473,26 +480,51 @@
                     @foreach($userChats as $userChat)
                         window.Echo.private(`chat.{{ $userChat->id }}`)
                             .listen('MessageSent', (e) => {
-                                // Solo mostrar si NO estamos en la página de ese chat específico
-                                // O si el contenedor de mensajes no existe (no estamos en la vista de chat)
-                                if (e.sender_id != {{ Auth::id() }} && !document.getElementById('mensajes-container')) {
-                                    Swal.fire({
-                                        title: 'Nuevo Mensaje',
-                                        text: e.contenido,
-                                        icon: 'info',
-                                        toast: true,
-                                        position: 'top-end',
-                                        showConfirmButton: false,
-                                        timer: 4000,
-                                        timerProgressBar: true,
-                                        didOpen: (toast) => {
-                                            toast.addEventListener('mouseenter', Swal.stopTimer)
-                                            toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                            toast.addEventListener('click', () => {
-                                                window.location.href = `/chats/${e.chat_id}`;
-                                            })
-                                        }
-                                    });
+                                // e.mensaje ya viene estructurado por el cambio anterior en el evento
+                                const msg = e.mensaje;
+                                
+                                if (msg.sender_id != {{ Auth::id() }}) {
+                                    // 1. Actualizar contadores de burbujas en el layout
+                                    const dotDesktop = document.getElementById('unread-count');
+                                    const dotMobile = document.getElementById('unread-count-mobile');
+                                    const dotChatSidebar = document.getElementById(`badge-chat-${msg.chat_id}`);
+                                    
+                                    if (dotDesktop) {
+                                        let current = parseInt(dotDesktop.innerText) || 0;
+                                        dotDesktop.innerText = current + 1;
+                                        dotDesktop.classList.remove('hidden');
+                                    }
+                                    if (dotMobile) {
+                                        let current = parseInt(dotMobile.innerText) || 0;
+                                        dotMobile.innerText = current + 1;
+                                        dotMobile.classList.remove('hidden');
+                                    }
+                                    if (dotChatSidebar) {
+                                        let current = parseInt(dotChatSidebar.innerText) || 0;
+                                        dotChatSidebar.innerText = current + 1;
+                                        dotChatSidebar.classList.remove('hidden');
+                                    }
+
+                                    // 2. Solo mostrar alerta si NO estamos en la página de ese chat específico
+                                    if (!document.getElementById('mensajes-container')) {
+                                        Swal.fire({
+                                            title: 'Nuevo Mensaje',
+                                            text: msg.contenido,
+                                            icon: 'info',
+                                            toast: true,
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 4000,
+                                            timerProgressBar: true,
+                                            didOpen: (toast) => {
+                                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                                toast.addEventListener('click', () => {
+                                                    window.location.href = `/chats/${msg.chat_id}`;
+                                                })
+                                            }
+                                        });
+                                    }
                                 }
                             });
                     @endforeach

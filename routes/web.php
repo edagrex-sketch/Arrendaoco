@@ -205,7 +205,7 @@ Route::middleware('auth')->group(function () {
     // Chat Nativo Routes
     Route::get('/chats', [ChatController::class, 'index'])->name('chats.index');
     Route::get('/chats/{chat}', [ChatController::class, 'show'])->name('chats.show');
-    Route::post('/chats/{chat}/mensaje', [ChatController::class, 'sendMessage'])->name('chats.message.send');
+    Route::post('/chats/{chat}/mensaje', [ChatController::class, 'sendMessage'])->name('chats.messages.send');
     Route::get('/chats/iniciar/{otroUsuarioId}/{inmuebleId?}', [ChatController::class, 'startChat'])->name('chats.start');
 });
 
