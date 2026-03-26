@@ -247,6 +247,32 @@
                     </div>
                 </div>
             </div>
+
+            {{-- ROCO AI CONTEXTUAL WIDGET --}}
+            <div class="lg:col-span-12 mt-6">
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-[2.5rem] border border-orange-100 p-8 shadow-sm flex flex-col md:flex-row items-center gap-8 relative overflow-hidden group">
+                    {{-- Decoración de huellas --}}
+                    <div class="absolute -right-10 -bottom-10 text-orange-200/20 rotate-12 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                        <svg class="h-40 w-40" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zM5 9c0 1.1-.9 2-2 2S1 10.1 1 9s.9-2 2-2 2 .9 2 2zm7 11c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm7-4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-14 0c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2z"/>
+                        </svg>
+                    </div>
+
+                    <div class="h-24 w-24 rounded-3xl bg-white shadow-xl shadow-orange-200/50 flex items-center justify-center p-4 border border-orange-100 shrink-0 transform group-hover:rotate-6 transition-all">
+                        <img src="{{ asset('logo1.png') }}" class="w-full h-auto" alt="ROCO">
+                    </div>
+
+                    <div class="flex-1 text-center md:text-left">
+                        <h3 class="text-2xl font-black text-orange-900 tracking-tight mb-2">¿Tienes dudas sobre esta propiedad?</h3>
+                        <p class="text-orange-700/70 font-bold text-sm max-w-xl">Pregúntale a ROCO. Él conoce todos los detalles de <b>{{ $inmueble->titulo }}</b> y te ayudará a decidirte.</p>
+                    </div>
+
+                    <button onclick="window.openRocoWithContext({{ $inmueble->id }}, '¡Guau! Roco, cuéntame sobre esta casa: {{ $inmueble->titulo }}')" 
+                        class="bg-orange-600 text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/30 hover:-translate-y-1 active:scale-95 whitespace-nowrap z-10">
+                        Consultar a Roco
+                    </button>
+                </div>
+            </div>
         </div>
 
         {{-- Contenedor fondo blanco para lo demás, similar a la card de Reseñas --}}

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>AWOS U3 Investigacion ArrendaOco</title>
+    <style>
+        @page {
+            margin: 1.9cm 2cm 1.9cm 2cm;
+        }
+
+        body {
+            font-family: "DejaVu Sans", sans-serif;
+            font-size: 10.2pt;
+            line-height: 1.33;
+            color: #111827;
+        }
+
+        h1, h2, h3 {
+            color: #0f172a;
+            margin-bottom: 0.3rem;
+        }
+
+        h1 {
+            font-size: 18pt;
+            text-align: center;
+            margin-top: 1.7cm;
+        }
+
+        h2 {
+            font-size: 12.5pt;
+            margin-top: 0.8rem;
+        }
+
+        p {
+            text-align: justify;
+            margin: 0 0 0.45rem 0;
+        }
+
+        .cover {
+            page-break-after: always;
+        }
+
+        .cover p {
+            text-align: center;
+            margin: 0.4rem 0;
+        }
+
+        .spacer-lg {
+            height: 1.8cm;
+        }
+
+        .spacer-md {
+            height: 1cm;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        ul {
+            margin-top: 0.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        li {
+            margin-bottom: 0.22rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.7rem;
+            margin-bottom: 1rem;
+        }
+
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 0.3rem;
+            vertical-align: top;
+        }
+
+        th {
+            background: #e2e8f0;
+            text-align: left;
+        }
+
+        .small {
+            font-size: 8.8pt;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+    <section class="cover">
+        <p><strong>UNIVERSIDAD TECNOLOGICA</strong></p>
+        <p><strong>Licenciatura en Ingenieria en Tecnologias de la Informacion e Innovacion Digital</strong></p>
+        <p><strong>Asignatura:</strong> Aplicaciones Web Orientadas a Servicios</p>
+        <p><strong>Unidad de Aprendizaje:</strong> III. Desarrollo de una interfaz de programacion de aplicaciones (API)</p>
+
+        <div class="spacer-lg"></div>
+
+        <h1>Investigacion: Proceso de desarrollo de una API propia en el proyecto ArrendaOco</h1>
+
+        <div class="spacer-md"></div>
+
+        <p><span class="label">Evidencia:</span> Resumen de investigacion</p>
+        <p><span class="label">Alumno(s):</span> [[NOMBRE_INTEGRANTE_1]], [[NOMBRE_INTEGRANTE_2]], [[NOMBRE_INTEGRANTE_3]]</p>
+        <p><span class="label">Grupo:</span> [[GRUPO]]</p>
+        <p><span class="label">Docente:</span> Reynolds Bonifaz Solorzano</p>
+        <p><span class="label">Fecha de entrega:</span> 25 de marzo de 2026</p>
+    </section>
+
+    <section>
+        <h2>Introduccion</h2>
+        <p>Una interfaz de programacion de aplicaciones permite que distintos sistemas intercambien informacion de forma segura y reutilizable. En ArrendaOco, la API construida con Laravel 12 conecta el backend con clientes web y moviles para procesos como registro, consulta de inmuebles, contratos, pagos, reportes y chat en tiempo real. El analisis del codigo muestra que desarrollar una API propia no significa solo publicar endpoints, sino modelar el negocio, proteger los recursos y entregar respuestas JSON utiles para otras aplicaciones.</p>
+
+        <h2>Framework y proceso de desarrollo identificados en ArrendaOco</h2>
+        <p>El primer paso visible en el proyecto es la definicion del dominio. Las migraciones y modelos incluyen entidades como <em>Usuario</em>, <em>Inmueble</em>, <em>Contrato</em>, <em>Pago</em>, <em>Resena</em>, <em>Evento</em>, <em>Chat</em> y <em>Mensaje</em>. Esto permite representar el proceso de arrendamiento con relaciones claras, por ejemplo propietario-inmueble, contrato-pagos o chat-mensajes, lo que facilita que la API responda con datos relacionados y no con tablas aisladas.</p>
+        <p>El segundo paso es la exposicion de servicios en <em>routes/api.php</em>, donde se observa una separacion entre rutas publicas y rutas protegidas con <em>auth:sanctum</em>. Las primeras permiten consultar inmuebles y resenas; las segundas habilitan operaciones privadas como perfil, favoritos, contratos, pagos, reportes, calendario y chat. Esta estructura es importante porque reduce riesgos y deja claro que recursos requieren autenticacion. La logica se implementa en controladores especializados: <em>AuthController</em> valida credenciales y genera tokens; <em>InmuebleController</em> aplica filtros y paginacion; <em>ContratoController</em> usa transacciones para rentar un inmueble y cambiar su estado sin inconsistencias; y <em>PagoController</em> y <em>ReporteController</em> procesan informacion financiera.</p>
+        <p>El tercer paso es la normalizacion de respuestas y la integracion de servicios complementarios. Recursos como <em>InmuebleResource</em> y <em>UserResource</em> entregan JSON consistente, mientras que otras funciones generan estados de cuenta en PDF, exportaciones en Excel y eventos de tiempo real para mensajeria. En conjunto, el framework permite que una misma API atienda distintos clientes sin duplicar logica de negocio.</p>
+
+        <h2>Estrategias para desarrollar APIs propias y su aplicacion en el proyecto</h2>
+        <p>La primera estrategia es asegurar identidad, autorizacion y validacion desde el inicio. ArrendaOco implementa autenticacion con tokens personales mediante Laravel Sanctum y la complementa con roles, estado de cuenta y politicas como <em>InmueblePolicy</em>. Ademas, cada controlador valida campos obligatorios, tipos de datos, rangos numericos, existencia de relaciones y archivos cargados. Esto evita operaciones indebidas y disminuye errores cuando la API es consumida por web o movil.</p>
+        <p>La segunda estrategia es separar responsabilidades. Laravel facilita esta practica con rutas, controladores, modelos, recursos y eventos. En el proyecto, la clase <em>MediaUrl</em> normaliza archivos; los recursos transforman la salida; y Eloquent concentra las relaciones del dominio. El resultado es una API mas mantenible y facil de ampliar, ya que cada modulo atiende una parte concreta del negocio.</p>
+        <p>La tercera estrategia es pensar en la experiencia del consumidor. ArrendaOco incorpora paginacion, filtros, respuestas resumidas, reportes, documentos PDF y mensajeria en tiempo real. En lugar de entregar datos dispersos, la API responde con informacion util para la interfaz. Como mejora futura, seria recomendable formalizar versionado de endpoints y ampliar las pruebas automatizadas, lo cual reforzaria la evolucion del servicio.</p>
+
+        <h2>Conclusion</h2>
+        <p>El analisis del proyecto ArrendaOco confirma que Laravel es un framework adecuado para desarrollar APIs propias porque integra enrutamiento, autenticacion, validacion, ORM, recursos JSON y servicios complementarios en un mismo entorno. A partir de este caso puede concluirse que una API efectiva debe modelar bien el dominio, separar recursos publicos y privados, proteger operaciones sensibles y responder con informacion clara para distintos clientes. Por ello, ArrendaOco funciona como un ejemplo practico de una API orientada a servicios aplicada a un problema real de arrendamiento.</p>
+    </section>
+
+    <section class="page-break">
+        <h2>Coevaluacion del equipo</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Integrante</th>
+                    <th>Actividad realizada</th>
+                    <th>Desempeno</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>[[NOMBRE_INTEGRANTE_1]]</td>
+                    <td>Analisis del proyecto y redaccion del resumen.</td>
+                    <td>Excelente</td>
+                    <td>Participacion activa en la interpretacion del codigo y organizacion del documento.</td>
+                </tr>
+                <tr>
+                    <td>[[NOMBRE_INTEGRANTE_2]]</td>
+                    <td>Revision de formato, ortografia y coevaluacion.</td>
+                    <td>Muy bien</td>
+                    <td>Apoyo en la presentacion final y verificacion de los apartados solicitados.</td>
+                </tr>
+                <tr>
+                    <td>[[NOMBRE_INTEGRANTE_3]]</td>
+                    <td>Integracion de fuentes y validacion final del contenido.</td>
+                    <td>Muy bien</td>
+                    <td>Colaboracion en la limpieza del documento y cierre de la evidencia.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Fuentes consultadas</h2>
+        <ul class="small">
+            <li>Proyecto ArrendaOco. Archivo de rutas del API: <em>routes/api.php</em>.</li>
+            <li>Proyecto ArrendaOco. Controladores del API: <em>app/Http/Controllers/Api/AuthController.php</em>, <em>InmuebleController.php</em>, <em>ContratoController.php</em>, <em>PagoController.php</em>, <em>ReporteController.php</em> y <em>ChatController.php</em>.</li>
+            <li>Proyecto ArrendaOco. Recursos y modelos: <em>app/Http/Resources/InmuebleResource.php</em>, <em>UserResource.php</em>, <em>app/Models/Usuario.php</em>, <em>Inmueble.php</em> y <em>app/Policies/InmueblePolicy.php</em>.</li>
+            <li>Laravel. (2026). Documentation 12.x: Routing. Recuperado de https://laravel.com/docs/12.x/routing</li>
+            <li>Laravel. (2026). Documentation 12.x: Laravel Sanctum. Recuperado de https://laravel.com/docs/12.x/sanctum</li>
+            <li>Laravel. (2026). Documentation 12.x: Eloquent API Resources. Recuperado de https://laravel.com/docs/12.x/eloquent-resources</li>
+            <li>Laravel. (2026). Documentation 12.x: Broadcasting. Recuperado de https://laravel.com/docs/12.x/broadcasting</li>
+        </ul>
+    </section>
+</body>
+</html>

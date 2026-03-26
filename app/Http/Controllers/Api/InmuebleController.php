@@ -24,6 +24,11 @@ class InmuebleController extends Controller
         $query = Inmueble::with(['propietario', 'imagenes', 'resenas.usuario'])
             ->where('estatus', 'disponible');
 
+        // Excluir mis propios inmuebles si estoy autenticado (para no rentarme a mi mismo)
+        if ($request->user('sanctum')) {
+            $query->where('propietario_id', '!=', $request->user('sanctum')->id);
+        }
+
         if ($request->has('tipo')) {
             $query->where('tipo', $request->tipo);
         }

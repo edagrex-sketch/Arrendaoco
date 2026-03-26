@@ -55,28 +55,31 @@
         {{-- Banner de Propiedad (Contexto Permanente) --}}
         @if($chat->inmueble)
             @php $estaRentado = $chat->inmueble->estatus === 'rentado'; @endphp
-            <div class="{{ $estaRentado ? 'bg-red-50 border-red-200' : 'bg-[#003049]/5 border-[#003049]/10' }} backdrop-blur-md border-b px-6 py-3 flex items-center justify-between z-20 sticky top-0 shadow-sm transition-colors duration-500">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl overflow-hidden border-2 {{ $estaRentado ? 'border-red-200' : 'border-white' }} shadow-sm flex-shrink-0 grayscale-[{{ $estaRentado ? '0.8' : '0' }}]">
-                        <img src="{{ \App\Support\MediaUrl::fromStoragePath($chat->inmueble->imagen) }}" class="w-full h-full object-cover">
-                    </div>
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-2">
-                            <p class="text-[10px] font-bold {{ $estaRentado ? 'text-red-500' : 'text-[#669BBC]' }} uppercase tracking-widest leading-none">
-                                {{ $estaRentado ? 'Propiedad No Disponible' : 'Negociando renta de:' }}
-                            </p>
-                            @if($estaRentado)
-                                <span class="px-1.5 py-0.5 bg-red-600 text-white text-[8px] font-black rounded-md animate-pulse">RENTADO</span>
-                            @endif
+            <a href="{{ route('inmuebles.show', $chat->inmueble) }}" class="block group/banner">
+                <div class="{{ $estaRentado ? 'bg-red-50 border-red-200' : 'bg-[#003049]/5 border-[#003049]/10 hover:bg-[#003049]/10' }} backdrop-blur-md border-b px-6 py-3 flex items-center justify-between z-20 sticky top-0 shadow-sm transition-all duration-300">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl overflow-hidden border-2 {{ $estaRentado ? 'border-red-200' : 'border-white' }} shadow-sm flex-shrink-0 grayscale-[{{ $estaRentado ? '0.8' : '0' }}] group-hover/banner:scale-105 transition-transform">
+                            <img src="{{ \App\Support\MediaUrl::fromStoragePath($chat->inmueble->imagen) }}" class="w-full h-full object-cover">
                         </div>
-                        <h4 class="font-extrabold {{ $estaRentado ? 'text-red-900 opacity-60' : 'text-[#003049]' }} text-sm truncate uppercase">{{ $chat->inmueble->titulo }}</h4>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <p class="text-[10px] font-bold {{ $estaRentado ? 'text-red-500' : 'text-[#669BBC]' }} uppercase tracking-widest leading-none">
+                                    {{ $estaRentado ? 'Propiedad No Disponible' : 'Negociando renta de:' }}
+                                </p>
+                                @if($estaRentado)
+                                    <span class="px-1.5 py-0.5 bg-red-600 text-white text-[8px] font-black rounded-md animate-pulse">RENTADO</span>
+                                @endif
+                                <svg class="w-3 h-3 text-[#669BBC] opacity-0 group-hover/banner:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+                            </div>
+                            <h4 class="font-extrabold {{ $estaRentado ? 'text-red-900 opacity-60' : 'text-[#003049]' }} text-sm truncate uppercase">{{ $chat->inmueble->titulo }}</h4>
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-[10px] text-gray-400 font-bold">Precio mensual</p>
+                        <p class="font-extrabold {{ $estaRentado ? 'text-red-900/40 line-through' : 'text-[#003049]' }} text-sm">${{ number_format($chat->inmueble->renta_mensual) }}</p>
                     </div>
                 </div>
-                <div class="text-right flex-shrink-0">
-                    <p class="text-[10px] text-gray-400 font-bold">Precio mensual</p>
-                    <p class="font-extrabold {{ $estaRentado ? 'text-red-900/40 line-through' : 'text-[#003049]' }} text-sm">${{ number_format($chat->inmueble->renta_mensual) }}</p>
-                </div>
-            </div>
+            </a>
             
             @if($estaRentado)
                 <div class="bg-red-600/90 text-white text-[10px] py-1.5 px-4 text-center font-bold tracking-wide shadow-inner">
@@ -190,18 +193,20 @@
                         <p class="text-[10px] text-gray-400">Envía interés formal por la casa</p>
                     </div>
                 </button>
-            @else
-                {{-- Opciones para el Arrendador --}}
-                <button onclick="sendActionMessage('contrato_enviado')" class="w-full flex items-center gap-3 p-3 hover:bg-green-50 transition-colors rounded-xl text-left group">
-                    <div class="p-2 bg-green-50 text-green-600 rounded-lg group-hover:bg-green-600 group-hover:text-white transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-bold text-green-700">Proponer Acuerdo</p>
-                        <p class="text-[10px] text-gray-400">Inicia el proceso de contrato</p>
-                    </div>
                 </button>
             @endif
+
+            <div class="border-t border-gray-50 my-1"></div>
+            
+            <button onclick="consultarRocoMediador()" class="w-full flex items-center gap-3 p-3 hover:bg-orange-50 transition-colors rounded-xl text-left group">
+                <div class="p-2 bg-orange-50 text-orange-600 rounded-lg group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zM5 9c0 1.1-.9 2-2 2S1 10.1 1 9s.9-2 2-2 2 .9 2 2zm7 11c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm7-4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-14 0c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2z"/></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-orange-700">Mediador Roco</p>
+                    <p class="text-[10px] text-gray-400">Pide consejos legales o ayuda</p>
+                </div>
+            </button>
         </div>
 
         <form id="form-mensaje" class="group flex items-center gap-2 bg-gray-50 p-2 pl-3 rounded-[26px] border border-gray-100 focus-within:border-[#669BBC]/50 focus-within:bg-white focus-within:shadow-[0_20px_50px_rgba(102,155,188,0.15)] transition-all duration-500">
@@ -351,6 +356,25 @@
             container.scrollTop = container.scrollHeight;
         } catch (error) {
             console.error('Error:', error);
+        }
+    }
+
+    function consultarRocoMediador() {
+        toggleActions();
+        const mensajes = document.querySelectorAll('.message-bubble');
+        let ultimoTexto = "";
+        if (mensajes.length > 0) {
+            ultimoTexto = mensajes[mensajes.length - 1].dataset.contenido;
+        }
+
+        const prompt = ultimoTexto 
+            ? `¡Guau! Roco, en este chat dijeron: "${ultimoTexto}". ¿Qué me sugieres responder o qué dice la ley al respecto?` 
+            : `Roco, ayúdame como mediador en este chat de renta por favor.`;
+
+        if (window.openRocoWithContext) {
+            window.openRocoWithContext("{{ $chat->inmueble_id }}", prompt);
+        } else {
+            console.warn("Roco no está cargado correctamente.");
         }
     }
 

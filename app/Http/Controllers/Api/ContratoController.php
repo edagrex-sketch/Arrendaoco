@@ -74,31 +74,40 @@ class ContratoController extends Controller
      * ====================================================== */
     public function rentar(Request $request, Inmueble $inmueble)
     {
+        $usuario = $request->user();
+
         $data = $request->validate([
-            'inquilino_id'  => 'required|exists:usuarios,id',
+            'inquilino_id'  => 'nullable|exists:usuarios,id',
             'fecha_inicio'  => 'required|date',
             'fecha_fin'     => 'nullable|date|after:fecha_inicio',
             'renta_mensual' => 'required|numeric|min:0',
             'deposito'      => 'nullable|numeric|min:0',
         ]);
 
-        if ($inmueble->propietario_id !== $request->user()->id) {
-            abort(403, 'Solo el propietario puede rentar este inmueble');
+        // Si el que llama NO es el propietario, asumimos que es el inquilino que quiere rentar
+        if ($inmueble->propietario_id !== $usuario->id) {
+            // El inquilino_id será el usuario autenticado
+            $data['inquilino_id'] = $usuario->id;
+        } else {
+            // Si el que llama es el propietario, DEBE especificar un inquilino_id (a quién le renta)
+            if (!isset($data['inquilino_id'])) {
+                return response()->json(['message' => 'Debes especificar el inquilino_id para formalizar la renta'], 422);
+            }
         }
 
         if ($inmueble->estatus !== 'disponible') {
-            abort(422, 'El inmueble no está disponible');
+            return response()->json(['message' => 'El inmueble no está disponible en este momento'], 422);
         }
 
-        if ($data['inquilino_id'] == $request->user()->id) {
-            abort(422, 'El propietario no puede ser el inquilino');
+        if ($data['inquilino_id'] == $inmueble->propietario_id) {
+            return response()->json(['message' => 'No puedes rentar tu propio inmueble'], 422);
         }
 
-        $contrato = DB::transaction(function () use ($data, $inmueble, $request) {
+        $contrato = DB::transaction(function () use ($data, $inmueble, $usuario) {
 
             $contrato = Contrato::create([
                 'inmueble_id'    => $inmueble->id,
-                'propietario_id' => $request->user()->id,
+                'propietario_id' => $inmueble->propietario_id, // Siempre el dueño del inmueble
                 'inquilino_id'   => $data['inquilino_id'],
                 'fecha_inicio'   => $data['fecha_inicio'],
                 'fecha_fin'      => $data['fecha_fin'],

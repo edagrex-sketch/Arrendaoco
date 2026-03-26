@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ArrenditoController;
 use App\Http\Controllers\Api\ResenaController;
 use App\Http\Controllers\Api\PerfilController;
 use App\Http\Controllers\Api\EventoController;
+use App\Http\Controllers\Api\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -99,4 +100,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Excel
     Route::get('/contratos/{contrato}/estado-cuenta/excel', [ContratoController::class, 'exportarEstadoCuentaExcel']);
+
+    // Chats
+    Route::get('/chats', [ChatController::class, 'index']);
+    Route::get('/chats/{chat}/mensajes', [ChatController::class, 'messages']);
+    Route::post('/chats/{chat}/enviar', [ChatController::class, 'sendMessage']);
+    Route::post('/chats/iniciar/{otroUsuarioId}/{inmuebleId?}', [ChatController::class, 'startChat']);
+    Route::post('/fcm-token', [ChatController::class, 'updateFcmToken']);
 });
