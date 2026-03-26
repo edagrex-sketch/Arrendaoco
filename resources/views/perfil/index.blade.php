@@ -98,10 +98,11 @@
                                         </svg>
                                     </div>
                                     <input type="text" name="nombre" id="nombre"
-                                        value="{{ old('nombre', $usuario->nombre) }}"
-                                        class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-[#003049]/10 focus:border-[#003049] transition-all outline-none"
-                                        placeholder="Tu nombre completo" required>
+                                        value="{{ $usuario->nombre }}"
+                                        class="w-full pl-10 pr-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed outline-none"
+                                        readonly disabled>
                                 </div>
+                                <p class="text-xs text-gray-400 mt-1 pl-1">El nombre no puede ser modificado.</p>
                             </div>
 
                             <!-- Input Email -->
@@ -117,10 +118,11 @@
                                         </svg>
                                     </div>
                                     <input type="email" name="email" id="email"
-                                        value="{{ old('email', $usuario->email) }}"
-                                        class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-[#003049]/10 focus:border-[#003049] transition-all outline-none"
-                                        placeholder="ejemplo@correo.com" required>
+                                        value="{{ $usuario->email }}"
+                                        class="w-full pl-10 pr-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed outline-none"
+                                        readonly disabled>
                                 </div>
+                                <p class="text-xs text-gray-400 mt-1 pl-1">El correo no puede ser modificado.</p>
                             </div>
 
                             <div class="border-t border-gray-100 pt-8 mt-4">

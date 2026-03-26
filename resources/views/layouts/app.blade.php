@@ -26,7 +26,16 @@
     <div class="min-h-screen flex flex-col">
 
         <!-- Barra de Navegación -->
-        <nav class="bg-[#003049] border-b border-[#003049] sticky top-0 z-50 shadow-lg"
+        @php
+            $novedadRenta = false;
+            if (Auth::check()) {
+                $novedadRenta = \App\Models\Contrato::where('inquilino_id', Auth::id())
+                    ->where('estatus', 'activo')
+                    ->where('updated_at', '>', now()->subHours(24))
+                    ->exists() && !session()->has('renta_visto_' . Auth::id());
+            }
+        @endphp
+        <nav class="bg-brand-dark border-b border-brand-dark sticky top-0 z-50 shadow-lg"
             x-data="{ mobileMenuOpen: false }">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <!-- 1. Logo y Nombre -->
@@ -35,13 +44,13 @@
                     <!-- Cuadrado del logo en un azul más claro para resaltar -->
                     <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco" class="h-10 w-auto object-contain">
                     <span class="text-xl font-bold text-white tracking-tight">
-                        ArrendaOco<span class="text-[#669BBC]"></span>
+                        ArrendaOco<span class="text-brand-light"></span>
                     </span>
                 </a>
                 <!-- 2. Menú Central (Enlaces) -->
                 <div class="hidden md:flex items-center gap-8">
                     <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
-                        class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
+                        class="text-sm font-medium text-white hover:text-brand-light transition-colors border-b-2 border-transparent hover:border-brand-light py-1">
                         Inicio
                     </a>
                     @auth
@@ -51,8 +60,11 @@
                                 Favoritos
                             </a>
                             <a href="{{ route('inmuebles.mis_rentas') }}"
-                                class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
+                                class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1 relative">
                                 Mi renta
+                                @if($novedadRenta)
+                                    <span class="absolute -top-1 -right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                                @endif
                             </a>
                             <a href="{{ route('chats.index') }}"
                                 class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors border-b-2 border-transparent hover:border-[#669BBC] py-1">
@@ -134,7 +146,7 @@
 
                             @if (Auth::user()->tieneRol('propietario'))
                                 <a href="{{ route('inmuebles.create') }}"
-                                    class="inline-flex items-center justify-center rounded-full bg-[#C1121F] px-5 py-2 text-sm font-bold text-white shadow-md hover:bg-[#780000] transition-colors">
+                                    class="btn-danger px-5 py-2 text-sm">
                                     Publicar
                                 </a>
                             @endif
@@ -154,7 +166,7 @@
                             </a>
 
                             <a href="{{ route('registro') }}"
-                                class="inline-flex items-center justify-center rounded-lg bg-[#FDF0D5] px-5 py-2 text-sm font-bold text-[#003049] shadow hover:bg-white transition-transform active:scale-95">
+                                class="btn-secondary px-5 py-2 text-sm">
                                 Registrarse
                             </a>
                         @endauth
@@ -198,8 +210,11 @@
                                 Favoritos
                             </a>
                             <a href="{{ route('inmuebles.mis_rentas') }}"
-                                class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
+                                class="flex items-center justify-between px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
                                 Mi renta
+                                @if($novedadRenta)
+                                    <span class="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-lg shadow-red-500/50"></span>
+                                @endif
                             </a>
                             <a href="{{ route('chats.index') }}"
                                 class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
@@ -288,7 +303,7 @@
         <!-- Footer -->
         <!-- Footer Premium -->
         <!-- Footer Premium (3 Columnas) -->
-        <footer class="bg-[#003049] text-white pt-16 pb-8 border-t-4 border-[#669BBC]">
+        <footer class="bg-brand-dark text-white pt-16 pb-8 border-t-4 border-brand-light">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- CAMBIO AQUÍ: lg:grid-cols-3 para 3 columnas iguales -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">

@@ -15,7 +15,8 @@ class InmuebleController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->search;
+        $search  = $request->search;
+        $estatus = $request->estatus; // 'disponible' | 'rentado' | 'proceso' | null (todos)
 
         if (auth()->user()->es_admin || auth()->user()->tieneRol('admin')) {
             $query = Inmueble::with('propietario');
@@ -35,7 +36,14 @@ class InmuebleController extends Controller
             $inmuebles = $query->paginate(10)->withQueryString();
             return view('admin.inmuebles.index', compact('inmuebles'));
         } else {
-            $query = Inmueble::with('contratos.inquilino')->where('propietario_id', auth()->id());
+            $estatus = $request->get('estatus', 'proceso'); // Default to 'proceso'
+            if ($estatus === 'todos') {
+                $estatus = null;
+            }
+
+            $query = Inmueble::with(['contratos' => function ($q) {
+                $q->with('inquilino')->whereIn('estatus', ['pendiente_aprobacion', 'activo'])->latest();
+            }])->where('propietario_id', auth()->id());
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
@@ -45,8 +53,44 @@ class InmuebleController extends Controller
                 });
             }
 
-            $inmuebles = $query->paginate(10)->withQueryString();
-            return view('inmuebles.index', compact('inmuebles'));
+            // Filtro por estatus
+            if ($estatus === 'proceso') {
+                // Inmuebles con contrato pendiente de aprobación
+                $query->whereHas('contratos', fn($q) => $q->where('estatus', 'pendiente_aprobacion'));
+            } elseif ($estatus === 'disponible') {
+                $query->where('estatus', 'disponible')
+                      ->whereDoesntHave('contratos', fn($q) => $q->where('estatus', 'pendiente_aprobacion'));
+            } elseif ($estatus === 'rentado') {
+                $query->where('estatus', 'rentado');
+            }
+
+            // Ordenamiento por defecto: proceso_renta > disponible > rentado
+            // Usamos CASE en SQL para prioridad
+            $query->orderByRaw("
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1 FROM contratos
+                        WHERE contratos.inmueble_id = inmuebles.id
+                          AND contratos.estatus = 'pendiente_aprobacion'
+                    ) THEN 0
+                    WHEN inmuebles.estatus = 'disponible' THEN 1
+                    ELSE 2
+                END ASC
+            ")->orderBy('created_at', 'desc');
+
+            $inmuebles = $query->paginate(12)->withQueryString();
+
+            // Contadores para los filtros de tabs
+            $base = Inmueble::where('propietario_id', auth()->id());
+            $cuentas = [
+                'total'     => (clone $base)->count(),
+                'proceso'   => (clone $base)->whereHas('contratos', fn($q) => $q->where('estatus', 'pendiente_aprobacion'))->count(),
+                'disponible'=> (clone $base)->where('estatus', 'disponible')
+                                            ->whereDoesntHave('contratos', fn($q) => $q->where('estatus', 'pendiente_aprobacion'))->count(),
+                'rentado'   => (clone $base)->where('estatus', 'rentado')->count(),
+            ];
+
+            return view('inmuebles.index', compact('inmuebles', 'estatus', 'cuentas'));
         }
     }
 
@@ -63,8 +107,31 @@ class InmuebleController extends Controller
 
     public function misRentas()
     {
-        $contratos = \App\Models\Contrato::with('inmueble.propietario')->where('inquilino_id', auth()->id())->latest()->get();
-        
+        $userId = auth()->id();
+
+        // Contratos activos/pendientes — excluimos 'rechazado' y 'cancelado' del listado
+        $contratos = \App\Models\Contrato::with('inmueble.propietario')
+            ->where('inquilino_id', $userId)
+            ->whereNotIn('estatus', ['rechazado', 'cancelado'])
+            ->latest()
+            ->get();
+
+        // Detectar si hay contrato rechazado que el inquilino aún no ha visto
+        // Usamos session para mostrarlo solo una vez
+        $contratoRechazado = null;
+        if (!session()->has('rechazo_visto_' . $userId)) {
+            $contratoRechazado = \App\Models\Contrato::with('inmueble')
+                ->where('inquilino_id', $userId)
+                ->where('estatus', 'rechazado')
+                ->latest()
+                ->first();
+
+            if ($contratoRechazado) {
+                // Marcamos como visto para no mostrarlo de nuevo
+                session()->put('rechazo_visto_' . $userId, true);
+            }
+        }
+
         $pagosPendientes = \App\Models\Pago::with('contrato.inmueble')
                             ->whereIn('contrato_id', $contratos->pluck('id'))
                             ->where('estatus', 'pendiente')
@@ -78,7 +145,44 @@ class InmuebleController extends Controller
                             ->orderBy('fecha_pago', 'desc')
                             ->get();
 
-        return view('inmuebles.mis_rentas', compact('contratos', 'pagosPendientes', 'historialPagos'));
+        // Marco como visto para quitar el punto rojo de notificación
+        session()->put('renta_visto_' . auth()->id(), true);
+
+        return view('inmuebles.mis_rentas', compact('contratos', 'pagosPendientes', 'historialPagos', 'contratoRechazado'));
+    }
+
+    public function cancelarRenta(\App\Models\Contrato $contrato)
+    {
+        if ($contrato->inquilino_id !== auth()->id() && $contrato->propietario_id !== auth()->id() && !auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
+            abort(403, 'No tienes permiso para cancelar esta renta.');
+        }
+
+        if ($contrato->estatus !== 'activo') {
+            return back()->with('error', 'Esta renta ya no está activa.');
+        }
+
+        try {
+            DB::beginTransaction();
+            $contrato->estatus = 'cancelado';
+            
+            // Set end date to now if it isn't set, otherwise maybe it already has one.
+            if (!$contrato->fecha_fin) {
+                // If the user wants to keep a history of what the intended end date was, they might not zero it out. But typically cancelling happens now.
+                $contrato->fecha_fin = now();
+            }
+            $contrato->save();
+
+            if ($contrato->inmueble) {
+                $contrato->inmueble->estatus = 'disponible';
+                $contrato->inmueble->save();
+            }
+            DB::commit();
+
+            return back()->with('success', 'Renta (contrato) cancelada exitosamente y la propiedad está disponible de nuevo.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Ocurrió un error al cancelar la renta: ' . $e->getMessage());
+        }
     }
 
     //cargar las ultimas 9 casas disponibles

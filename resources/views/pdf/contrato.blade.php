@@ -57,29 +57,42 @@
 
     <p class="mt-8 mb-4 text-center">Firman de conformidad todas las Partes por medio del registro digital de ArrendaOco.</p>
 
-    <div style="width: 100%; text-align: center;">
-        <div class="signature-block">
-            <div style="min-height: 80px; position:relative; background-color: #fffbeb; border: 1px solid #fde68a; margin-bottom: 5px; padding: 10px; border-radius: 4px;">
-                <p style="text-align:center; font-size: 9px; color:#92400e; margin: 0; line-height: 1.2;">
-                    * Pendiente de firma del Arrendador. Se le notificará y validará la transacción. Por consiguiente, la renta AÚN NO ESTÁ APROBADA de forma definitiva hasta confirmar su ocupación.
-                </p>
-            </div>
-            <div class="signature-line">
-                <p class="font-bold text-xs" style="margin:2px 0;">Firma del Arrendador</p>
-                <p style="margin:2px 0;">{{ optional($contrato->inmueble->propietario)->nombre ?? 'El Arrendador' }}</p>
-            </div>
-        </div>
-        <div class="signature-block">
-            <div style="height: 80px;">
-                @if($contrato->firma_digital)
-                    <img src="{{ $contrato->firma_digital }}" class="firma" alt="Firma Inquilino" style="max-height: 80px; border:none; background:transparent;">
-                @endif
-            </div>
-            <div class="signature-line">
-                <p class="font-bold text-xs" style="margin:2px 0;">Firma del Inquilino (Firma Digital)</p>
-                <p style="margin:2px 0;">{{ optional($contrato->inquilino)->nombre ?? 'El Inquilino' }}</p>
-            </div>
-        </div>
+    <div style="width: 100%; margin-top: 50px; page-break-inside: avoid;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                {{-- Firma del Arrendador --}}
+                <td style="width: 45%; text-align: center; vertical-align: bottom;">
+                    <div style="height: 80px; margin-bottom: 10px;">
+                        @if($contrato->firma_propietario)
+                            <img src="{{ $contrato->firma_propietario }}" alt="Firma Arrendador" style="max-height: 80px; max-width: 200px;">
+                        @else
+                            <div style="border: 1px dashed #ccc; padding: 10px; height: 60px;">
+                                <p style="font-size: 8px; color: #666;">Pendiente de firma</p>
+                            </div>
+                        @endif
+                    </div>
+                    <div style="border-top: 1px solid #000; padding-top: 5px;">
+                        <p class="font-bold" style="font-size: 10px; margin: 0; text-transform: uppercase;">Firma del Arrendador</p>
+                        <p style="font-size: 10px; margin: 2px 0;">{{ optional($contrato->inmueble->propietario)->nombre }}</p>
+                    </div>
+                </td>
+
+                <td style="width: 10%;"></td> {{-- Espacio --}}
+
+                {{-- Firma del Inquilino --}}
+                <td style="width: 45%; text-align: center; vertical-align: bottom;">
+                    <div style="height: 80px; margin-bottom: 10px;">
+                        @if($contrato->firma_digital)
+                            <img src="{{ $contrato->firma_digital }}" alt="Firma Inquilino" style="max-height: 80px; max-width: 200px;">
+                        @endif
+                    </div>
+                    <div style="border-top: 1px solid #000; padding-top: 5px;">
+                        <p class="font-bold" style="font-size: 10px; margin: 0; text-transform: uppercase;">Firma del Inquilino</p>
+                        <p style="font-size: 10px; margin: 2px 0;">{{ optional($contrato->inquilino)->nombre }}</p>
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>

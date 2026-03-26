@@ -35,28 +35,132 @@
             @endif
         </div>
 
+        {{-- ===== AVISO DE RECHAZO (aparece solo una vez) ===== --}}
+        @if(isset($contratoRechazado) && $contratoRechazado)
+        <div
+            x-data="{ visible: true }"
+            x-show="visible"
+            x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-4"
+            class="mb-8 bg-white border-2 border-[#C1121F]/30 rounded-3xl overflow-hidden shadow-lg"
+        >
+            <div class="bg-[#C1121F] px-6 py-4 flex items-center gap-3">
+                <div class="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="font-black text-white text-base">Solicitud rechazada</p>
+                    <p class="text-white/80 text-xs font-medium">El propietario no ha aceptado tu solicitud de renta.</p>
+                </div>
+                <button @click="visible = false" class="text-white/70 hover:text-white transition-colors ml-auto shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="px-6 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="h-16 w-16 rounded-2xl overflow-hidden bg-slate-100 shrink-0">
+                        @if(optional($contratoRechazado->inmueble)->imagen)
+                            <img src="{{ str_starts_with($contratoRechazado->inmueble->imagen, 'http') ? $contratoRechazado->inmueble->imagen : asset('storage/'.$contratoRechazado->inmueble->imagen) }}"
+                                class="w-full h-full object-cover" alt="">
+                        @endif
+                    </div>
+                    <div>
+                        <p class="font-bold text-[#003049] text-base">{{ optional($contratoRechazado->inmueble)->titulo ?? 'Propiedad' }}</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Renta: ${{ number_format($contratoRechazado->renta_mensual, 2) }}/mes · Inicio solicitado: {{ \Carbon\Carbon::parse($contratoRechazado->fecha_inicio)->format('d/m/Y') }}</p>
+                        <p class="text-xs text-gray-400 mt-1">Tus fondos pre-autorizados han sido <strong class="text-[#003049]">liberados</strong>. No se realizó ningún cargo.</p>
+                    </div>
+                </div>
+                <div class="flex gap-3 shrink-0">
+                    <button @click="visible = false"
+                        class="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors px-4 py-2">
+                        Descartar
+                    </button>
+                    <a href="{{ route('inicio') }}"
+                        class="inline-flex items-center gap-2 bg-[#003049] text-white font-bold px-6 py-3 rounded-2xl shadow-lg shadow-[#003049]/20 hover:bg-[#002236] hover:-translate-y-0.5 transition-all text-sm">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        Seguir buscando
+                    </a>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- ===== AVISO DE CONTRATO ACEPTADO (Nuevo) ===== --}}
+        @php
+            $nuevoContratoAceptado = $contratos->where('estatus', 'activo')->where('updated_at', '>', now()->subHours(24))->first();
+            $primerPago = $nuevoContratoAceptado ? \App\Models\Pago::where('contrato_id', $nuevoContratoAceptado->id)->where('estatus', 'pagado')->first() : null;
+        @endphp
+        
+        @if($nuevoContratoAceptado)
+            <div class="mb-10 bg-white rounded-[3rem] p-10 shadow-2xl shadow-[#669BBC]/10 border-2 border-[#669BBC]/20 relative overflow-hidden group">
+                {{-- Decoración: ROCO o un círculo --}}
+                <div class="absolute top-0 right-0 h-40 w-40 bg-[#FDF0D5] rounded-bl-[100px] -mr-10 -mt-10 opacity-60 group-hover:scale-110 transition-transform duration-700"></div>
+                
+                <div class="relative z-10 flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
+                    <div class="h-24 w-24 bg-[#003049] rounded-3xl flex items-center justify-center shrink-0 shadow-xl shadow-[#003049]/20 rotate-3">
+                         <svg class="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-3xl font-black text-[#003049] mb-2 leading-tight">¡Enhorabuena! Tu renta ha sido confirmada.</h2>
+                        <p class="text-[#669BBC] font-bold text-lg mb-6">El propietario ha firmado el contrato y tu nuevo hogar te espera.</p>
+                        
+                        <div class="flex flex-wrap gap-4 justify-center md:justify-start">
+                            {{-- Botones de Descarga --}}
+                            <a href="{{ route('contratos.descargar', $nuevoContratoAceptado->id) }}" class="inline-flex items-center gap-2 bg-[#003049] text-white px-5 py-2.5 rounded-2xl font-black text-sm hover:bg-[#669BBC] transition-colors shadow-lg shadow-[#003049]/10">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                Descargar Contrato
+                            </a>
+                            @if($primerPago)
+                                <a href="{{ route('pagos.descargar_recibo', $primerPago->id) }}" class="inline-flex items-center gap-2 bg-[#FDF0D5] text-[#003049] px-5 py-2.5 rounded-2xl font-black text-sm border border-[#669BBC]/20 hover:bg-white transition-colors">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    Descargar Recibo
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between flex-wrap gap-4">
+                    <p class="text-sm text-gray-400 italic font-medium max-w-lg">**ROCO** está feliz de verte aquí. Ahora puedes realizar más acciones como reportar fallos o chatear con tu casero. **¡Que disfrutes de ArrendaOco!**</p>
+                    <a href="{{ route('chats.index') }}" class="bg-[#003049] text-white px-8 py-3 rounded-2xl font-black shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all inline-flex items-center gap-2">
+                        Enviar un mensaje al dueño
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                    </a>
+                </div>
+            </div>
+        @endif
+
         @if($contratos->isEmpty())
             <div class="bg-white rounded-3xl p-12 text-center shadow-lg border border-slate-100 flex flex-col items-center">
-                <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-blue-300" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                <div class="w-24 h-24 bg-[#FDF0D5] rounded-full flex items-center justify-center mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-[#669BBC]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
                 </div>
                 <h2 class="text-2xl font-bold text-[#003049] mb-3">Aún no tienes rentas activas</h2>
-                <p class="text-slate-500 max-w-md mx-auto mb-8">Parece que todavía no has rentado ninguna propiedad. ¡Explora
-                    las opciones disponibles y encuentra tu próximo hogar!</p>
-                <a href="{{ route('welcome') }}"
-                    class="bg-[#003049] text-white font-bold py-3 px-8 rounded-full shadow-lg hover:translate-y-[-2px] hover:shadow-xl transition-all inline-flex items-center gap-2">
-                    Explorar Propiedades
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                <p class="text-slate-500 max-w-md mx-auto mb-8">
+                    Explora las propiedades disponibles y encuentra tu próximo hogar.
+                </p>
+                <a href="{{ route('inicio') }}"
+                    class="bg-[#003049] text-white font-bold py-3 px-8 rounded-2xl shadow-lg hover:-translate-y-1 hover:shadow-xl hover:bg-[#002236] transition-all inline-flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
+                    Seguir buscando
                 </a>
             </div>
         @else
+
             <div class="lg:flex lg:gap-10">
                 <!-- Columna Izquierda / Propiedades Rentadas -->
                 <div class="lg:w-1/3 mb-10 lg:mb-0">
@@ -78,14 +182,18 @@
                                     </svg>
                                 </div>
                             @endif
-                            @if(isset($contrato) && !$contrato->created_at->isToday())
-                                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur text-[#003049] text-sm font-black px-3 py-1 rounded-full shadow-md">
-                                    Activa
+                            @if(isset($contrato) && $contrato->estatus === 'activo')
+                                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur text-green-700 text-sm font-black px-3 py-1 rounded-full shadow-md border border-green-200">
+                                    ✓ Activa
                                 </div>
-                            @else
+                            @elseif(isset($contrato) && $contrato->estatus === 'pendiente_aprobacion')
                                 <div class="absolute top-4 right-4 bg-amber-100/90 backdrop-blur text-amber-700 text-sm font-black px-3 py-1 rounded-full shadow-md flex items-center gap-1 border border-amber-200">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415l-2.414-2.414V6z" clip-rule="evenodd" /></svg>
-                                    En proceso
+                                    Pendiente aprobación
+                                </div>
+                            @else
+                                <div class="absolute top-4 right-4 bg-red-100/90 backdrop-blur text-red-700 text-sm font-black px-3 py-1 rounded-full shadow-md border border-red-200">
+                                    {{ ucfirst($contrato->estatus) }}
                                 </div>
                             @endif
                         </div>
@@ -107,42 +215,83 @@
                                     {{ $inmueble ? $inmueble->direccion : 'Sin dirección' }}
                                 </p>
                                 
-                                @if(isset($contrato) && $contrato->created_at->isToday())
-                                    <p class="text-xs text-amber-600 font-medium mb-4 bg-amber-50 rounded-lg p-2 border border-amber-100 flex items-start gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                        Esperando validación del arrendador. Una vez aprobada, inicia tu estancia.
-                                    </p>
+                                @if(isset($contrato) && $contrato->estatus === 'pendiente_aprobacion')
+                                    <div class="mb-4 bg-amber-50 rounded-xl p-3 border border-amber-200">
+                                        <p class="text-xs text-amber-700 font-bold mb-1 flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                            Esperando aprobación del arrendador
+                                        </p>
+                                        <p class="text-xs text-amber-600">Tus fondos están pre-autorizados. El propietario tiene 24 horas para responder.</p>
+                                    </div>
                                 @endif
 
                                 <div
-                                    class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex items-center justify-between mb-4">
-                                    <div>
-                                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Renta Mensual</p>
-                                        <p class="text-[#003049] font-black text-lg">
-                                            ${{ number_format($contrato->renta_mensual, 2) }}</p>
+                                    class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex flex-col justify-between mb-4 gap-2">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Renta Mensual</p>
+                                            <p class="text-[#003049] font-black text-lg">
+                                                ${{ number_format($contrato->renta_mensual, 2) }}</p>
+                                        </div>
+                                        <div class="w-px h-10 bg-slate-200 mx-2"></div>
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-right">Día de Pago</p>
+                                            <p class="text-[#003049] font-black text-lg text-right">
+                                                {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d') }}</p>
+                                        </div>
                                     </div>
-                                    <div class="w-px h-10 bg-slate-200"></div>
-                                    <div>
-                                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Día de Pago</p>
-                                        <p class="text-[#003049] font-black text-lg text-right">
-                                            {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d') }}</p>
+                                    <div class="border-t border-slate-200 pt-2 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Inicio Renta</p>
+                                            <p class="text-xs text-slate-600 font-bold">
+                                                {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d/m/Y') }}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-right">Fin Renta</p>
+                                            <p class="text-xs text-[#003049] font-black text-right lowercase">
+                                                @php
+                                                    $fechaFinCalculada = null;
+                                                    if ($contrato->fecha_inicio && $contrato->plazo) {
+                                                        try {
+                                                            $inicio = \Carbon\Carbon::parse($contrato->fecha_inicio);
+                                                            $plazo = strtolower($contrato->plazo);
+                                                            $cantidad = (int) filter_var($plazo, FILTER_SANITIZE_NUMBER_INT);
+                                                            
+                                                            if (str_contains($plazo, 'año')) {
+                                                                $fechaFinCalculada = $inicio->addYears($cantidad ?: 1);
+                                                            } elseif (str_contains($plazo, 'mes')) {
+                                                                $fechaFinCalculada = $inicio->addMonths($cantidad ?: 1);
+                                                            }
+                                                        } catch (\Exception $e) {
+                                                            $fechaFinCalculada = null;
+                                                        }
+                                                    }
+                                                @endphp
+                                                {{ $contrato->fecha_fin ? \Carbon\Carbon::parse($contrato->fecha_fin)->format('d/m/Y') : ($fechaFinCalculada ? $fechaFinCalculada->format('d/m/Y') : 'Indefinido') }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div class="flex items-center gap-3 text-sm text-slate-600 border-t border-slate-100 pt-4">
-                                    @if($inmueble && $inmueble->propietario)
+                                    @php
+                                        $esPropietario = $contrato->propietario_id === auth()->id();
+                                        $otraParte = $esPropietario ? $contrato->inquilino : ($inmueble ? $inmueble->propietario : null);
+                                    @endphp
+                                    @if($otraParte)
                                         <div
                                             class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs uppercase overflow-hidden shrink-0">
-                                            @if($inmueble->propietario->foto_perfil)
-                                                <img src="{{ str_starts_with($inmueble->propietario->foto_perfil, 'http') ? $inmueble->propietario->foto_perfil : (str_contains($inmueble->propietario->foto_perfil, 'storage/') ? asset($inmueble->propietario->foto_perfil) : asset('storage/' . $inmueble->propietario->foto_perfil)) }}"
-                                                    alt="Propietario" class="w-full h-full object-cover">
+                                            @if($otraParte->foto_perfil)
+                                                <img src="{{ str_starts_with($otraParte->foto_perfil, 'http') ? $otraParte->foto_perfil : (str_contains($otraParte->foto_perfil, 'storage/') ? asset($otraParte->foto_perfil) : asset('storage/' . $otraParte->foto_perfil)) }}"
+                                                    alt="Usuario" class="w-full h-full object-cover">
                                             @else
-                                                {{ substr($inmueble->propietario->nombre, 0, 2) }}
+                                                {{ substr($otraParte->nombre, 0, 2) }}
                                             @endif
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-xs text-slate-400 font-medium leading-none mb-1">Propietario</p>
-                                            <p class="font-bold text-slate-800 truncate">{{ $inmueble->propietario->nombre }}</p>
+                                            <p class="text-xs text-slate-400 font-medium leading-none mb-1">{{ $esPropietario ? 'Inquilino' : 'Propietario' }}</p>
+                                            <p class="font-bold text-slate-800 truncate">{{ $otraParte->nombre }}</p>
                                         </div>
                                     @endif
                                 </div>
@@ -164,23 +313,24 @@
                                             </svg>
                                             Ver Contrato
                                         </a>
-                                    @else
-                                        <!-- Boton de prueba para cancelar renta y desvincular -->
-                                        <form action="{{ route('rentas.cancelar_prueba', $contrato) }}" method="POST" class="w-full">
+                                    @endif
+
+                                    @if(in_array($contrato->estatus, ['activo', 'pendiente_aprobacion', 'pendiente']))
+                                        <form action="{{ route('rentas.cancelar', $contrato) }}" method="POST" class="w-full">
                                             @csrf
                                             @method('DELETE')
-                                            <!-- Solo para pruebas -->
-                                            <button type="submit"
-                                                onclick="return confirm('¿Estás seguro de cancelar esta renta? (Botón funcional solo para pruebas)')"
-                                                class="w-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors text-center font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            <button type="submit" onclick="return confirm('¿Cancelar esta renta? Si está pendiente de aprobación, tus fondos serán liberados.');"
+                                                class="w-full bg-red-50 text-red-500 hover:text-white hover:bg-red-500 text-center font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
-                                                Cancelar mi renta (Prueba)
+                                                {{ $contrato->estatus === 'pendiente_aprobacion' ? 'Retirar solicitud' : 'Cancelar mi renta' }}
                                             </button>
                                         </form>
+                                    @else
+                                        <div class="w-full bg-slate-100 text-slate-400 text-center font-bold py-3 rounded-xl cursor-not-allowed text-sm flex items-center justify-center gap-2">
+                                            {{ $contrato->estatus === 'rechazado' ? 'Solicitud rechazada' : 'Renta cancelada/finalizada' }}
+                                        </div>
                                     @endif
                                 @endif
                             </div>
@@ -228,9 +378,12 @@
                                     }
                                 @endphp
                                 <p class="text-xs text-gray-400 font-bold mb-4">Vence el {{ $vence->format('d/m/Y') }}</p>
-                                <a href="#" class="w-full md:w-auto text-center px-10 py-4 bg-[#003049] text-white font-black rounded-2xl shadow-lg shadow-[#003049]/20 hover:bg-[#002538] hover:-translate-y-1 transition-all active:scale-95">
-                                    Pagar Ahora
-                                </a>
+                                <form action="{{ route('pagos.stripe.mensualidad', $pago->contrato) }}" method="POST" class="w-full md:w-auto">
+                                    @csrf
+                                    <button type="submit" class="w-full text-center px-10 py-4 bg-[#003049] text-white font-black rounded-2xl shadow-lg shadow-[#003049]/20 hover:bg-[#002538] hover:-translate-y-1 transition-all active:scale-95">
+                                        Pagar Ahora
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     @empty
@@ -261,7 +414,35 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
-                            @forelse($historialPagos as $pago)
+                            @php
+                                $todosLosPagos = collect();
+                                foreach($contratos as $c) {
+                                    // 1. Pago Inicial mock (basado en el inicio del contrato)
+                                    $todosLosPagos->push((object)[
+                                        'concepto' => 'Depósito y 1er Mes',
+                                        'subconcepto' => 'Propiedad: ' . ($c->inmueble->titulo ?? 'N/A'),
+                                        'fecha' => \Carbon\Carbon::parse($c->fecha_inicio),
+                                        'monto' => $c->renta_mensual + ($c->deposito ?? 0),
+                                        'estatus' => 'Pagado'
+                                    ]);
+                                    
+                                    // 2. Pagos reales
+                                    if ($c->pagos) {
+                                        foreach($c->pagos as $p) {
+                                            $todosLosPagos->push((object)[
+                                                'concepto' => current(explode(' ', $p->concepto ?? 'Mensualidad')) . ' ' . ($p->mes ?? '') . '/' . ($p->anio ?? ''),
+                                                'subconcepto' => 'Propiedad: ' . ($c->inmueble->titulo ?? 'N/A'),
+                                                'fecha' => \Carbon\Carbon::parse($p->fecha_pago ?? $p->created_at),
+                                                'monto' => $p->total_con_recargo ?? $p->monto,
+                                                'estatus' => $p->estatus
+                                            ]);
+                                        }
+                                    }
+                                }
+                                $todosLosPagos = $todosLosPagos->sortByDesc('fecha');
+                            @endphp
+
+                            @forelse($todosLosPagos as $pago)
                             <tr class="hover:bg-gray-50/50 transition-colors">
                                 <td class="px-8 py-6">
                                     <div class="flex items-center gap-4">
@@ -272,15 +453,15 @@
                                         </div>
                                         <div>
                                             <p class="font-bold text-[#003049] whitespace-nowrap">{{ $pago->concepto }}</p>
-                                            <p class="text-xs text-gray-400">{{ $pago->contrato->inmueble->titulo ?? 'Propiedad' }}</p>
+                                            <p class="text-xs text-gray-400">{{ $pago->subconcepto }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-8 py-6 text-sm font-medium text-gray-600 whitespace-nowrap">{{ \Carbon\Carbon::parse($pago->fecha_pago)->format('d/m/Y') }}</td>
+                                <td class="px-8 py-6 text-sm font-medium text-gray-600 whitespace-nowrap">{{ $pago->fecha->format('d/m/Y') }}</td>
                                 <td class="px-8 py-6 text-lg font-black text-[#003049] whitespace-nowrap">${{ number_format($pago->monto, 2) }}</td>
                                 <td class="px-8 py-6 text-right">
                                     <div class="flex items-center justify-end gap-3">
-                                        <span class="px-3 py-1 bg-[#669BBC]/20 text-[#003049] text-[10px] font-black uppercase tracking-widest rounded-full">Pagado</span>
+                                        <span class="px-3 py-1 {{ strtolower($pago->estatus) === 'pagado' ? 'bg-[#669BBC]/20 text-[#003049]' : 'bg-yellow-100 text-yellow-700' }} text-[10px] font-black uppercase tracking-widest rounded-full">{{ ucfirst($pago->estatus) }}</span>
                                         <button class="p-2 hover:bg-[#669BBC]/10 rounded-lg text-[#669BBC] transition-colors" title="Ver Recibo">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -291,7 +472,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="4" class="px-8 py-6 text-center text-gray-500">No hay transacciones previas.</td>
+                                <td colspan="4" class="px-8 py-6 text-center text-sm font-medium text-gray-500">No hay transacciones todavía.</td>
                             </tr>
                             @endforelse
                         </tbody>

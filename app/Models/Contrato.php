@@ -25,6 +25,7 @@ class Contrato extends Model
         'deposito',
         'estatus',
         'firma_digital',
+        'firma_propietario',
     ];
 
     /*

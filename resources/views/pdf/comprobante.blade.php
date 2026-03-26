@@ -200,7 +200,7 @@
                 <div class="invoice-no">Nº: {{ str_pad($pago->id, 4, '0', STR_PAD_LEFT) }}-{{ date('y') }}</div>
             </td>
             <td style="vertical-align: top; text-align: right;">
-                <div class="logo-circle">AO</div>
+                <img src="{{ public_path('logo2.png') }}" alt="Logo ArrendaOco" style="height: 70px; width: auto; float: right;">
             </td>
         </tr>
     </table>
