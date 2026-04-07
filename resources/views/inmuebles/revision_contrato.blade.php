@@ -38,33 +38,7 @@
                 </div>
                 <div class="p-6 h-[560px] overflow-y-auto bg-slate-50">
                     <div class="bg-white shadow-sm border border-gray-200 rounded p-8 text-sm text-gray-700 space-y-4 font-serif leading-relaxed">
-                        <h3 class="text-center font-bold text-lg mb-6 uppercase text-gray-800">Contrato de Arrendamiento Temporal</h3>
-
-                        <p class="text-justify">El presente contrato es celebrado en <strong>{{ $contrato->inmueble->ciudad ?? 'Ocosingo, Chiapas' }}</strong> en fecha <strong>{{ \Carbon\Carbon::parse($contrato->created_at)->translatedFormat('d \d\e F \d\e\l Y') }}</strong>.</p>
-
-                        <h4 class="font-bold mt-4">ENTRE</h4>
-                        <p class="text-justify"><strong>{{ optional($contrato->inmueble->propietario)->nombre ?? 'El Arrendador' }}</strong> — De aquí en adelante el "Arrendador".</p>
-                        <p class="text-center text-gray-400">— Y —</p>
-                        <p class="text-justify"><strong>{{ optional($contrato->inquilino)->nombre ?? 'El Inquilino' }}</strong> — De aquí en adelante el "Inquilino".</p>
-
-                        <h4 class="font-bold mt-6 border-b pb-1">CLÁUSULAS</h4>
-
-                        <p class="font-bold mt-3">1. Objeto del Contrato</p>
-                        <p class="text-justify">El Arrendador acepta alquilar al Inquilino la propiedad <strong>{{ $contrato->inmueble->titulo }}</strong> ubicada en <strong>{{ $contrato->inmueble->direccion ?? 'la dirección acordada' }}</strong> para uso habitacional exclusivo.</p>
-
-                        <p class="font-bold mt-3">2. Duración y Renta</p>
-                        <p class="text-justify">Este Contrato tendrá un plazo de <strong>{{ $contrato->plazo }}</strong> a contar desde el <strong>{{ \Carbon\Carbon::parse($contrato->fecha_inicio)->translatedFormat('d \d\e F \d\e\l Y') }}</strong>.<br>
-                        Renta mensual: <strong>${{ number_format($contrato->renta_mensual, 2) }} MXN</strong>.<br>
-                        Depósito de garantía: <strong>${{ number_format($contrato->deposito ?? 0, 2) }} MXN</strong>.</p>
-
-                        <p class="font-bold mt-3">3. Condiciones Generales</p>
-                        <p class="text-justify">El Inquilino se compromete a respetar las normas de convivencia y políticas de la propiedad definidas por el Arrendador en la plataforma ArrendaOco.</p>
-
-                        <div class="bg-gray-50 border border-gray-200 p-3 rounded text-center italic text-gray-400 text-xs mt-6">
-                            [Las cláusulas restantes forman parte íntegra del contrato y el Inquilino las acepta todas al firmar.]
-                        </div>
-
-                        <p class="mt-8 mb-6 text-center text-gray-700 font-medium">Firman de conformidad todas las Partes.</p>
+                        <x-contrato-legal :inmueble="$contrato->inmueble" :contrato="$contrato" />
 
                         <div class="grid grid-cols-2 gap-6 mt-4 text-center text-xs">
                             {{-- Firma Propietario --}}
