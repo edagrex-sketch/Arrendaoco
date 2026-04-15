@@ -356,24 +356,50 @@
                         </table>
                     </div>
 
-                    {{-- Configuración de Pagos --}}
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div>
-                            <label class="block text-sm font-medium mb-1 text-muted-foreground">Momento de Pago <span class="text-red-500">*</span></label>
-                            <select name="momento_pago" required class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
-                                <option value="adelantado">Por adelantado</option>
-                                <option value="vencido">A tiempo vencido</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1 text-muted-foreground">Tolerancia (Días) <span class="text-red-500">*</span></label>
-                            <input type="number" name="dias_tolerancia" value="2" min="0" max="15" required class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1 text-muted-foreground">Preaviso Salida (Días) <span class="text-red-500">*</span></label>
-                            <input type="number" name="dias_preaviso" value="30" min="1" max="31" required class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
-                        </div>
-                    </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div>
+                <label class="block text-sm font-medium mb-1 text-muted-foreground">Momento de Pago <span class="text-red-500">*</span></label>
+                <select name="momento_pago" required class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
+                    <option value="adelantado">Por adelantado</option>
+                    <option value="vencido">A tiempo vencido</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1 text-muted-foreground">Tolerancia (Días) <span class="text-red-500">*</span></label>
+                <input type="number" name="dias_tolerancia" value="2" min="0" max="15" required class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1 text-muted-foreground">Preaviso Salida (Días) <span class="text-red-500">*</span></label>
+                <input type="number" name="dias_preaviso" value="30" min="1" max="31" required class="w-full rounded-lg border-input bg-white border py-2 px-3 text-sm">
+            </div>
+        </div>
+
+        {{-- Duración del Contrato --}}
+        <div class="mb-6 bg-slate-50 p-5 rounded-xl border border-gray-200">
+            <div class="flex items-center gap-2 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#003049]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <label class="text-sm font-bold text-slate-700">Duración del Contrato <span class="text-red-500">*</span></label>
+            </div>
+            <p class="text-xs text-slate-500 mb-3">Define cuántos meses durará el contrato. El sistema calculará automáticamente la fecha de vencimiento.</p>
+            <div class="flex items-center gap-4">
+                <div class="relative w-40">
+                    <input type="number"
+                           name="duracion_contrato_meses"
+                           id="duracion_contrato_meses"
+                           value="{{ old('duracion_contrato_meses', 12) }}"
+                           min="1" max="60" required
+                           class="w-full rounded-lg bg-white border border-input py-2 px-3 font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary text-center transition-all">
+                </div>
+                <span class="text-sm font-medium text-slate-600">meses</span>
+                <div class="flex gap-2">
+                    <button type="button" onclick="setDuracion(6)"  class="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded-lg hover:border-primary hover:text-primary transition-colors">6 meses</button>
+                    <button type="button" onclick="setDuracion(12)" class="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded-lg hover:border-primary hover:text-primary transition-colors">1 año</button>
+                    <button type="button" onclick="setDuracion(24)" class="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded-lg hover:border-primary hover:text-primary transition-colors">2 años</button>
+                </div>
+            </div>
+        </div>
 
                     {{-- Cláusulas Adicionales  --}}
                     <div class="mb-6 bg-slate-50 p-5 rounded-xl border border-border">
@@ -798,6 +824,10 @@
                 }
             }))
         });
+
+        function setDuracion(meses) {
+            document.getElementById('duracion_contrato_meses').value = meses;
+        }
     </script>
 
 @endsection

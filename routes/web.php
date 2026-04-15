@@ -163,24 +163,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/buscar', [InmuebleController::class, 'publicSearch'])->name('inmuebles.public_search');
     Route::get('/inmuebles/{inmueble}', [InmuebleController::class, 'show'])->name('inmuebles.show');
     Route::get('/inmuebles/{inmueble}/rentar', [InmuebleController::class, 'rentar'])->name('inmuebles.rentar');
-    Route::get('/inmuebles/{inmueble}/contrato', function (\App\Models\Inmueble $inmueble) {
-        // Mismas validaciones que InmuebleController@rentar
-        if ($inmueble->propietario_id === auth()->id()) {
-            return redirect()->route('inmuebles.show', $inmueble)->with('error', 'No puedes rentar tu propia propiedad.');
-        }
-        if ($inmueble->estatus !== 'disponible') {
-            return redirect()->route('inmuebles.show', $inmueble)->with('error', 'Esta propiedad ya no está disponible para rentar.');
-        }
-        $rentaActiva = \App\Models\Contrato::where('inquilino_id', auth()->id())
-            ->where('estatus', 'activo')
-            ->exists();
-        if ($rentaActiva) {
-            return redirect()->route('inmuebles.show', $inmueble)
-                ->with('error', 'Ya tienes una propiedad rentada actualmente.');
-        }
-        $inmueble->load('propietario');
-        return view('contrato-pago', compact('inmueble'));
-    })->name('inmuebles.contrato');
+    // Fase 2 — Nuevo flujo físico: «Ver Contrato» (reemplaza el wizard contrato-pago)
+    Route::get('/inmuebles/{inmueble}/ver-contrato',
+        [\App\Http\Controllers\ContratoFisicoController::class, 'verContrato']
+    )->name('contratos.ver');
+    Route::get('/contratos/{contrato}/descargar-registrar',
+        [\App\Http\Controllers\ContratoFisicoController::class, 'registrarDescarga']
+    )->name('contratos.descargar-registrar');
+    Route::get('/contratos/{contrato}/subir-firmado',
+        [\App\Http\Controllers\ContratoFisicoController::class, 'formSubirFirmado']
+    )->name('contratos.subir-firmado');
+    Route::post('/contratos/{contrato}/subir-firmado',
+        [\App\Http\Controllers\ContratoFisicoController::class, 'subirFirmado']
+    )->name('contratos.subir-firmado.post');
 
     // Rutas de Inmuebles
     Route::get('/mis-propiedades', [InmuebleController::class, 'index'])->name('inmuebles.index');
@@ -206,30 +201,22 @@ Route::middleware('auth')->group(function () {
     })->name('contratos.revision');
 
     Route::post('/contratos/{contrato}/aprobar', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
+        // LEGADO: ruta de aprobación del flujo anterior (pendiente_aprobacion)
+        // Para contratos nuevos del flujo físico, usar ContratoFisicoController@subirFirmado
         if ($contrato->propietario_id !== Auth::id()) abort(403);
-        if ($contrato->estatus !== 'pendiente_aprobacion') {
+        if (!in_array($contrato->estatus, ['pendiente_aprobacion', 'pdf_descargado'])) {
             return redirect()->route('inmuebles.index')->with('info', 'Esta solicitud ya fue procesada.');
         }
 
-        $request->validate(['firma_propietario' => 'required|string']);
-
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-            // 1. Activar el contrato con firma del propietario
-            $contrato->update([
-                'estatus'           => 'activo',
-                'firma_propietario' => $request->firma_propietario,
-            ]);
+            // 1. Activar el contrato (sin firma digital)
+            $contrato->update(['estatus' => 'activo']);
 
             // 2. Marcar el inmueble como rentado
             $contrato->inmueble->update(['estatus' => 'rentado']);
 
-            // 3. Marcar el pago como capturado (pagado)
-            \App\Models\Pago::where('contrato_id', $contrato->id)
-                ->where('estatus', 'pendiente')
-                ->update(['estatus' => 'pagado', 'concepto' => 'Depósito y 1er Mes']);
-
-            // 4. Crear eventos de calendario
+            // 3. Crear evento de calendario
             \App\Models\Evento::create([
                 'usuario_id'  => $contrato->inquilino_id,
                 'renta_id'    => $contrato->id,
@@ -237,22 +224,15 @@ Route::middleware('auth')->group(function () {
                 'descripcion' => '¡Tu renta fue aprobada! Ya puedes coordinar la entrega de llaves.',
                 'fecha'       => now(),
             ]);
-            \App\Models\Evento::create([
-                'usuario_id'  => $contrato->propietario_id,
-                'renta_id'    => $contrato->id,
-                'titulo'      => 'Contrato Activo: ' . $contrato->inmueble->titulo,
-                'descripcion' => 'Aprobaste la renta de ' . optional($contrato->inquilino)->nombre . '. Los fondos han sido capturados.',
-                'fecha'       => now(),
-            ]);
 
-            // 5. Notificar al inquilino
+            // 4. Notificar al inquilino (opcional)
             try {
                 $contrato->load('inmueble', 'inquilino');
                 Mail::to(optional($contrato->inquilino)->email)->send(new RentaRespondidaMail($contrato, 'aprobada'));
             } catch (\Exception $e) {}
 
             \Illuminate\Support\Facades\DB::commit();
-            return redirect()->route('inmuebles.index')->with('success', '¡Renta aprobada exitosamente! Los fondos han sido capturados y el inquilino fue notificado.');
+            return redirect()->route('inmuebles.index')->with('success', '¡Contrato activado! El inmueble ha sido marcado como rentado.');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
             return back()->with('error', 'Error al aprobar: ' . $e->getMessage());
@@ -420,79 +400,10 @@ Route::post('/reset-password', function (\Illuminate\Http\Request $request) {
 })->name('password.update');
 
 
-// Rutas de Pago (Protegidas con Auth)
+// ─── Rutas de Pago (flujo mensual vigente) ────────────────────────────────
+// NOTA: El checkout inicial (wizard + hold) fue eliminado en la Fase 0.
+// Los contratos ahora se inician desde ContratoFisicoController@verContrato.
 Route::middleware('auth')->prefix('pagos')->group(function () {
-    Route::post('/checkout/{inmueble}', function (\Illuminate\Http\Request $request, \App\Models\Inmueble $inmueble) {
-        $metodo = $request->input('metodo_pago', 'card');
-        
-        // MODO SIMULACIÓN: Saltamos Stripe y vamos directo al éxito
-        return redirect()->route('pagos.test.success.process', [
-            'inmueble' => $inmueble->id,
-            'metodo_pago' => $metodo,
-            'fecha_inicio' => $request->input('fecha_inicio'),
-            'plazo' => $request->input('plazo'),
-            'firma_digital' => $request->input('firma_digital')
-        ]);
-    })->name('pagos.stripe.checkout');
-
-    Route::match(['get', 'post'], '/success/{inmueble}', function (\Illuminate\Http\Request $request, \App\Models\Inmueble $inmueble) {
-        // Bloquear si ya existe un contrato pendiente o activo para este inmueble
-        $contratoExistente = \App\Models\Contrato::where('inmueble_id', $inmueble->id)
-            ->whereIn('estatus', ['pendiente_aprobacion', 'activo'])
-            ->first();
-        if ($contratoExistente) {
-            return view('pagos.success', ['inmueble' => $inmueble, 'contrato' => $contratoExistente]);
-        }
-
-        // ============================================================
-        // FASE 2 — CORREGIDO:
-        // El inmueble NO se marca 'rentado' hasta que el propietario apruebe.
-        // Solo se congela (en simulación) y el contrato queda 'pendiente_aprobacion'.
-        // ============================================================
-
-        $metodo = $request->input('metodo_pago', 'card');
-
-        $contrato = \App\Models\Contrato::create([
-            'inmueble_id'    => $inmueble->id,
-            'propietario_id' => $inmueble->propietario_id,
-            'inquilino_id'   => Auth::id(),
-            'fecha_inicio'   => $request->input('fecha_inicio', now()),
-            'plazo'          => $request->input('plazo', '1 año'),
-            'firma_digital'  => $request->input('firma_digital', null),
-            'renta_mensual'  => $inmueble->renta_mensual,
-            'deposito'       => $inmueble->deposito ?? $inmueble->renta_mensual,
-            'estatus'        => 'pendiente_aprobacion',
-        ]);
-
-        // Registrar pago inicial en estado 'pendiente' (fondos congelados, no capturados)
-        $pago = \App\Models\Pago::create([
-            'contrato_id'       => $contrato->id,
-            'mes'               => now()->month,
-            'anio'              => now()->year,
-            'monto'             => $contrato->renta_mensual + ($contrato->deposito ?? 0),
-            'estatus'           => 'pendiente',
-            'fecha_pago'        => now(),
-            'dias_atraso'       => 0,
-            'recargo'           => 0,
-            'total_con_recargo' => $contrato->renta_mensual + ($contrato->deposito ?? 0),
-            'concepto'          => 'Depósito y 1er Mes (Hold)',
-        ]);
-
-        // Notificar al propietario por correo
-        try {
-            $contrato->load('inmueble.propietario', 'inquilino');
-            Mail::to(optional($inmueble->propietario)->email)->send(new SolicitudRentaMail($contrato));
-        } catch (\Exception $e) {
-            // Mail falla silenciosamente en modo dev
-        }
-
-        if ($metodo === 'oxxo') {
-            $referencia = implode(' - ', str_split(rand(100000000000000, 999999999999999), 4));
-            return view('pagos.oxxo', ['inmueble' => $inmueble, 'referencia' => $referencia, 'contrato' => $contrato]);
-        }
-
-        return view('pagos.success', compact('inmueble', 'contrato', 'pago'));
-    })->name('pagos.test.success.process');
 
     Route::post('/pagar-mensualidad/{contrato}', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
         \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));

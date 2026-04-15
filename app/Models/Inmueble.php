@@ -46,6 +46,7 @@ class Inmueble extends Model
         'momento_pago',
         'dias_tolerancia',
         'dias_preaviso',
+        'duracion_contrato_meses', // Duración del contrato definida por el propietario
         'permite_mascotas',
         'tipos_mascotas',
         'servicios_incluidos',
@@ -55,14 +56,15 @@ class Inmueble extends Model
     ];
 
     protected $casts = [
-        'tipos_mascotas' => 'array',
-        'servicios_incluidos' => 'array',
-        'pago_servicio' => 'array',
-        'requiere_deposito' => 'boolean',
-        'tiene_cerradura_propia' => 'boolean',
-        'tiene_estacionamiento' => 'boolean',
-        'permite_mascotas' => 'boolean',
-        'incluir_clausulas' => 'boolean',
+        'tipos_mascotas'          => 'array',
+        'servicios_incluidos'     => 'array',
+        'pago_servicio'           => 'array',
+        'requiere_deposito'       => 'boolean',
+        'tiene_cerradura_propia'  => 'boolean',
+        'tiene_estacionamiento'   => 'boolean',
+        'permite_mascotas'        => 'boolean',
+        'incluir_clausulas'       => 'boolean',
+        'duracion_contrato_meses' => 'integer',
     ];
 
     public function propietario()

@@ -89,11 +89,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @foreach ($inmuebles as $inmueble)
                 @php
-                    // Detectar si este inmueble tiene contrato pendiente de aprobación
-                    $contratosPendientes = $inmueble->contratos->where('estatus', 'pendiente_aprobacion');
-                    $contratoPendiente   = $contratosPendientes->first();
-                    $contratoActivo      = $inmueble->contratos->where('estatus', 'activo')->first();
-                    $enProceso           = $contratoPendiente !== null;
+                    // Detectar contratos activos del flujo físico (nuevo) y del flujo anterior (legado)
+                    $contratosPendientes   = $inmueble->contratos->where('estatus', 'pendiente_aprobacion');
+                    $contratosPdfDesc      = $inmueble->contratos->where('estatus', 'pdf_descargado');
+                    $contratoPendiente     = $contratosPendientes->first();
+                    $contratoPdfDesc       = $contratosPdfDesc->first();
+                    $contratoActivo        = $inmueble->contratos->where('estatus', 'activo')->first();
+                    $enProceso             = $contratoPendiente !== null || $contratoPdfDesc !== null;
+                    // El contrato activo para mostrar en el card (prioriza flujo físico)
+                    $contratoEnCurso       = $contratoPdfDesc ?? $contratoPendiente;
                 @endphp
 
                 <div class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border {{ $enProceso ? 'border-[#669BBC]/40 ring-2 ring-[#669BBC]/20' : 'border-slate-100' }} flex flex-col h-full relative">
@@ -146,9 +150,29 @@
                             </div>
                         </div>
 
-                        {{-- ===== Apartado Especial: Inquilino en Proceso de Renta ===== --}}
-                        @if($enProceso && $contratoPendiente->inquilino)
-                            @php $inq = $contratoPendiente->inquilino; @endphp
+                        {{-- ===== Alerta: PDF Descargado — Esperando firmado físico ===== --}}
+                        @if($contratoPdfDesc && $contratoPdfDesc->inquilino)
+                            @php $inq = $contratoPdfDesc->inquilino; @endphp
+                            <div class="mt-2 p-4 bg-[#FDF0D5] rounded-2xl border border-[#003049]/20 flex items-start gap-3">
+                                <div class="h-9 w-9 rounded-xl bg-[#003049] flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#FDF0D5]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                    </svg>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-[10px] font-black uppercase tracking-widest text-[#003049] mb-0.5">PDF Descargado &mdash; Subir firmado</p>
+                                    <p class="text-sm font-bold text-[#003049] truncate">{{ $inq->nombre }}</p>
+                                    <p class="text-[10px] text-slate-500">Descargado: {{ \Carbon\Carbon::parse($contratoPdfDesc->pdf_descargado_at)->format('d/m/Y H:i') }}</p>
+                                </div>
+                                <a href="{{ route('contratos.subir-firmado', $contratoPdfDesc->id) }}"
+                                   class="shrink-0 bg-[#003049] text-white text-xs font-black px-3 py-2 rounded-xl hover:bg-[#002236] transition-colors whitespace-nowrap">
+                                    Subir firmado
+                                </a>
+                            </div>
+
+                        {{-- ===== Inquilino pendiente de aprobación (flujo legado) ===== --}}
+                        @elseif($enProceso && $contratoEnCurso && $contratoEnCurso->inquilino)
+                            @php $inq = $contratoEnCurso->inquilino; @endphp
                             <div class="mt-2 p-4 bg-[#FDF0D5] rounded-2xl border border-[#669BBC]/30 flex items-center gap-3">
                                 <div class="w-11 h-11 rounded-full bg-white border-2 border-[#669BBC]/30 flex items-center justify-center text-[#003049] font-bold uppercase overflow-hidden shrink-0 shadow-sm text-sm">
                                     @if($inq->foto_perfil)
