@@ -19,6 +19,7 @@ class Pago extends Model
         'dias_atraso',
         'recargo',
         'total_con_recargo',
+        'concepto',
     ];
 
     public function contrato()

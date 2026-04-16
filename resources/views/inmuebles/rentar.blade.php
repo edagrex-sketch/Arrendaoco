@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="max-w-6xl mx-auto px-4 py-8 lg:py-16">
-        <div class="flex flex-col lg:flex-row gap-12">
+        <div class="flex flex-col lg:flex-row gap-12" x-data="{ method: 'card' }">
 
             <!-- Columna Izquierda: Métodos de Pago -->
             <div class="flex-1">
@@ -21,7 +21,7 @@
                 <p class="text-gray-500 font-medium mb-10 text-lg">Selecciona tu forma de pago preferida para reservar esta
                     propiedad. Todas las transacciones están cifradas y protegidas.</p>
 
-                <div class="space-y-4" x-data="{ method: 'card' }">
+                <div class="space-y-4">
                     <!-- Opción 1: Tarjeta -->
                     <div @click="method = 'card'"
                         :class="method === 'card' ? 'border-[#003049] bg-[#003049]/5 ring-2 ring-[#003049]/20' : 'border-gray-200 hover:border-gray-300 bg-white'"
@@ -179,19 +179,16 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('pagos.test.success.process', $inmueble->id) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="metodo_pago" :value="method">
-                        <button type="submit"
-                            class="flex items-center justify-center gap-3 w-full text-center bg-[#C1121F] text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-[#C1121F]/30 hover:bg-[#780000] hover:-translate-y-1 transition-all active:scale-95 border border-[#780000]">
-                            Pagar y Reservar
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
-                        </button>
-                    </form>
+                    <a :href="`{{ route('inmuebles.contrato', $inmueble->id) }}?metodo_pago=${method}`"
+                        id="btn-llenar-contrato"
+                        class="flex items-center justify-center gap-3 w-full text-center bg-[#C1121F] text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-[#C1121F]/30 hover:bg-[#780000] hover:-translate-y-1 transition-all active:scale-95 border border-[#780000]">
+                        Llenar contrato
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </a>
 
                     <p
                         class="text-center mt-6 text-[10px] text-gray-400 leading-relaxed font-bold uppercase tracking-wider">

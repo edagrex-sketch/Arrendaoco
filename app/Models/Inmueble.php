@@ -37,6 +37,34 @@ class Inmueble extends Model
         'latitud',
         'longitud',
         'contrato_documento',
+        'requiere_deposito',
+        'tiene_cerradura_propia',
+        'tiene_cerradura', // Retained for backwards compatibility
+        'cantidad_llaves',
+        'tiene_estacionamiento',
+        'estado_mobiliario',
+        'momento_pago',
+        'dias_tolerancia',
+        'dias_preaviso',
+        'duracion_contrato_meses', // Duración del contrato definida por el propietario
+        'permite_mascotas',
+        'tipos_mascotas',
+        'servicios_incluidos',
+        'pago_servicio',
+        'incluir_clausulas',
+        'clausulas_extra',
+    ];
+
+    protected $casts = [
+        'tipos_mascotas'          => 'array',
+        'servicios_incluidos'     => 'array',
+        'pago_servicio'           => 'array',
+        'requiere_deposito'       => 'boolean',
+        'tiene_cerradura_propia'  => 'boolean',
+        'tiene_estacionamiento'   => 'boolean',
+        'permite_mascotas'        => 'boolean',
+        'incluir_clausulas'       => 'boolean',
+        'duracion_contrato_meses' => 'integer',
     ];
 
     public function propietario()
@@ -66,5 +94,25 @@ class Inmueble extends Model
     public function getImagenUrlAttribute(): ?string
     {
         return MediaUrl::fromStoragePath($this->attributes['imagen'] ?? null);
+    }
+
+    public function mascotas()
+    {
+        return $this->belongsToMany(Mascota::class, 'inmueble_mascota');
+    }
+
+    public function mobiliarios()
+    {
+        return $this->belongsToMany(Mobiliario::class, 'inmueble_mobiliario');
+    }
+
+    public function zonasComunes()
+    {
+        return $this->belongsToMany(ZonaComun::class, 'inmueble_zona_comun');
+    }
+
+    public function servicios()
+    {
+        return $this->hasMany(InmuebleServicio::class, 'inmueble_id');
     }
 }

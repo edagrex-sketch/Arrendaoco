@@ -15,7 +15,8 @@ class InmuebleController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->search;
+        $search  = $request->search;
+        $estatus = $request->estatus; // 'disponible' | 'rentado' | 'proceso' | null (todos)
 
         if (auth()->user()->es_admin || auth()->user()->tieneRol('admin')) {
             $query = Inmueble::with('propietario');
@@ -35,7 +36,10 @@ class InmuebleController extends Controller
             $inmuebles = $query->paginate(10)->withQueryString();
             return view('admin.inmuebles.index', compact('inmuebles'));
         } else {
-            $query = Inmueble::with('contratos.inquilino')->where('propietario_id', auth()->id());
+            $query = Inmueble::with(['contratos' => function ($q) {
+                // Incluir 'pdf_descargado' para que el landlord vea quién descargó el PDF
+                $q->with('inquilino')->whereIn('estatus', ['pendiente_aprobacion', 'pdf_descargado', 'activo'])->latest();
+            }])->where('propietario_id', auth()->id());
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
@@ -45,7 +49,24 @@ class InmuebleController extends Controller
                 });
             }
 
-            $inmuebles = $query->paginate(10)->withQueryString();
+            // Ordenamiento prioridad:
+            // 0: En proceso (pendiente_aprobacion o pdf_descargado)
+            // 1: Disponibles
+            // 2: Otros (Rentados, etc)
+            $query->orderByRaw("
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1 FROM contratos
+                        WHERE contratos.inmueble_id = inmuebles.id
+                          AND contratos.estatus IN ('pendiente_aprobacion', 'pdf_descargado')
+                    ) THEN 0
+                    WHEN inmuebles.estatus = 'disponible' THEN 1
+                    ELSE 2
+                END ASC
+            ")->orderBy('created_at', 'desc');
+
+            $inmuebles = $query->paginate(12)->withQueryString();
+
             return view('inmuebles.index', compact('inmuebles'));
         }
     }
@@ -63,8 +84,82 @@ class InmuebleController extends Controller
 
     public function misRentas()
     {
-        $contratos = \App\Models\Contrato::with('inmueble.propietario')->where('inquilino_id', auth()->id())->latest()->get();
-        return view('inmuebles.mis_rentas', compact('contratos'));
+        $userId = auth()->id();
+
+        // Contratos activos/pendientes — excluimos 'rechazado' y 'cancelado' del listado
+        $contratos = \App\Models\Contrato::with('inmueble.propietario')
+            ->where('inquilino_id', $userId)
+            ->whereNotIn('estatus', ['rechazado', 'cancelado'])
+            ->latest()
+            ->get();
+
+        // Detectar si hay contrato rechazado que el inquilino aún no ha visto
+        // Usamos session para mostrarlo solo una vez
+        $contratoRechazado = null;
+        if (!session()->has('rechazo_visto_' . $userId)) {
+            $contratoRechazado = \App\Models\Contrato::with('inmueble')
+                ->where('inquilino_id', $userId)
+                ->where('estatus', 'rechazado')
+                ->latest()
+                ->first();
+
+            if ($contratoRechazado) {
+                // Marcamos como visto para no mostrarlo de nuevo
+                session()->put('rechazo_visto_' . $userId, true);
+            }
+        }
+
+        $pagosPendientes = \App\Models\Pago::with('contrato.inmueble')
+                            ->whereIn('contrato_id', $contratos->pluck('id'))
+                            ->where('estatus', 'pendiente')
+                            ->orderBy('anio', 'asc')
+                            ->orderBy('mes', 'asc')
+                            ->get();
+
+        $historialPagos = \App\Models\Pago::with('contrato.inmueble')
+                            ->whereIn('contrato_id', $contratos->pluck('id'))
+                            ->where('estatus', 'pagado')
+                            ->orderBy('fecha_pago', 'desc')
+                            ->get();
+
+        // Marco como visto para quitar el punto rojo de notificación
+        session()->put('renta_visto_' . auth()->id(), true);
+
+        return view('inmuebles.mis_rentas', compact('contratos', 'pagosPendientes', 'historialPagos', 'contratoRechazado'));
+    }
+
+    public function cancelarRenta(\App\Models\Contrato $contrato)
+    {
+        if ($contrato->inquilino_id !== auth()->id() && $contrato->propietario_id !== auth()->id() && !auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
+            abort(403, 'No tienes permiso para cancelar esta renta.');
+        }
+
+        if ($contrato->estatus !== 'activo') {
+            return back()->with('error', 'Esta renta ya no está activa.');
+        }
+
+        try {
+            DB::beginTransaction();
+            $contrato->estatus = 'cancelado';
+            
+            // Set end date to now if it isn't set, otherwise maybe it already has one.
+            if (!$contrato->fecha_fin) {
+                // If the user wants to keep a history of what the intended end date was, they might not zero it out. But typically cancelling happens now.
+                $contrato->fecha_fin = now();
+            }
+            $contrato->save();
+
+            if ($contrato->inmueble) {
+                $contrato->inmueble->estatus = 'disponible';
+                $contrato->inmueble->save();
+            }
+            DB::commit();
+
+            return back()->with('success', 'Renta (contrato) cancelada exitosamente y la propiedad está disponible de nuevo.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Ocurrió un error al cancelar la renta: ' . $e->getMessage());
+        }
     }
 
     //cargar las ultimas 9 casas disponibles
@@ -235,7 +330,7 @@ class InmuebleController extends Controller
             $inmueble->direccion = $request->direccion;
             $inmueble->tipo = $request->tipo;
             $inmueble->renta_mensual = $request->precio;
-            $inmueble->deposito = $request->deposito;
+            $inmueble->deposito = $request->deposito ?: 0;
             $inmueble->habitaciones = $request->habitaciones;
 
             $parts = explode(',', $request->banos_casa);
@@ -246,6 +341,21 @@ class InmuebleController extends Controller
             $inmueble->metros = $request->metros;
             $inmueble->latitud = $request->latitud;
             $inmueble->longitud = $request->longitud;
+            
+            // Nuevos campos extendidos
+            $inmueble->requiere_deposito = $request->requiere_deposito === 'si';
+            $inmueble->tiene_cerradura_propia = $request->tiene_cerradura === 'si'; // Fallback if old name comes through
+            $inmueble->cantidad_llaves = $request->cantidad_llaves ?? 0;
+            $inmueble->permite_mascotas = $request->permite_mascotas === 'si';
+            $inmueble->incluir_clausulas = $request->incluir_clausulas === 'si';
+            $inmueble->clausulas_extra = $request->clausulas_extra ?? '';
+
+            $inmueble->estado_mobiliario = $request->estado_mobiliario ?? 'no amueblada';
+            $inmueble->tiene_estacionamiento = $request->tiene_estacionamiento == 1;
+            $inmueble->momento_pago = $request->momento_pago ?? 'adelantado';
+            $inmueble->dias_tolerancia = $request->dias_tolerancia ?? 0;
+            $inmueble->dias_preaviso = $request->dias_preaviso ?? 30;
+
             $inmueble->propietario_id = auth()->id();
 
             $inmueble->ciudad = 'Ocosingo';
@@ -263,6 +373,31 @@ class InmuebleController extends Controller
             }
 
             $inmueble->save();
+
+            // Sincronizar Zonas Comunes
+            if ($request->tiene_zonas_comunes === 'si' && $request->has('zonas_comunes')) {
+                $zonasIds = \App\Models\ZonaComun::whereIn('slug', $request->zonas_comunes)->pluck('id');
+                $inmueble->zonasComunes()->sync($zonasIds);
+            }
+
+            // Sincronizar Mascotas
+            if ($request->permite_mascotas === 'si' && $request->has('tipos_mascotas')) {
+                $mascotasIds = \App\Models\Mascota::whereIn('slug', $request->tipos_mascotas)->pluck('id');
+                $inmueble->mascotas()->sync($mascotasIds);
+            }
+
+            // Sincronizar Servicios
+            if ($request->has('servicios_incluidos')) {
+                foreach ($request->servicios_incluidos as $serv) {
+                    $slug = \Illuminate\Support\Str::slug($serv, '_');
+                    $pago = $request->pago_servicio[$slug] ?? 'inquilino';
+                    \App\Models\InmuebleServicio::create([
+                        'inmueble_id' => $inmueble->id,
+                        'servicio' => $serv,
+                        'paga' => $pago
+                    ]);
+                }
+            }
 
             foreach ($request->file('imagenes') as $foto) {
                 $path = $foto->store('inmuebles', 'public');
@@ -339,7 +474,7 @@ class InmuebleController extends Controller
             'titulo' => $request->nombre,
             'tipo' => $request->tipo,
             'renta_mensual' => $request->precio,
-            'deposito' => $request->deposito,
+            'deposito' => $request->deposito ?: 0,
             'descripcion' => $request->descripcion,
             'direccion' => $request->direccion,
             'habitaciones' => $request->habitaciones,
@@ -349,7 +484,56 @@ class InmuebleController extends Controller
             'metros' => $request->metros,
             'latitud' => $request->latitud,
             'longitud' => $request->longitud,
+            
+            // Nuevos campos extendidos
+            'requiere_deposito' => $request->requiere_deposito === 'si',
+            'tiene_cerradura_propia' => $request->has('tiene_cerradura') ? $request->tiene_cerradura === 'si' : false,
+            'cantidad_llaves' => $request->cantidad_llaves ?? 0,
+            'permite_mascotas' => $request->permite_mascotas === 'si',
+            'incluir_clausulas' => $request->incluir_clausulas === 'si',
+            'clausulas_extra' => $request->clausulas_extra ?? '',
+            'estado_mobiliario' => $request->estado_mobiliario ?? 'no amueblada',
+            'tiene_estacionamiento' => $request->tiene_estacionamiento == 1,
+            'momento_pago' => $request->momento_pago ?? 'adelantado',
+            'dias_tolerancia' => $request->dias_tolerancia ?? 0,
+            'dias_preaviso' => $request->dias_preaviso ?? 30,
         ]);
+
+        // Sincronizar Zonas Comunes
+        if ($request->has('tiene_zonas_comunes')) {
+            if ($request->tiene_zonas_comunes === 'si' && $request->has('zonas_comunes')) {
+                $zonasIds = \App\Models\ZonaComun::whereIn('slug', $request->zonas_comunes)->pluck('id');
+                $inmueble->zonasComunes()->sync($zonasIds);
+            } else {
+                $inmueble->zonasComunes()->detach();
+            }
+        }
+
+        // Sincronizar Mascotas
+        if ($request->has('permite_mascotas')) {
+            if ($request->permite_mascotas === 'si' && $request->has('tipos_mascotas')) {
+                $mascotasIds = \App\Models\Mascota::whereIn('slug', $request->tipos_mascotas)->pluck('id');
+                $inmueble->mascotas()->sync($mascotasIds);
+            } else {
+                $inmueble->mascotas()->detach();
+            }
+        }
+
+        // Sincronizar Servicios
+        if ($request->has('servicios_incluidos')) {
+            $inmueble->servicios()->delete(); // Limpiar viejos
+            foreach ($request->servicios_incluidos as $serv) {
+                $slug = \Illuminate\Support\Str::slug($serv, '_');
+                $pago = isset($request->pago_servicio) && isset($request->pago_servicio[$slug]) ? $request->pago_servicio[$slug] : 'inquilino';
+                \App\Models\InmuebleServicio::create([
+                    'inmueble_id' => $inmueble->id,
+                    'servicio' => $serv,
+                    'paga' => $pago
+                ]);
+            }
+        } else {
+            $inmueble->servicios()->delete();
+        }
 
         if ($request->hasFile('contrato_documento')) {
             $pathContrato = $request->file('contrato_documento')->store('contratos', 'public');
@@ -369,6 +553,11 @@ class InmuebleController extends Controller
             }
         }
 
+        if ($request->has('return_to_contrato')) {
+            return redirect()->route('contratos.revision', $request->return_to_contrato)
+                ->with('success', 'Propiedad actualizada con éxito. Los datos se han refrescado.');
+        }
+
         return redirect()->route('inmuebles.index')->with('success', 'Propiedad actualizada con éxito.');
     }
 
@@ -384,6 +573,26 @@ class InmuebleController extends Controller
 
         $inmueble->delete();
         return redirect()->route('inmuebles.index')->with('success', 'Propiedad eliminada correctamente.');
+    }
+
+    public function descargarContratoPdf(\App\Models\Contrato $contrato)
+    {
+        if ($contrato->inquilino_id !== auth()->id() && $contrato->propietario_id !== auth()->id() && !auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
+            abort(403);
+        }
+        $contrato->load('inmueble.propietario', 'inquilino');
+        $pdf = Pdf::loadView('pdf.contrato', compact('contrato'));
+        return $pdf->download('Contrato_Arrendo_' . $contrato->id . '.pdf');
+    }
+
+    public function descargarComprobantePdf(\App\Models\Pago $pago)
+    {
+        $pago->load('contrato.inmueble.propietario', 'contrato.inquilino');
+        if ($pago->contrato->inquilino_id !== auth()->id() && $pago->contrato->propietario_id !== auth()->id() && !auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
+            abort(403);
+        }
+        $pdf = Pdf::loadView('pdf.comprobante', compact('pago'));
+        return $pdf->download('Recibo_Pago_' . $pago->id . '.pdf');
     }
 }
 

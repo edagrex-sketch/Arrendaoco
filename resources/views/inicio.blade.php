@@ -8,8 +8,8 @@
        1. HERO SECTION & BUSCADOR 
     --}}
     <section class="mb-12 px-4 py-8">
-        <div class="w-full max-w-5xl mx-auto rounded-xl bg-card p-6 shadow-lg border border-border">
-            <h2 class="mb-6 text-center text-3xl font-semibold text-card-foreground">
+        <div class="w-full max-w-5xl mx-auto rounded-3xl bg-card p-8 shadow-2xl shadow-slate-200/50 border border-border">
+            <h2 class="mb-8 text-center text-3xl font-black text-foreground tracking-tight">
                 Encuentra tu próximo hogar en Ocosingo
             </h2>
             <form id="form-busqueda" action="{{ route('inmuebles.public_search') }}" method="GET"
@@ -71,7 +71,7 @@
                     </div>
                 </div>
                 <button type="submit"
-                    class="inline-flex h-12 items-center justify-center rounded-md bg-[#003049] px-8 text-sm font-semibold text-white transition-all hover:bg-[#003049]/90 hover:scale-[1.02] shadow-md gap-2 w-full lg:w-auto">
+                    class="btn-primary w-full lg:w-auto px-8">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -83,7 +83,7 @@
             @guest
                 <div class="mt-4 text-center">
                     <p class="text-xs text-muted-foreground">¿Quieres usar los filtros avanzados? 
-                        <a href="{{ route('login') }}" class="font-bold text-[#003049] hover:underline transition-all">Inicia Sesión</a>
+                        <a href="{{ route('login') }}" class="font-bold text-brand-dark hover:underline transition-all">Inicia Sesión</a>
                     </p>
                 </div>
             @endguest
@@ -96,16 +96,16 @@
     <section class="container mx-auto px-4 mb-16" x-data="mapExploration()">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-xl bg-[#003049] flex items-center justify-center text-white shadow-lg">
+                <div class="h-10 w-10 rounded-xl bg-brand-dark flex items-center justify-center text-white shadow-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-black text-[#003049] tracking-tight">Explora el Mapa</h2>
+                    <h2 class="text-2xl font-black text-brand-dark tracking-tight">Explora el Mapa</h2>
                     <p class="text-slate-400 text-xs font-bold uppercase tracking-widest hidden md:block">Encuentra disponibilidad cerca de ti con vista satelital</p>
                 </div>
             </div>
             
-            <button @click="toggleMap" class="text-sm font-bold bg-[#FDF0D5] text-[#003049] px-4 py-2 rounded-xl hover:bg-[#FDF0D5]/80 transition-all flex items-center gap-2 shadow-sm whitespace-nowrap">
+            <button @click="toggleMap" class="btn-secondary py-2 px-4 shadow-sm">
                 <span x-text="showMap ? 'Contraer Mapa' : 'Mostrar Mapa'"></span>
                 <svg x-show="!showMap" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                 <svg x-show="showMap" style="display: none;" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>
@@ -237,7 +237,7 @@
     {{-- 3. SECCIÓN DE RESULTADOS --}}
     <section class="container mx-auto px-4 mb-20 -mt-8" id="resultados-busqueda">
         <div class="flex items-center justify-between mb-8">
-            <h2 class="text-2xl font-bold text-[#003049]">Propiedades Disponibles</h2>
+            <h2 class="text-2xl font-black text-brand-dark">Propiedades Disponibles</h2>
             <div class="flex items-center gap-4">
                 <span class="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
                     {{ $inmuebles->total() }} resultados
