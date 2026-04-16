@@ -24,42 +24,6 @@
         </a>
     </div>
 
-    {{-- ===== TABS DE FILTRO ===== --}}
-    @php
-        $tabActivo = $estatus ?? 'todos';
-        $tabs = [
-            'todos'      => ['label' => 'Todos',            'count' => $cuentas['total'],      'icon' => 'M4 6h16M4 10h16M4 14h16M4 18h16'],
-            'proceso'    => ['label' => 'En Proceso',       'count' => $cuentas['proceso'],    'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-            'disponible' => ['label' => 'Disponibles',      'count' => $cuentas['disponible'], 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
-            'rentado'    => ['label' => 'Rentados',         'count' => $cuentas['rentado'],    'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
-        ];
-    @endphp
-
-    <div class="flex flex-wrap gap-2 mb-8" role="tablist">
-        @foreach($tabs as $key => $tab)
-            @php
-                $isActive = $tabActivo === $key;
-                $url = route('inmuebles.index', ['estatus' => $key]);
-            @endphp
-            <a href="{{ $url }}" role="tab"
-                class="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-200
-                       {{ $isActive
-                            ? 'bg-[#003049] text-white shadow-lg shadow-[#003049]/20'
-                            : 'bg-white text-[#003049] border border-gray-200 hover:border-[#669BBC] hover:bg-[#FDF0D5]' }}">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ $tab['icon'] }}"/>
-                </svg>
-                {{ $tab['label'] }}
-                <span class="ml-1 {{ $isActive ? 'bg-white/20 text-white' : 'bg-[#FDF0D5] text-[#003049]' }} text-xs font-black px-2 py-0.5 rounded-full">
-                    {{ $tab['count'] }}
-                </span>
-                @if($key === 'proceso' && $tab['count'] > 0)
-                    <span class="w-2 h-2 rounded-full bg-[#C1121F] animate-pulse"></span>
-                @endif
-            </a>
-        @endforeach
-    </div>
-
     @if ($inmuebles->isEmpty())
         {{-- ===== Estado vacío ===== --}}
         <div class="bg-white rounded-3xl p-20 text-center border-2 border-dashed border-slate-200">
@@ -69,20 +33,14 @@
                         d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
             </div>
-            @if($tabActivo !== 'todos')
-                <h3 class="text-2xl font-bold text-[#003049] mb-2">Sin propiedades en esta categoría</h3>
-                <p class="text-gray-500 mb-6">No tienes propiedades con el filtro seleccionado.</p>
-                <a href="{{ route('inmuebles.index') }}" class="text-[#669BBC] font-bold hover:underline">Ver todas</a>
-            @else
-                <h3 class="text-2xl font-bold text-[#003049] mb-2">Aún no tienes propiedades</h3>
-                <p class="text-gray-500 text-lg mb-8">Comienza a publicar hoy mismo y llega a miles de personas.</p>
-                <a href="{{ route('inmuebles.create') }}" class="text-[#C1121F] font-bold hover:underline flex items-center justify-center gap-2">
-                    Crear mi primera publicación
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                </a>
-            @endif
+            <h3 class="text-2xl font-bold text-[#003049] mb-2">Aún no tienes propiedades</h3>
+            <p class="text-gray-500 text-lg mb-8">Comienza a publicar hoy mismo y llega a miles de personas.</p>
+            <a href="{{ route('inmuebles.create') }}" class="text-[#C1121F] font-bold hover:underline flex items-center justify-center gap-2">
+                Crear mi primera publicación
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </a>
         </div>
     @else
         {{-- ===== Grid de propiedades ===== --}}
@@ -164,32 +122,46 @@
                                     <p class="text-sm font-bold text-[#003049] truncate">{{ $inq->nombre }}</p>
                                     <p class="text-[10px] text-slate-500">Descargado: {{ \Carbon\Carbon::parse($contratoPdfDesc->pdf_descargado_at)->format('d/m/Y H:i') }}</p>
                                 </div>
-                                <a href="{{ route('contratos.subir-firmado', $contratoPdfDesc->id) }}"
-                                   class="shrink-0 bg-[#003049] text-white text-xs font-black px-3 py-2 rounded-xl hover:bg-[#002236] transition-colors whitespace-nowrap">
-                                    Subir firmado
-                                </a>
+                                <div class="flex flex-col gap-2 shrink-0">
+                                    <a href="{{ route('contratos.subir-firmado', $contratoPdfDesc->id) }}"
+                                       class="bg-[#003049] text-white text-center text-xs font-black px-3 py-2 rounded-xl hover:bg-[#002236] transition-colors whitespace-nowrap">
+                                        Subir firmado
+                                    </a>
+                                    <a href="{{ route('chats.start', ['otroUsuarioId' => $inq->id, 'inmuebleId' => $inmueble->id]) }}"
+                                       class="bg-white border border-[#003049]/20 text-[#003049] text-center text-[10px] font-bold px-3 py-2 rounded-xl hover:bg-[#003049]/5 transition-colors whitespace-nowrap flex items-center justify-center gap-1">
+                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                        Mensaje
+                                    </a>
+                                </div>
                             </div>
 
                         {{-- ===== Inquilino pendiente de aprobación (flujo legado) ===== --}}
                         @elseif($enProceso && $contratoEnCurso && $contratoEnCurso->inquilino)
                             @php $inq = $contratoEnCurso->inquilino; @endphp
-                            <div class="mt-2 p-4 bg-[#FDF0D5] rounded-2xl border border-[#669BBC]/30 flex items-center gap-3">
-                                <div class="w-11 h-11 rounded-full bg-white border-2 border-[#669BBC]/30 flex items-center justify-center text-[#003049] font-bold uppercase overflow-hidden shrink-0 shadow-sm text-sm">
+                            <div class="mt-2 p-4 bg-[#FDF0D5] rounded-2xl border border-[#669BBC]/30 flex items-start gap-3">
+                                <div class="w-11 h-11 rounded-full bg-white border-2 border-[#669BBC]/30 flex items-center justify-center text-[#003049] font-bold uppercase overflow-hidden shrink-0 shadow-sm text-sm mt-0.5">
                                     @if($inq->foto_perfil)
                                         <img src="{{ str_starts_with($inq->foto_perfil, 'http') ? $inq->foto_perfil : asset('storage/'.$inq->foto_perfil) }}" alt="Inquilino" class="w-full h-full object-cover">
                                     @else
                                         {{ substr($inq->nombre, 0, 2) }}
                                     @endif
                                 </div>
-                                <div class="min-w-0 flex-1">
+                                <div class="min-w-0 flex-1 mt-1">
                                     <p class="text-[10px] font-black uppercase tracking-widest text-[#669BBC] mb-0.5">Firma recibida de</p>
                                     <p class="text-sm font-bold text-[#003049] truncate">{{ $inq->nombre }}</p>
-                                    <p class="text-[10px] text-gray-500 truncate">Inicio: {{ \Carbon\Carbon::parse($contratoPendiente->fecha_inicio)->format('d/m/Y') }} · {{ $contratoPendiente->plazo }}</p>
+                                    <p class="text-[10px] text-gray-500 truncate">Inicio: {{ \Carbon\Carbon::parse($contratoPendiente->fecha_inicio)->format('d/m/Y') }}</p>
                                 </div>
-                                <a href="{{ route('contratos.revision', $contratoPendiente->id) }}"
-                                    class="shrink-0 bg-[#003049] text-white text-xs font-black px-3 py-2 rounded-xl hover:bg-[#002236] transition-colors">
-                                    Revisar
-                                </a>
+                                <div class="flex flex-col gap-2 shrink-0">
+                                    <a href="{{ route('contratos.revision', $contratoPendiente->id) }}"
+                                        class="bg-[#003049] text-white text-center text-xs font-black px-3 py-2 rounded-xl hover:bg-[#002236] transition-colors whitespace-nowrap">
+                                        Revisar
+                                    </a>
+                                    <a href="{{ route('chats.start', ['otroUsuarioId' => $inq->id, 'inmuebleId' => $inmueble->id]) }}"
+                                       class="bg-white border border-[#003049]/20 text-[#003049] text-center text-[10px] font-bold px-3 py-2 rounded-xl hover:bg-[#003049]/5 transition-colors whitespace-nowrap flex items-center justify-center gap-1">
+                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                        Mensaje
+                                    </a>
+                                </div>
                             </div>
 
                         {{-- Inquilino activo --}}

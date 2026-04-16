@@ -98,9 +98,18 @@
                         <span class="text-xs font-bold text-[#669BBC] uppercase">Inicio</span>
                         <span class="font-semibold">{{ \Carbon\Carbon::parse($contrato->fecha_inicio)->translatedFormat('d M, Y') }}</span>
                     </div>
-                    <div class="flex justify-between text-gray-600">
+                    <div class="flex justify-between items-center text-gray-600">
                         <span class="text-xs font-bold text-[#669BBC] uppercase">Plazo</span>
-                        <span class="font-semibold">{{ $contrato->plazo }}</span>
+                        <select form="form-aprobar" name="duracion_meses" class="font-semibold bg-gray-50 border border-gray-200 rounded text-sm px-2 py-1 focus:ring-[#003049] text-[#003049]">
+                            @php
+                                $dM = $contrato->inmueble->duracion_contrato_meses ?? 12;
+                            @endphp
+                            <option value="6" {{ $dM == 6 ? 'selected' : '' }}>6 meses</option>
+                            <option value="12" {{ $dM == 12 ? 'selected' : '' }}>1 año</option>
+                            <option value="18" {{ $dM == 18 ? 'selected' : '' }}>18 meses</option>
+                            <option value="24" {{ $dM == 24 ? 'selected' : '' }}>2 años</option>
+                            <option value="36" {{ $dM == 36 ? 'selected' : '' }}>3 años</option>
+                        </select>
                     </div>
                     <div class="flex justify-between text-gray-600 border-t pt-2 mt-2">
                         <span class="text-xs font-bold text-[#669BBC] uppercase">Renta/mes</span>
@@ -117,22 +126,6 @@
                 </div>
             </div>
 
-            {{-- Firma Digital del Propietario --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 class="font-bold text-[#003049] mb-3 flex items-center gap-2">
-                    <svg class="h-5 w-5 text-[#669BBC]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                    Tu Firma Digital
-                </h3>
-                <p class="text-xs text-gray-500 mb-3">Dibuja tu firma para aceptar el contrato. Solo es requerida si deseas <strong>aprobar</strong>.</p>
-                <div class="border-2 border-dashed border-gray-300 rounded-xl bg-slate-50 relative" style="height: 130px;">
-                    <canvas id="signature-pad-propietario" class="absolute top-0 left-0 w-full h-full rounded-xl cursor-crosshair"></canvas>
-                </div>
-                <div class="flex justify-end gap-2 mt-2">
-                    <button type="button" onclick="undoFirma()" class="text-xs text-gray-500 hover:text-[#003049] font-medium bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">Deshacer</button>
-                    <button type="button" onclick="clearFirma()" class="text-xs text-red-500 hover:text-red-700 font-medium bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">Limpiar</button>
-                </div>
-            </div>
-
             {{-- Botones de Acción --}}
             <div class="space-y-3">
                 <button id="btn-aprobar" onclick="accionContrato('aprobar')"
@@ -145,12 +138,19 @@
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     Rechazar Solicitud
                 </button>
+                
+                <div class="pt-4 border-t border-gray-100">
+                    <a href="{{ route('inmuebles.edit', ['inmueble' => $contrato->inmueble->id, 'return_to_contrato' => $contrato->id]) }}" 
+                       class="w-full bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 font-bold py-3 px-6 rounded-xl transition-all flex justify-center items-center gap-2 text-sm">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        Editar más datos del Inmueble
+                    </a>
+                </div>
             </div>
 
             {{-- Forms Hidden --}}
             <form id="form-aprobar" action="{{ route('contratos.aprobar', $contrato->id) }}" method="POST" class="hidden">
                 @csrf
-                <input type="hidden" name="firma_propietario" id="input-firma-propietario">
             </form>
             <form id="form-rechazar" action="{{ route('contratos.rechazar', $contrato->id) }}" method="POST" class="hidden">
                 @csrf
@@ -162,99 +162,14 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 
 <script>
-    let signaturePad = null;
-    let canvas = null;
-
-    function initSignature() {
-        canvas = document.getElementById('signature-pad-propietario');
-        if (!canvas) return;
-
-        // Limpiar para evitar duplicados si se llama de nuevo
-        if (signaturePad) {
-            signaturePad.off();
-            signaturePad = null;
-        }
-
-        // Dimensiones físicas exactas
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-
-        // Importante para dispositivos móviles
-        canvas.style.touchAction = 'none';
-
-        signaturePad = new SignaturePad(canvas, {
-            penColor: '#003049',
-            minWidth: 1,
-            maxWidth: 3,
-            throttle: 16
-        });
-
-        // Eventos de actualización de previsualización
-        canvas.addEventListener('mouseup',  actualizarPreview);
-        canvas.addEventListener('touchend', actualizarPreview);
-        canvas.addEventListener('mousemove', () => { if(signaturePad) actualizarPreview(); });
-        canvas.addEventListener('touchmove', () => { if(signaturePad) actualizarPreview(); });
-
-        console.log('SignaturePad inicializado en canvas:', canvas.width, 'x', canvas.height);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // Ejecución inmediata + un pequeño delay de respaldo para layout fluido
-        initSignature();
-        setTimeout(initSignature, 500);
-
-        window.addEventListener('resize', initSignature);
-    });
-
-    function actualizarPreview() {
-        if (!signaturePad || signaturePad.isEmpty()) return;
-        const preview = document.getElementById('preview-firma-propietario');
-        if (preview) {
-            preview.innerHTML = `<img src="${signaturePad.toDataURL()}" class="w-full h-full object-contain">`;
-        }
-    }
-
-    function clearFirma() {
-        if (signaturePad) {
-            signaturePad.clear();
-            const preview = document.getElementById('preview-firma-propietario');
-            if (preview) {
-                preview.innerHTML = '<p class="text-[9px] text-amber-800 leading-tight">← Agrega tu firma digital abajo</p>';
-            }
-        }
-    }
-
-    function undoFirma() {
-        if (signaturePad) {
-            const data = signaturePad.toData();
-            if (data && data.length > 0) { 
-                data.pop(); 
-                signaturePad.fromData(data); 
-                actualizarPreview(); 
-            }
-        }
-    }
-
     function accionContrato(accion) {
         if (accion === 'aprobar') {
-            if (!signaturePad || signaturePad.isEmpty()) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Firma Requerida',
-                    text: 'Debes dibujar tu firma digital en el cuadro para poder aprobar el contrato.',
-                    confirmButtonColor: '#003049'
-                });
-                return;
-            }
-
             Swal.fire({
                 icon: 'question',
                 title: '¿Aprobar esta renta?',
-                html: 'Al aprobar, los fondos congelados serán <strong>capturados definitivamente</strong> y el contrato quedará activo.',
+                html: 'Al aprobar, se notificará al inquilino para que pueda descargar y firmar el contrato físico.',
                 showCancelButton: true,
                 confirmButtonText: 'Sí, Aprobar',
                 cancelButtonText: 'Cancelar',
@@ -262,7 +177,6 @@
                 cancelButtonColor: '#6b7280'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    document.getElementById('input-firma-propietario').value = signaturePad.toDataURL();
                     document.getElementById('form-aprobar').submit();
                 }
             });

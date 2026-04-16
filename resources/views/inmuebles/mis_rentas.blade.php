@@ -115,10 +115,17 @@
                         
                         <div class="flex flex-wrap gap-4 justify-center md:justify-start">
                             {{-- Botones de Descarga --}}
-                            <a href="{{ route('contratos.descargar', $nuevoContratoAceptado->id) }}" class="inline-flex items-center gap-2 bg-[#003049] text-white px-5 py-2.5 rounded-2xl font-black text-sm hover:bg-[#669BBC] transition-colors shadow-lg shadow-[#003049]/10">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                Descargar Contrato
-                            </a>
+                            @if($nuevoContratoAceptado->archivo_firmado)
+                                <a href="{{ str_starts_with($nuevoContratoAceptado->archivo_firmado, 'http') ? $nuevoContratoAceptado->archivo_firmado : asset('storage/' . $nuevoContratoAceptado->archivo_firmado) }}" target="_blank" class="inline-flex items-center gap-2 bg-[#003049] text-white px-5 py-2.5 rounded-2xl font-black text-sm hover:bg-[#669BBC] transition-colors shadow-lg shadow-[#003049]/10">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    Ver Contrato Firmado
+                                </a>
+                            @else
+                                <a href="{{ route('contratos.descargar', $nuevoContratoAceptado->id) }}" class="inline-flex items-center gap-2 bg-[#003049] text-white px-5 py-2.5 rounded-2xl font-black text-sm hover:bg-[#669BBC] transition-colors shadow-lg shadow-[#003049]/10">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                    Descargar Contrato Base
+                                </a>
+                            @endif
                             @if($primerPago)
                                 <a href="{{ route('pagos.descargar_recibo', $primerPago->id) }}" class="inline-flex items-center gap-2 bg-[#FDF0D5] text-[#003049] px-5 py-2.5 rounded-2xl font-black text-sm border border-[#669BBC]/20 hover:bg-white transition-colors">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -191,6 +198,11 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415l-2.414-2.414V6z" clip-rule="evenodd" /></svg>
                                     Pendiente aprobación
                                 </div>
+                            @elseif(isset($contrato) && $contrato->estatus === 'pdf_descargado')
+                                <div class="absolute top-4 right-4 bg-[#003049]/90 backdrop-blur text-white text-sm font-black px-3 py-1 rounded-full shadow-md flex items-center gap-1 border border-[#669BBC]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#FDF0D5]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    Solicitud Aprobada
+                                </div>
                             @else
                                 <div class="absolute top-4 right-4 bg-red-100/90 backdrop-blur text-red-700 text-sm font-black px-3 py-1 rounded-full shadow-md border border-red-200">
                                     {{ ucfirst($contrato->estatus) }}
@@ -216,63 +228,76 @@
                                 </p>
                                 
                                 @if(isset($contrato) && $contrato->estatus === 'pendiente_aprobacion')
-                                    <div class="mb-4 bg-amber-50 rounded-xl p-3 border border-amber-200">
-                                        <p class="text-xs text-amber-700 font-bold mb-1 flex items-center gap-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                            Esperando aprobación del arrendador
+                                    <div class="mb-4 bg-amber-50 rounded-xl p-4 border border-amber-200">
+                                        <p class="text-sm text-amber-700 font-bold mb-1 flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                            En espera de confirmación
                                         </p>
-                                        <p class="text-xs text-amber-600">Tus fondos están pre-autorizados. El propietario tiene 24 horas para responder.</p>
+                                        <p class="text-xs text-amber-600 mt-1">El propietario ha sido notificado. Cuando confirme la renta, aparecerá aquí la opción para descargar el contrato físico.</p>
+                                    </div>
+                                @elseif(isset($contrato) && $contrato->estatus === 'pdf_descargado')
+                                    <div class="mb-4 bg-[#FDF0D5] rounded-xl p-4 shadow-sm">
+                                        <p class="text-sm text-[#003049] font-black mb-2 flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#669BBC]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            ¡Solicitud Aprobada!
+                                        </p>
+                                        <p class="text-xs text-[#003049] mt-1 mb-3 font-medium">Descarga tu contrato, imprímelo y llévalo a tu cita con el propietario para firmarlo físicamente.</p>
+                                        <a href="{{ route('contratos.descargar-registrar', $contrato) }}" target="_blank" class="w-full bg-[#003049] text-white text-center font-bold py-2 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-[#002236] transition-colors shadow-md text-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                            Descargar Contrato PDF
+                                        </a>
+                                    </div>
+                                @else
+                                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex flex-col justify-between mb-4 gap-2">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Renta Mensual</p>
+                                                <p class="text-[#003049] font-black text-lg">
+                                                    ${{ number_format($contrato->renta_mensual, 2) }}</p>
+                                            </div>
+                                            <div class="w-px h-10 bg-slate-200 mx-2"></div>
+                                            <div>
+                                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-right">Día de Pago</p>
+                                                <p class="text-[#003049] font-black text-lg text-right">
+                                                    {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d') }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="border-t border-slate-200 pt-2 flex items-center justify-between">
+                                            <div>
+                                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Inicio Renta</p>
+                                                <p class="text-xs text-slate-600 font-bold">
+                                                    {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d/m/Y') }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-right">Fin Renta</p>
+                                                <p class="text-xs text-[#003049] font-black text-right lowercase">
+                                                    @php
+                                                        $fechaFinCalculada = null;
+                                                        if ($contrato->fecha_inicio && $contrato->plazo) {
+                                                            try {
+                                                                $inicio = \Carbon\Carbon::parse($contrato->fecha_inicio);
+                                                                $plazo = strtolower($contrato->plazo);
+                                                                $cantidad = (int) filter_var($plazo, FILTER_SANITIZE_NUMBER_INT);
+                                                                
+                                                                if (str_contains($plazo, 'año')) {
+                                                                    $fechaFinCalculada = $inicio->addYears($cantidad ?: 1);
+                                                                } elseif (str_contains($plazo, 'mes')) {
+                                                                    $fechaFinCalculada = $inicio->addMonths($cantidad ?: 1);
+                                                                }
+                                                            } catch (\Exception $e) {
+                                                                $fechaFinCalculada = null;
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    {{ $contrato->fecha_fin ? \Carbon\Carbon::parse($contrato->fecha_fin)->format('d/m/Y') : ($fechaFinCalculada ? $fechaFinCalculada->format('d/m/Y') : 'Indefinido') }}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 @endif
-
-                                <div
-                                    class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex flex-col justify-between mb-4 gap-2">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Renta Mensual</p>
-                                            <p class="text-[#003049] font-black text-lg">
-                                                ${{ number_format($contrato->renta_mensual, 2) }}</p>
-                                        </div>
-                                        <div class="w-px h-10 bg-slate-200 mx-2"></div>
-                                        <div>
-                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-right">Día de Pago</p>
-                                            <p class="text-[#003049] font-black text-lg text-right">
-                                                {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d') }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="border-t border-slate-200 pt-2 flex items-center justify-between">
-                                        <div>
-                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Inicio Renta</p>
-                                            <p class="text-xs text-slate-600 font-bold">
-                                                {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d/m/Y') }}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 text-right">Fin Renta</p>
-                                            <p class="text-xs text-[#003049] font-black text-right lowercase">
-                                                @php
-                                                    $fechaFinCalculada = null;
-                                                    if ($contrato->fecha_inicio && $contrato->plazo) {
-                                                        try {
-                                                            $inicio = \Carbon\Carbon::parse($contrato->fecha_inicio);
-                                                            $plazo = strtolower($contrato->plazo);
-                                                            $cantidad = (int) filter_var($plazo, FILTER_SANITIZE_NUMBER_INT);
-                                                            
-                                                            if (str_contains($plazo, 'año')) {
-                                                                $fechaFinCalculada = $inicio->addYears($cantidad ?: 1);
-                                                            } elseif (str_contains($plazo, 'mes')) {
-                                                                $fechaFinCalculada = $inicio->addMonths($cantidad ?: 1);
-                                                            }
-                                                        } catch (\Exception $e) {
-                                                            $fechaFinCalculada = null;
-                                                        }
-                                                    }
-                                                @endphp
-                                                {{ $contrato->fecha_fin ? \Carbon\Carbon::parse($contrato->fecha_fin)->format('d/m/Y') : ($fechaFinCalculada ? $fechaFinCalculada->format('d/m/Y') : 'Indefinido') }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <div class="flex items-center gap-3 text-sm text-slate-600 border-t border-slate-100 pt-4">
                                     @php
@@ -315,16 +340,27 @@
                                         </a>
                                     @endif
 
-                                    @if(in_array($contrato->estatus, ['activo', 'pendiente_aprobacion', 'pendiente']))
+                                    @php
+                                        $estatusCancelable = ['activo', 'pendiente_aprobacion', 'pendiente', 'disponible', 'pdf_descargado'];
+                                        $labelCancelar = match($contrato->estatus) {
+                                            'pendiente_aprobacion' => 'Retirar solicitud',
+                                            'disponible', 'pdf_descargado' => 'Cancelar solicitud',
+                                            default => 'Cancelar mi renta',
+                                        };
+                                        $mensajeCancelar = in_array($contrato->estatus, ['pendiente_aprobacion', 'disponible', 'pdf_descargado'])
+                                            ? '¿Cancelar esta solicitud de renta? El inmueble quedará disponible nuevamente.'
+                                            : '¿Estás seguro de que deseas cancelar tu renta? El inmueble quedará disponible nuevamente.';
+                                    @endphp
+                                    @if(in_array($contrato->estatus, $estatusCancelable))
                                         <form action="{{ route('rentas.cancelar', $contrato) }}" method="POST" class="w-full">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" onclick="return confirm('¿Cancelar esta renta? Si está pendiente de aprobación, tus fondos serán liberados.');"
+                                            <button type="submit" onclick="return confirm('{{ $mensajeCancelar }}')"
                                                 class="w-full bg-red-50 text-red-500 hover:text-white hover:bg-red-500 text-center font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
-                                                {{ $contrato->estatus === 'pendiente_aprobacion' ? 'Retirar solicitud' : 'Cancelar mi renta' }}
+                                                {{ $labelCancelar }}
                                             </button>
                                         </form>
                                     @else

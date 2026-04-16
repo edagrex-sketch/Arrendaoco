@@ -88,10 +88,36 @@
         @foreach($mensajes as $mensaje)
             @php $isMe = $mensaje->sender_id == Auth::id(); @endphp
             <div class="flex {{ $isMe ? 'justify-end' : 'justify-start' }} animate-fade-in">
-                <div class="max-w-[75%] space-y-1">
-                    <div class="px-5 py-3 rounded-2xl shadow-sm relative group {{ $isMe ? 'bg-[#003049] text-white rounded-tr-none' : 'bg-white text-gray-800 rounded-tl-none border border-gray-100' }}">
-                        <p class="text-sm leading-relaxed">{{ $mensaje->contenido }}</p>
-                    </div>
+                <div class="max-w-[85%] sm:max-w-[75%] space-y-1">
+                    @if($mensaje->tipo === 'solicitud_renta')
+                        {{-- Mensaje rico para solicitud de renta --}}
+                        <div class="px-5 py-4 rounded-2xl shadow-sm border border-[#669BBC]/30 bg-white relative group">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-full bg-[#FDF0D5] text-[#003049] flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-[#003049]">Solicitud de Renta Automática</p>
+                                    <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">{{ $mensaje->contenido }}</p>
+                                </div>
+                            </div>
+                            <div class="border-t border-gray-100 pt-3">
+                                <button type="button" class="w-full flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-[#003049] text-xs font-bold py-2 px-3 rounded-xl transition-colors border border-slate-200" onclick="alert('Funcionalidad de Perfil en desarrollo')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                    Ver usuario
+                                </button>
+                            </div>
+                        </div>
+                    @else
+                        {{-- Burbuja normal --}}
+                        <div class="px-5 py-3 rounded-2xl shadow-sm relative group {{ $isMe ? 'bg-[#003049] text-white rounded-tr-none' : 'bg-white text-gray-800 rounded-tl-none border border-gray-100' }}">
+                            <p class="text-sm leading-relaxed">{{ $mensaje->contenido }}</p>
+                        </div>
+                    @endif
                     <div class="flex items-center gap-1 {{ $isMe ? 'justify-end' : 'justify-start' }}">
                         <span class="text-[9px] text-gray-400 font-medium">
                             {{ $mensaje->created_at->format('H:i') }}

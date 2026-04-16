@@ -9,7 +9,7 @@
             <p class="text-muted-foreground mt-2 text-lg">Modifica los detalles de tu publicación.</p>
         </div>
 
-        <form action="{{ route('inmuebles.update', $inmueble) }}" method="POST" enctype="multipart/form-data"
+        <form action="{{ route('inmuebles.update', ['inmueble' => $inmueble] + (request()->has('return_to_contrato') ? ['return_to_contrato' => request('return_to_contrato')] : [])) }}" method="POST" enctype="multipart/form-data"
             class="space-y-8">
             @csrf
             @method('PUT')
@@ -449,7 +449,7 @@
                     class="flex-1 bg-[#003049] text-white font-black py-4 rounded-2xl shadow-xl hover:bg-[#003049]/90 transition-all uppercase tracking-widest">
                     Guardar Cambios
                 </button>
-                <a href="{{ route('inmuebles.index') }}"
+                <a href="{{ request()->has('return_to_contrato') ? route('contratos.revision', request('return_to_contrato')) : route('inmuebles.index') }}"
                     class="flex-1 bg-white text-muted-foreground font-bold py-4 rounded-2xl border border-slate-200 hover:bg-slate-50 transition-all text-center uppercase tracking-widest">
                     Cancelar
                 </a>

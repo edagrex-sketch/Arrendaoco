@@ -36,13 +36,9 @@ class InmuebleController extends Controller
             $inmuebles = $query->paginate(10)->withQueryString();
             return view('admin.inmuebles.index', compact('inmuebles'));
         } else {
-            $estatus = $request->get('estatus', 'proceso'); // Default to 'proceso'
-            if ($estatus === 'todos') {
-                $estatus = null;
-            }
-
             $query = Inmueble::with(['contratos' => function ($q) {
-                $q->with('inquilino')->whereIn('estatus', ['pendiente_aprobacion', 'activo'])->latest();
+                // Incluir 'pdf_descargado' para que el landlord vea quién descargó el PDF
+                $q->with('inquilino')->whereIn('estatus', ['pendiente_aprobacion', 'pdf_descargado', 'activo'])->latest();
             }])->where('propietario_id', auth()->id());
 
             if ($search) {
@@ -53,25 +49,16 @@ class InmuebleController extends Controller
                 });
             }
 
-            // Filtro por estatus
-            if ($estatus === 'proceso') {
-                // Inmuebles con contrato pendiente de aprobación
-                $query->whereHas('contratos', fn($q) => $q->where('estatus', 'pendiente_aprobacion'));
-            } elseif ($estatus === 'disponible') {
-                $query->where('estatus', 'disponible')
-                      ->whereDoesntHave('contratos', fn($q) => $q->where('estatus', 'pendiente_aprobacion'));
-            } elseif ($estatus === 'rentado') {
-                $query->where('estatus', 'rentado');
-            }
-
-            // Ordenamiento por defecto: proceso_renta > disponible > rentado
-            // Usamos CASE en SQL para prioridad
+            // Ordenamiento prioridad:
+            // 0: En proceso (pendiente_aprobacion o pdf_descargado)
+            // 1: Disponibles
+            // 2: Otros (Rentados, etc)
             $query->orderByRaw("
                 CASE
                     WHEN EXISTS (
                         SELECT 1 FROM contratos
                         WHERE contratos.inmueble_id = inmuebles.id
-                          AND contratos.estatus = 'pendiente_aprobacion'
+                          AND contratos.estatus IN ('pendiente_aprobacion', 'pdf_descargado')
                     ) THEN 0
                     WHEN inmuebles.estatus = 'disponible' THEN 1
                     ELSE 2
@@ -80,17 +67,7 @@ class InmuebleController extends Controller
 
             $inmuebles = $query->paginate(12)->withQueryString();
 
-            // Contadores para los filtros de tabs
-            $base = Inmueble::where('propietario_id', auth()->id());
-            $cuentas = [
-                'total'     => (clone $base)->count(),
-                'proceso'   => (clone $base)->whereHas('contratos', fn($q) => $q->where('estatus', 'pendiente_aprobacion'))->count(),
-                'disponible'=> (clone $base)->where('estatus', 'disponible')
-                                            ->whereDoesntHave('contratos', fn($q) => $q->where('estatus', 'pendiente_aprobacion'))->count(),
-                'rentado'   => (clone $base)->where('estatus', 'rentado')->count(),
-            ];
-
-            return view('inmuebles.index', compact('inmuebles', 'estatus', 'cuentas'));
+            return view('inmuebles.index', compact('inmuebles'));
         }
     }
 
@@ -574,6 +551,11 @@ class InmuebleController extends Controller
                     'updated_at' => now(),
                 ]);
             }
+        }
+
+        if ($request->has('return_to_contrato')) {
+            return redirect()->route('contratos.revision', $request->return_to_contrato)
+                ->with('success', 'Propiedad actualizada con éxito. Los datos se han refrescado.');
         }
 
         return redirect()->route('inmuebles.index')->with('success', 'Propiedad actualizada con éxito.');

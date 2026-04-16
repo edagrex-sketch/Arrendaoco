@@ -7,7 +7,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use App\Models\Inmueble;
 use App\Models\Contrato;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -15,21 +14,22 @@ use Barryvdh\DomPDF\Facade\Pdf;
 /**
  * ContratoFisicoController
  * ─────────────────────────────────────────────────────────────────
- * Gestiona el nuevo flujo de arrendamiento sin firma digital:
+ * Flujo de arrendamiento físico (sin firma digital):
  *
- *   1. Inquilino presiona "Ver Contrato" en show.blade.php
- *   2. Se crea (o recupera) un Contrato en estado 'disponible'
- *   3. Inquilino descarga el PDF → timestamp guardado → estado 'pdf_descargado'
- *   4. Propietario sube el escaneo firmado → estado 'activo' → inmueble = 'rentado'
+ *   1. Inquilino presiona "Ver Contrato" → SOLO previsualización (NO crea nada en BD)
+ *   2. Inquilino presiona "Confirmar y Descargar PDF" → crea el contrato en BD
+ *      y descarga el PDF en un único paso atómico.
+ *   3. Propietario sube el escaneo firmado → estado 'activo' → inmueble = 'rentado'
  */
 class ContratoFisicoController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | 1. Ver Contrato (Inquilino)
+    | 1. Ver Contrato (Inquilino) — SOLO PREVISUALIZACIÓN, sin escribir en BD
     |--------------------------------------------------------------------------
-    | Muestra el precontrato al inquilino. Si no existe un contrato 'disponible'
-    | para este inmueble y este inquilino, lo crea en ese estado.
+    | Muestra el precontrato al inquilino usando los datos del inmueble.
+    | NO escribe nada en la BD. El contrato solo se crea cuando el usuario
+    | confirma explícitamente haciendo clic en "Confirmar y Descargar PDF".
     */
     public function verContrato(Inmueble $inmueble): View|RedirectResponse
     {
@@ -57,50 +57,152 @@ class ContratoFisicoController extends Controller
 
         $inmueble->load('propietario', 'servicios', 'mascotas', 'zonasComunes');
 
-        // Buscar contrato existente en estado 'disponible' para este inquilino+inmueble
-        $contrato = Contrato::where('inmueble_id', $inmueble->id)
+        // Si ya existe un contrato en proceso (descargó antes y regresó), mostrarlo
+        $contratoExistente = Contrato::where('inmueble_id', $inmueble->id)
             ->where('inquilino_id', Auth::id())
             ->whereIn('estatus', ['disponible', 'pdf_descargado'])
             ->latest()
             ->first();
 
-        // Si no existe, crear un borrador en estado 'disponible'
-        if (!$contrato) {
-            // Calcular fecha_fin a partir de la duración definida por el propietario
-            $duracionMeses = $inmueble->duracion_contrato_meses ?? 12;
-            $fechaInicio   = now()->toDateString();
-            $fechaFin      = now()->addMonths($duracionMeses)->toDateString();
-            $plazo         = $duracionMeses >= 12
-                ? floor($duracionMeses / 12) . ' año' . (floor($duracionMeses / 12) > 1 ? 's' : '')
-                : $duracionMeses . ' meses';
-
-            $contrato = Contrato::create([
-                'inmueble_id'    => $inmueble->id,
-                'propietario_id' => $inmueble->propietario_id,
-                'inquilino_id'   => Auth::id(),
-                'fecha_inicio'   => $fechaInicio,
-                'fecha_fin'      => $fechaFin,
-                'plazo'          => $plazo,
-                'renta_mensual'  => $inmueble->renta_mensual,
-                'deposito'       => $inmueble->deposito ?? $inmueble->renta_mensual,
-                'estatus'        => 'disponible',
+        if ($contratoExistente) {
+            $contratoExistente->load('inquilino');
+            return view('inmuebles.ver_contrato', [
+                'inmueble' => $inmueble,
+                'contrato' => $contratoExistente,
+                'esPrevia' => false,
             ]);
         }
 
-        $contrato->load('inquilino');
+        // Primera visita: construir contrato provisional EN MEMORIA (sin guardar en BD)
+        $duracionMeses = $inmueble->duracion_contrato_meses ?? 12;
+        $plazo = $duracionMeses >= 12
+            ? floor($duracionMeses / 12) . ' año' . (floor($duracionMeses / 12) > 1 ? 's' : '')
+            : $duracionMeses . ' meses';
 
-        return view('inmuebles.ver_contrato', compact('inmueble', 'contrato'));
+        $contratoPrevia = new Contrato([
+            'inmueble_id'    => $inmueble->id,
+            'propietario_id' => $inmueble->propietario_id,
+            'inquilino_id'   => Auth::id(),
+            'fecha_inicio'   => now()->toDateString(),
+            'fecha_fin'      => now()->addMonths($duracionMeses)->toDateString(),
+            'plazo'          => $plazo,
+            'renta_mensual'  => $inmueble->renta_mensual,
+            'deposito'       => $inmueble->deposito ?? $inmueble->renta_mensual,
+            'estatus'        => 'disponible',
+        ]);
+        $contratoPrevia->setRelation('inquilino', Auth::user());
+        $contratoPrevia->setRelation('inmueble', $inmueble);
+
+        return view('inmuebles.ver_contrato', [
+            'inmueble' => $inmueble,
+            'contrato' => $contratoPrevia,
+            'esPrevia' => true,  // La vista usa esto para apuntar al endpoint correcto
+        ]);
     }
 
     /*
     |--------------------------------------------------------------------------
-    | 2. Registrar Descarga + Generar PDF (Inquilino o Propietario)
+    | 2. Confirmar y Descargar PDF (Inquilino)
     |--------------------------------------------------------------------------
-    | Guarda el timestamp de la primera descarga y devuelve el PDF.
+    | Punto de confirmación explícita. Crea el contrato en BD (si no existe)
+    | y devuelve el PDF en una sola acción atómica.
+    */
+    public function confirmarYDescargar(Inmueble $inmueble): RedirectResponse|\Symfony\Component\HttpFoundation\Response
+    {
+        if ($inmueble->propietario_id === Auth::id()) {
+            return redirect()->route('inmuebles.show', $inmueble)
+                ->with('error', 'No puedes arrendar tu propia propiedad.');
+        }
+
+        if ($inmueble->estatus !== 'disponible') {
+            return redirect()->route('inmuebles.show', $inmueble)
+                ->with('error', 'Esta propiedad ya no está disponible.');
+        }
+
+        $tieneRentaActiva = Contrato::where('inquilino_id', Auth::id())
+            ->where('estatus', 'activo')
+            ->exists();
+
+        if ($tieneRentaActiva) {
+            return redirect()->route('inmuebles.show', $inmueble)
+                ->with('error', 'Ya tienes una propiedad rentada. Finaliza tu contrato actual antes de rentar otra.');
+        }
+
+        // Crear o recuperar contrato en transacción atómica
+        $contrato = DB::transaction(function () use ($inmueble) {
+            $existing = Contrato::where('inmueble_id', $inmueble->id)
+                ->where('inquilino_id', Auth::id())
+                ->whereIn('estatus', ['pendiente_aprobacion', 'pdf_descargado'])
+                ->lockForUpdate()
+                ->latest()
+                ->first();
+
+            if ($existing) {
+                return $existing;
+            }
+
+            $duracionMeses = $inmueble->duracion_contrato_meses ?? 12;
+            $plazo = $duracionMeses >= 12
+                ? floor($duracionMeses / 12) . ' año' . (floor($duracionMeses / 12) > 1 ? 's' : '')
+                : $duracionMeses . ' meses';
+
+            $nuevoContrato = Contrato::create([
+                'inmueble_id'       => $inmueble->id,
+                'propietario_id'    => $inmueble->propietario_id,
+                'inquilino_id'      => Auth::id(),
+                'fecha_inicio'      => now()->toDateString(),
+                'fecha_fin'         => now()->addMonths($duracionMeses)->toDateString(),
+                'plazo'             => $plazo,
+                'renta_mensual'     => $inmueble->renta_mensual,
+                'deposito'          => $inmueble->deposito ?? $inmueble->renta_mensual,
+                'estatus'           => 'pendiente_aprobacion',
+            ]);
+
+            // ==== Crear chat automático y enviar mensaje tipo solicitud ====
+            $authId = Auth::id();
+            $id1 = min($authId, $inmueble->propietario_id);
+            $id2 = max($authId, $inmueble->propietario_id);
+
+            $chat = \App\Models\Chat::firstOrCreate(
+                [
+                    'usuario_1'   => $id1,
+                    'usuario_2'   => $id2,
+                    'inmueble_id' => $inmueble->id
+                ],
+                [
+                    'activo'          => true,
+                    'last_message_at' => now()
+                ]
+            );
+
+            $nombreUsuario = Auth::user()->nombre;
+            $mensajeTexto = "Hola soy {$nombreUsuario} y me interesa tu inmueble, estoy en espera de informacion para comenzar a rentar ";
+            
+            $mensaje = $chat->mensajes()->create([
+                'sender_id' => $authId,
+                'contenido' => $mensajeTexto,
+                'tipo'      => 'solicitud_renta'
+            ]);
+
+            $chat->update([
+                'last_message'    => $mensajeTexto,
+                'last_message_at' => now()
+            ]);
+
+            return $nuevoContrato;
+        });
+
+        return redirect()->route('inmuebles.mis_rentas')
+            ->with('success', '¡Solicitud enviada exitosamente! Se ha notificado al propietario de tu interés. Podrás descargar el contrato PDF en cuanto sea aprobado.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 3. Registrar Descarga + Generar PDF — ruta legacy para contratos existentes
+    |--------------------------------------------------------------------------
     */
     public function registrarDescarga(Contrato $contrato): RedirectResponse|\Symfony\Component\HttpFoundation\Response
     {
-        // Solo las partes involucradas pueden descargar
         abort_unless(
             in_array(Auth::id(), [$contrato->inquilino_id, $contrato->propietario_id]),
             403,
@@ -108,7 +210,6 @@ class ContratoFisicoController extends Controller
         );
 
         DB::transaction(function () use ($contrato) {
-            // Solo registrar el timestamp la primera vez
             if (is_null($contrato->pdf_descargado_at)) {
                 $contrato->update([
                     'pdf_descargado_at' => now(),
@@ -126,7 +227,7 @@ class ContratoFisicoController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | 3. Formulario de Subida de Contrato Firmado (Propietario)
+    | 4. Formulario de Subida de Contrato Firmado (Propietario)
     |--------------------------------------------------------------------------
     */
     public function formSubirFirmado(Contrato $contrato): View|RedirectResponse
@@ -145,9 +246,8 @@ class ContratoFisicoController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | 4. Procesar Subida del Contrato Firmado (Propietario)
+    | 5. Procesar Subida del Contrato Firmado (Propietario)
     |--------------------------------------------------------------------------
-    | Activa el contrato y marca el inmueble como rentado.
     */
     public function subirFirmado(Request $request, Contrato $contrato): RedirectResponse
     {
@@ -158,7 +258,7 @@ class ContratoFisicoController extends Controller
                 'required',
                 'file',
                 'mimes:pdf,jpg,jpeg,png,webp',
-                'max:10240', // 10 MB máximo
+                'max:10240',
             ],
         ], [
             'archivo_firmado.required' => 'Debes subir el archivo del contrato firmado.',
@@ -167,25 +267,20 @@ class ContratoFisicoController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $contrato) {
-            // Guardar el archivo en disco
             $path = $request->file('archivo_firmado')
                 ->store('contratos_firmados', 'public');
 
-            // Activar el contrato
             $contrato->update([
-                'archivo_firmado'  => $path,
+                'archivo_firmado'   => $path,
                 'archivo_subido_at' => now(),
                 'estatus'           => 'activo',
             ]);
 
-            // Marcar el inmueble como rentado
             $contrato->inmueble->update(['estatus' => 'rentado']);
         });
 
-        // Notificar al inquilino (silencioso si falla)
         try {
             $contrato->load('inmueble', 'inquilino');
-            // Mail::to(optional($contrato->inquilino)->email)->send(new ContratoActivadoMail($contrato));
         } catch (\Exception $e) { /* silencioso */ }
 
         return redirect()->route('inmuebles.index')

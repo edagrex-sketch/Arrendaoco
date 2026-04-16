@@ -167,6 +167,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/inmuebles/{inmueble}/ver-contrato',
         [\App\Http\Controllers\ContratoFisicoController::class, 'verContrato']
     )->name('contratos.ver');
+    // Nueva ruta: solo se activa cuando el usuario confirma explícitamente la renta
+    Route::post('/inmuebles/{inmueble}/confirmar-renta',
+        [\App\Http\Controllers\ContratoFisicoController::class, 'confirmarYDescargar']
+    )->name('contratos.confirmar');
     Route::get('/contratos/{contrato}/descargar-registrar',
         [\App\Http\Controllers\ContratoFisicoController::class, 'registrarDescarga']
     )->name('contratos.descargar-registrar');
@@ -208,31 +212,31 @@ Route::middleware('auth')->group(function () {
             return redirect()->route('inmuebles.index')->with('info', 'Esta solicitud ya fue procesada.');
         }
 
+        $request->validate(['duracion_meses' => 'nullable|integer|min:1|max:60']);
+
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-            // 1. Activar el contrato (sin firma digital)
-            $contrato->update(['estatus' => 'activo']);
+            if ($request->filled('duracion_meses')) {
+                $duracion = (int) $request->duracion_meses;
+                $plazoText = $duracion >= 12
+                    ? floor($duracion / 12) . ' año' . (floor($duracion / 12) > 1 ? 's' : '')
+                    : $duracion . ' meses';
+                $contrato->fecha_fin = \Carbon\Carbon::parse($contrato->fecha_inicio)->addMonths($duracion)->toDateString();
+                $contrato->plazo = $plazoText;
+            }
 
-            // 2. Marcar el inmueble como rentado
-            $contrato->inmueble->update(['estatus' => 'rentado']);
+            // 1. Aprobar la renta: pasa a estado donde el inquilino puede descargar
+            $contrato->estatus = 'pdf_descargado';
+            $contrato->save();
 
-            // 3. Crear evento de calendario
-            \App\Models\Evento::create([
-                'usuario_id'  => $contrato->inquilino_id,
-                'renta_id'    => $contrato->id,
-                'titulo'      => 'Renta Aprobada: ' . $contrato->inmueble->titulo,
-                'descripcion' => '¡Tu renta fue aprobada! Ya puedes coordinar la entrega de llaves.',
-                'fecha'       => now(),
-            ]);
-
-            // 4. Notificar al inquilino (opcional)
+            // 2. Notificar al inquilino (opcional)
             try {
                 $contrato->load('inmueble', 'inquilino');
                 Mail::to(optional($contrato->inquilino)->email)->send(new RentaRespondidaMail($contrato, 'aprobada'));
             } catch (\Exception $e) {}
 
             \Illuminate\Support\Facades\DB::commit();
-            return redirect()->route('inmuebles.index')->with('success', '¡Contrato activado! El inmueble ha sido marcado como rentado.');
+            return redirect()->route('inmuebles.index')->with('success', '¡Solicitud aprobada! El inquilino ha sido notificado y ahora podrá descargar el contrato PDF.');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
             return back()->with('error', 'Error al aprobar: ' . $e->getMessage());
@@ -270,29 +274,48 @@ Route::middleware('auth')->group(function () {
         }
     })->name('contratos.rechazar');
     
-    // Ruta solo para pruebas: cancelar renta y desvincular
+    // Cancelar renta: desvincula el inmueble y marca el contrato como cancelado
     Route::delete('/mis-rentas/cancelar/{contrato}', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
-        if ($contrato->inquilino_id === \Illuminate\Support\Facades\Auth::id()) {
-            $inmueble = $contrato->inmueble;
-            if ($inmueble) {
-                $inmueble->update(['estatus' => 'disponible']);
-                
-                // Buscar todos los contratos de este usuario para este inmueble (por si hay duplicados de prueba)
-                $contratosIds = \App\Models\Contrato::where('inquilino_id', \Illuminate\Support\Facades\Auth::id())
-                                ->where('inmueble_id', $inmueble->id)
-                                ->pluck('id');
-                
-                // Borrar pagos y eventos asociados a estos contratos para limpiar el UI
-                \App\Models\Pago::whereIn('contrato_id', $contratosIds)->delete();
-                \App\Models\Evento::whereIn('renta_id', $contratosIds)->delete();
-                
-                // Borrar los contratos
-                \App\Models\Contrato::whereIn('id', $contratosIds)->delete();
-            } else {
-                $contrato->delete();
-            }
+        // Solo el inquilino o admin puede cancelar
+        if ($contrato->inquilino_id !== \Illuminate\Support\Facades\Auth::id()
+            && !\Illuminate\Support\Facades\Auth::user()->es_admin
+            && !\Illuminate\Support\Facades\Auth::user()->tieneRol('admin')) {
+            abort(403, 'No tienes permiso para cancelar esta renta.');
         }
-        return redirect()->route('inmuebles.mis_rentas')->with('success', 'Renta cancelada y desvinculada exitosamente.');
+
+        $estatusCancelable = ['activo', 'pendiente_aprobacion', 'pendiente', 'disponible', 'pdf_descargado'];
+        if (!in_array($contrato->estatus, $estatusCancelable)) {
+            return redirect()->route('inmuebles.mis_rentas')
+                ->with('error', 'Esta renta ya no se puede cancelar (estatus: ' . $contrato->estatus . ').');
+        }
+
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            // 1. Marcar el contrato como cancelado (mantener historial)
+            $contrato->update(['estatus' => 'cancelado']);
+
+            // 2. Desvincular el inmueble → disponible nuevamente
+            if ($contrato->inmueble) {
+                $contrato->inmueble->update(['estatus' => 'disponible']);
+            }
+
+            // 3. Eliminar pagos pendientes asociados (no los pagados, que son historial)
+            \App\Models\Pago::where('contrato_id', $contrato->id)
+                ->where('estatus', 'pendiente')
+                ->delete();
+
+            // 4. Eliminar eventos del calendario de esta renta
+            \App\Models\Evento::where('renta_id', $contrato->id)->delete();
+
+            \Illuminate\Support\Facades\DB::commit();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return redirect()->route('inmuebles.mis_rentas')
+                ->with('error', 'Error al cancelar la renta: ' . $e->getMessage());
+        }
+
+        return redirect()->route('inmuebles.mis_rentas')
+            ->with('success', 'Renta cancelada. El inmueble está disponible nuevamente.');
     })->name('rentas.cancelar');
 
     Route::get('/publicar', [InmuebleController::class, 'create'])->name('inmuebles.create');

@@ -22,7 +22,11 @@
                 Contrato de Arrendamiento
             </h1>
             <p class="text-sm text-slate-500 mt-1">
-                Lee con atención antes de descargar. Ambas partes deberán firmar la copia impresa.
+                @if($esPrevia)
+                    Revisa los términos con atención. Para iniciar el proceso de renta, confirma y descarga el PDF.
+                @else
+                    Lee con atención antes de descargar. Ambas partes deberán firmar la copia impresa.
+                @endif
             </p>
         </div>
 
@@ -37,9 +41,24 @@
     </div>
 
     {{-- ══════════════════════════════════════════════════════
-         AVISO — Estado del contrato
+         AVISOS DE ESTADO
     ══════════════════════════════════════════════════════ --}}
-    @if($contrato->estatus === 'pdf_descargado')
+
+    {{-- Aviso: es una previsualización (sin contrato en BD aún) --}}
+    @if($esPrevia)
+    <div class="mb-6 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <p class="text-sm text-amber-800 font-semibold">
+            <strong>Vista previa del contrato.</strong> Aún no has solicitado esta renta.
+            Al confirmar y descargar el PDF, iniciarás formalmente el proceso de arrendamiento.
+        </p>
+    </div>
+    @endif
+
+    {{-- Aviso: contrato ya en proceso (PDF ya descargado) --}}
+    @if(!$esPrevia && $contrato->estatus === 'pdf_descargado')
     <div class="mb-6 flex items-start gap-3 bg-brand-cream border border-brand-light/30 rounded-2xl px-5 py-4 shadow-sm">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-brand-dark shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -133,23 +152,35 @@
                 </ul>
             </div>
 
-            {{-- CTA — Descargar PDF --}}
+            {{-- CTA — Descargar / Confirmar PDF --}}
             <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
                 <h3 class="text-xs font-black text-brand-light uppercase tracking-widest mb-3">
                     Siguiente Paso
                 </h3>
                 <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                    Descarga el PDF, <strong class="text-brand-dark">imprímelo en dos copias</strong> y llévalas junto con tu identificación al inmueble para firmar con el propietario.
+                    @if($esPrevia)
+                        Al confirmar, enviaremos al propietario tu solicitud de renta.
+                        Una vez confirmado, podrás <strong class="text-brand-dark">descargar el PDF</strong> e imprimirlo para llevar a firmarlo.
+                    @else
+                        Descarga el PDF, <strong class="text-brand-dark">imprímelo en dos copias</strong> y llévalas junto con tu identificación al inmueble para firmar con el propietario.
+                    @endif
                 </p>
 
                 {{-- Botón que abre el modal de instrucciones --}}
                 <button @click="modalAbierto = true"
                         id="btn-abrir-modal-descarga"
                         class="btn-primary w-full justify-center text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Descargar PDF
+                    @if($esPrevia) 
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Confirmar Renta 
+                    @else 
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Descargar Contrato PDF 
+                    @endif
                 </button>
 
                 <p class="text-[10px] text-center text-slate-400 mt-3">
@@ -199,23 +230,34 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-white font-black text-lg leading-tight">Instrucciones de Formalización</h2>
-                    <p class="text-brand-light text-xs mt-0.5">Lee antes de descargar el contrato</p>
+                    <h2 class="text-white font-black text-lg leading-tight">
+                        @if($esPrevia) Confirmar solicitud de renta @else Instrucciones de Formalización @endif
+                    </h2>
+                    <p class="text-brand-light text-xs mt-0.5">
+                        @if($esPrevia) Revisa antes de confirmar tu solicitud @else Lee antes de descargar el contrato @endif
+                    </p>
                 </div>
             </div>
 
             {{-- Cuerpo del modal --}}
             <div class="px-6 py-5">
+                @if($esPrevia)
+                <p class="text-sm font-bold text-brand-dark mb-4">
+                    Al confirmar, notificaremos al propietario para iniciar el proceso.
+                    Podrás descargar el contrato PDF en esta misma pantalla una vez confirmado.
+                </p>
+                @else
                 <p class="text-sm font-bold text-brand-dark mb-4">
                     Para que el contrato tenga validez legal, sigue estos pasos:
                 </p>
+                @endif
 
                 <ol class="space-y-3">
                     @php $pasos = [
                         ['icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4',
-                         'texto' => 'Imprime <strong>dos copias</strong> del contrato PDF.'],
+                         'texto' => 'Imprime <strong>dos copias</strong> del contrato PDF que descargarás aquí.'],
                         ['icon' => 'M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0',
-                         'texto' => 'Lleva una <strong>copia de tu identificación oficial</strong> vigente.'],
+                         'texto' => 'Lleva una <strong>copia de tu identificación oficial</strong> vigente al reunirte con el propietario.'],
                         ['icon' => 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z',
                          'texto' => 'En el inmueble, <strong>firma la copia del propietario</strong> y él firmará la tuya.'],
                         ['icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
@@ -242,16 +284,32 @@
                 </div>
             </div>
 
-            {{-- Footer del modal --}}
+            {{-- Footer del modal: comportamiento diferente según esPrevia --}}
             <div class="px-6 pb-6 flex flex-col sm:flex-row gap-3">
-                <a href="{{ route('contratos.descargar-registrar', $contrato) }}"
-                   id="btn-confirmar-descarga"
-                   class="btn-primary flex-1 justify-center text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    Entendido, descargar PDF
-                </a>
+                @if($esPrevia)
+                    {{-- Primera vez: POST a confirmar-renta → crea contrato en BD --}}
+                    <form action="{{ route('contratos.confirmar', $inmueble) }}" method="POST" class="flex-1">
+                        @csrf
+                        <button type="submit"
+                                id="btn-confirmar-descarga"
+                                class="btn-primary w-full justify-center text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Confirmar Renta
+                        </button>
+                    </form>
+                @else
+                    {{-- Contrato ya en BD: GET a descargar-registrar --}}
+                    <a href="{{ route('contratos.descargar-registrar', $contrato) }}"
+                       id="btn-confirmar-descarga"
+                       class="btn-primary flex-1 justify-center text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Descargar Contrato PDF
+                    </a>
+                @endif
                 <button @click="modalAbierto = false"
                         class="btn-outline flex-1 justify-center text-sm">
                     Cancelar
