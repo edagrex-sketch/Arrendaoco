@@ -4,7 +4,7 @@
 
 
 @section('content')
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10" x-data="{ modalAprobarAbierto: false }">
 
     {{-- Encabezado --}}
     <div class="mb-8">
@@ -128,7 +128,7 @@
 
             {{-- Botones de Acción --}}
             <div class="space-y-3">
-                <button id="btn-aprobar" onclick="accionContrato('aprobar')"
+                <button id="btn-aprobar" @click="modalAprobarAbierto = true"
                     class="w-full bg-[#003049] text-white font-bold py-4 px-6 rounded-xl shadow-xl shadow-[#003049]/20 hover:bg-[#002236] hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2 text-lg">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     Aprobar Renta
@@ -158,6 +158,80 @@
 
         </div>
     </div>
+
+    {{-- MODAL — Instrucciones de Formalización Física (Propietario) --}}
+    <div x-show="modalAprobarAbierto"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-[#003049]/80 backdrop-blur-sm px-4"
+         style="display: none;" x-cloak>
+
+        <div x-show="modalAprobarAbierto"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             @click.away="modalAprobarAbierto = false"
+             class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+
+            <div class="bg-[#003049] px-6 pt-6 pb-5 flex items-start gap-4">
+                <div class="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-white font-black text-lg leading-tight">Confirmar aprobación de renta</h2>
+                    <p class="text-[#669BBC] text-xs mt-0.5">Revisa antes de confirmar esta acción</p>
+                </div>
+            </div>
+
+            <div class="px-6 py-5">
+                <p class="text-sm font-bold text-[#003049] mb-4">
+                    Al confirmar, el inquilino será notificado y los fondos se capturarán. Podrás descargar el contrato PDF en esta misma pantalla una vez aprobado.
+                </p>
+
+                <ol class="space-y-3">
+                    @php $pasos = [
+                        ['texto' => 'Imprime <strong>dos copias</strong> del contrato PDF que descargarás aquí.'],
+                        ['texto' => 'Lleva una <strong>copia de tu identificación oficial</strong> vigente al reunirte con el inquilino.'],
+                        ['texto' => 'En el inmueble, <strong>firma la copia del inquilino</strong> y él/ella firmará la tuya.'],
+                        ['texto' => 'Asegúrate de <strong>llevarte tu copia firmada</strong> por ambas partes.'],
+                    ]; @endphp
+
+                    @foreach($pasos as $i => $paso)
+                    <li class="flex items-start gap-3">
+                        <div class="h-7 w-7 rounded-full bg-[#003049] flex items-center justify-center shrink-0 mt-0.5"><span class="text-white font-black text-[11px]">{{ $i + 1 }}</span></div>
+                        <p class="text-sm text-slate-600 leading-snug pt-1">{!! $paso['texto'] !!}</p>
+                    </li>
+                    @endforeach
+                </ol>
+
+                <div class="mt-5 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-start gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <p class="text-xs text-amber-800 font-semibold leading-relaxed">
+                        Sin la firma manuscrita en papel, el contrato <strong>no tiene validez legal</strong> ante terceros.
+                    </p>
+                </div>
+            </div>
+
+            <div class="px-6 pb-6 flex flex-col sm:flex-row gap-3">
+                <button onclick="document.getElementById('form-aprobar').submit();" class="flex-1 bg-[#003049] text-white font-bold py-3 px-4 rounded-xl hover:bg-[#002236] transition-colors flex justify-center items-center gap-2 text-sm z-10 relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Aprobar Renta
+                </button>
+                <button @click="modalAprobarAbierto = false" class="flex-1 bg-white border border-slate-300 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-50 transition-colors text-sm z-10 relative">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @push('scripts')
@@ -165,22 +239,7 @@
 
 <script>
     function accionContrato(accion) {
-        if (accion === 'aprobar') {
-            Swal.fire({
-                icon: 'question',
-                title: '¿Aprobar esta renta?',
-                html: 'Al aprobar, se notificará al inquilino para que pueda descargar y firmar el contrato físico.',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, Aprobar',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#003049',
-                cancelButtonColor: '#6b7280'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('form-aprobar').submit();
-                }
-            });
-        } else {
+        if (accion === 'rechazar') {
             Swal.fire({
                 icon: 'warning',
                 title: '¿Rechazar esta solicitud?',
