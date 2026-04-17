@@ -375,39 +375,49 @@
                             {{ $inmueble->direccion }}
                         </p>
 
-                        <div class="flex items-center gap-4 py-4 border-t border-slate-100 mb-6">
-                            <div class="flex items-center gap-1.5 text-slate-500" title="Habitaciones">
-                                <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M22 13V19C22 19.5523 21.5523 20 21 20H3C2.44772 20 2 19.5523 2 19V13C2 11.3431 3.34315 10 5 10H19C20.6569 10 22 11.3431 22 13ZM19 12H5C4.44772 12 4 12.4477 4 13V15H20V13C20 12.4477 19.5523 12 19 12ZM20 6H4V9H20V6Z" />
-                                </svg>
-                                <span class="text-base font-bold text-slate-700">{{ $inmueble->habitaciones }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Hab</span></span>
+                        <div class="flex items-center justify-between py-4 border-t border-slate-100 mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-1.5 text-slate-500" title="Habitaciones">
+                                    <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M22 13V19C22 19.5523 21.5523 20 21 20H3C2.44772 20 2 19.5523 2 19V13C2 11.3431 3.34315 10 5 10H19C20.6569 10 22 11.3431 22 13ZM19 12H5C4.44772 12 4 12.4477 4 13V15H20V13C20 12.4477 19.5523 12 19 12ZM20 6H4V9H20V6Z" />
+                                    </svg>
+                                    <span class="text-base font-bold text-slate-700">{{ $inmueble->habitaciones }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Hab</span></span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-slate-500" title="Baños">
+                                    <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M19 11C19.5523 11 20 11.4477 20 12V14C20 15.6569 18.6569 17 17 17H7C5.34315 17 4 15.6569 4 14V12C4 11.4477 4.44772 11 5 11H19ZM16 4H8V10H16V4ZM18 18H6V20H18V18Z" />
+                                    </svg>
+                                    <span class="text-base font-bold text-slate-700">{{ $inmueble->banos }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Baño</span></span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-slate-500" title="Superficie">
+                                    <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7M17 3H19C20.1046 3 21 3.89543 21 5V7M21 17V19C21 20.1046 20.1046 21 19 21H17M7 21H5C3.89543 21 3 20.1046 3 19V17M9 9H15V15H9V9Z" />
+                                    </svg>
+                                    <span class="text-base font-bold text-slate-700">{{ number_format($inmueble->metros ?? 0, 0) }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">M²</span></span>
+                                </div>
                             </div>
-                            <div class="flex items-center gap-1.5 text-slate-500" title="Baños">
-                                <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M19 11C19.5523 11 20 11.4477 20 12V14C20 15.6569 18.6569 17 17 17H7C5.34315 17 4 15.6569 4 14V12C4 11.4477 4.44772 11 5 11H19ZM16 4H8V10H16V4ZM18 18H6V20H18V18Z" />
-                                </svg>
-                                <span class="text-base font-bold text-slate-700">{{ $inmueble->banos }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Baño</span></span>
-                            </div>
-                            <div class="flex items-center gap-1.5 text-slate-500" title="Superficie">
-                                <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7M17 3H19C20.1046 3 21 3.89543 21 5V7M21 17V19C21 20.1046 20.1046 21 19 21H17M7 21H5C3.89543 21 3 20.1046 3 19V17M9 9H15V15H9V9Z" />
-                                </svg>
-                                <span class="text-base font-bold text-slate-700">{{ number_format($inmueble->metros ?? 0, 0) }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">M²</span></span>
-                            </div>
+                            @auth
+                                @if(Auth::id() === $inmueble->propietario_id)
+                                    <div class="flex-shrink-0 ml-2" title="Tu propiedad">
+                                        <div class="h-10 w-10 flex items-center justify-center rounded-full border-[3px] border-[#E63946] bg-white shadow-sm overflow-hidden group/owner group-hover:scale-105 transition-transform p-1">
+                                            @if(Auth::user()->foto_perfil)
+                                                <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}" class="w-full h-full object-cover rounded-full">
+                                            @else
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-full w-full text-orange-500" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+                                                </svg>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+                            @endauth
                         </div>
 
                         @auth
-                            @if(Auth::id() === $inmueble->propietario_id)
-                                <a href="{{ route('inmuebles.show', $inmueble) }}"
-                                    class="flex w-full py-4 items-center justify-center rounded-2xl bg-gradient-to-br from-[#003049] to-[#004e7a] text-sm font-black text-white transition-all hover:-translate-y-1 shadow-lg shadow-[#003049]/20 uppercase tracking-widest">
-                                    Gestionar Propiedad
-                                </a>
-                            @else
-                                <a href="{{ route('inmuebles.show', $inmueble) }}"
-                                    class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-100 text-sm font-black text-[#003049] transition-all hover:bg-slate-200 uppercase tracking-widest">
-                                    Ver Detalles
-                                </a>
-                            @endif
+                            <a href="{{ route('inmuebles.show', $inmueble) }}"
+                                class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-100 text-sm font-black text-[#003049] transition-all hover:bg-slate-200 uppercase tracking-widest">
+                                Ver Detalles
+                            </a>
                         @else
                             <button onclick="window.location.href='{{ route('login') }}'"
                                 class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 text-xs font-black text-slate-400 transition-all hover:bg-slate-100 uppercase tracking-widest gap-2">

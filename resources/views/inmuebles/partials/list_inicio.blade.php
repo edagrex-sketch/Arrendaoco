@@ -94,38 +94,48 @@
                             {{ $inmueble->direccion }}
                         </p>
 
-                        <div class="flex items-center gap-4 py-4 border-t border-slate-100 mb-6">
-                            <div class="flex items-center gap-1.5 text-slate-500" title="Habitaciones">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 11v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path><path d="M5 16v2"></path><path d="M19 16v2"></path><path d="M5 11V7a2 2 0 012-2h10a2 2 0 012 2v4"></path><path d="M5 11h14"></path>
-                                </svg>
-                                <span class="text-base font-bold text-slate-700">{{ $inmueble->habitaciones }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Hab</span></span>
+                        <div class="flex items-center justify-between py-4 border-t border-slate-100 mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-1.5 text-slate-500" title="Habitaciones">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 11v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path><path d="M5 16v2"></path><path d="M19 16v2"></path><path d="M5 11V7a2 2 0 012-2h10a2 2 0 012 2v4"></path><path d="M5 11h14"></path>
+                                    </svg>
+                                    <span class="text-base font-bold text-slate-700">{{ $inmueble->habitaciones }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Hab</span></span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-slate-500" title="Baños">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><line x1="10" x2="8" y1="5" y2="7"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="7" x2="7" y1="19" y2="21"/><line x1="17" x2="17" y1="19" y2="21"/>
+                                    </svg>
+                                    <span class="text-base font-bold text-slate-700">{{ $inmueble->banos }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Baño</span></span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-slate-500" title="Superficie">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/>
+                                    </svg>
+                                    <span class="text-base font-bold text-slate-700">{{ number_format($inmueble->metros ?? 0, 0) }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">M²</span></span>
+                                </div>
                             </div>
-                            <div class="flex items-center gap-1.5 text-slate-500" title="Baños">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><line x1="10" x2="8" y1="5" y2="7"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="7" x2="7" y1="19" y2="21"/><line x1="17" x2="17" y1="19" y2="21"/>
-                                </svg>
-                                <span class="text-base font-bold text-slate-700">{{ $inmueble->banos }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Baño</span></span>
-                            </div>
-                            <div class="flex items-center gap-1.5 text-slate-500" title="Superficie">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/>
-                                </svg>
-                                <span class="text-base font-bold text-slate-700">{{ number_format($inmueble->metros ?? 0, 0) }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">M²</span></span>
-                            </div>
+                            @auth
+                                @if(Auth::id() === $inmueble->propietario_id)
+                                    <div class="flex-shrink-0 ml-2" title="Tu propiedad">
+                                        <div class="h-10 w-10 flex items-center justify-center rounded-full border-[3px] border-[#E63946] bg-white shadow-sm overflow-hidden group/owner group-hover:scale-105 transition-transform p-1">
+                                            @if(Auth::user()->foto_perfil)
+                                                <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}" class="w-full h-full object-cover rounded-full">
+                                            @else
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-full w-full text-orange-500" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+                                                </svg>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+                            @endauth
                         </div>
 
-                            @if(Auth::id() === $inmueble->propietario_id)
-                                <a href="{{ route('inmuebles.show', $inmueble) }}"
-                                    class="flex w-full py-4 items-center justify-center rounded-2xl bg-gradient-to-br from-[#003049] to-[#004e7a] text-sm font-black text-white transition-all hover:-translate-y-1 shadow-lg shadow-[#003049]/20 uppercase tracking-widest">
-                                    Gestionar Propiedad
-                                </a>
-                            @else
-                                <a href="{{ route('inmuebles.show', $inmueble) }}"
-                                    class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-100 text-sm font-black text-[#003049] transition-all hover:bg-slate-200 uppercase tracking-widest">
-                                    Ver Detalles
-                                </a>
-                            @endif
+                            <a href="{{ route('inmuebles.show', $inmueble) }}"
+                                class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-100 text-sm font-black text-[#003049] transition-all hover:bg-slate-200 uppercase tracking-widest">
+                                Ver Detalles
+                            </a>
                     </div>
                 </div>
             @empty

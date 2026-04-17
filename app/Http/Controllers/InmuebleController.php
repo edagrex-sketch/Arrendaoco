@@ -312,7 +312,7 @@ class InmuebleController extends Controller
             'metros' => 'required|numeric|min:0',
             'descripcion' => ['required', 'string', 'regex:/^[a-zA-Z0-9\s.,?!áéíóúÁÉÍÓÚñÑüÜ\r\n]*$/'],
             'direccion' => 'required|string',
-            'imagenes' => 'required|array|min:1|max:10',
+            'imagenes' => 'required|array|min:5|max:10',
             'imagenes.*' => 'image|max:10240',
             'latitud' => 'nullable|numeric',
             'longitud' => 'nullable|numeric',

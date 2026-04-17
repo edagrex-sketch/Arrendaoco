@@ -582,7 +582,7 @@
                     
                     <button type="button" @click="nextStep()" x-show="step < 4" class="bg-primary text-primary-foreground font-bold py-2 px-6 rounded-xl hover:bg-primary/90 transition-all shadow-md shadow-primary/20">Siguiente Paso →</button>
 
-                    <button type="submit" x-show="step === 4" class="flex items-center justify-center gap-2 bg-[#003049] text-white px-8 py-3 rounded-xl font-bold text-base border-none cursor-pointer shadow-lg shadow-[#003049]/30 hover:bg-[#003049]/90 transition-all">
+                    <button type="submit" @click="validarFotos" x-show="step === 4" class="flex items-center justify-center gap-2 bg-[#003049] text-white px-8 py-3 rounded-xl font-bold text-base border-none cursor-pointer shadow-lg shadow-[#003049]/30 hover:bg-[#003049]/90 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-[#003049]">
                             <path fill-rule="evenodd" d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM13.636 5.864a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM7.485 11.485a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM14.696 14.696a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM7.485 7.485a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 111.06-1.06l1.06 1.06a.75.75 0 010 1.06zM15 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0115 10zM6.5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 016.5 10zM10 7a3 3 0 100 6 3 3 0 000-6z" clip-rule="evenodd" />
                         </svg>
@@ -794,6 +794,20 @@
                     const dataTransfer = new DataTransfer();
                     this.files.forEach(file => dataTransfer.items.add(file));
                     document.getElementById('fileInput').files = dataTransfer.files;
+                },
+
+                validarFotos(e) {
+                    if (this.files.length < 5) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Faltan fotos',
+                            text: 'El inmueble debe de tener al menos 5 fotografías para poder publicarse.',
+                            confirmButtonColor: '#003049'
+                        });
+                        return false;
+                    }
+                    return true;
                 },
 
                 nextStep() {
