@@ -94,22 +94,22 @@
         2. MAPA DE EXPLORACIÓN
     --}}
     <section class="container mx-auto px-4 mb-16" x-data="mapExploration()">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center mb-6 cursor-pointer group w-fit" @click="toggleMap">
             <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-xl bg-brand-dark flex items-center justify-center text-white shadow-lg">
+                <div class="h-10 w-10 rounded-xl bg-brand-dark flex items-center justify-center text-white shadow-lg transition-transform duration-300 group-hover:scale-105">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-black text-brand-dark tracking-tight">Explora el Mapa</h2>
-                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest hidden md:block">Encuentra disponibilidad cerca de ti con vista satelital</p>
+                    <h2 class="text-2xl font-black text-brand-dark tracking-tight transition-colors duration-300 group-hover:text-brand-light">Explora el Mapa</h2>
+                    <div class="flex items-center gap-2">
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest hidden md:block transition-colors duration-300 group-hover:text-slate-500">Encuentra disponibilidad cerca de ti con vista satelital</p>
+                        
+                        <svg :class="{'rotate-180': showMap}" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-dark transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
                 </div>
             </div>
-            
-            <button @click="toggleMap" class="btn-secondary py-2 px-4 shadow-sm">
-                <span x-text="showMap ? 'Contraer Mapa' : 'Mostrar Mapa'"></span>
-                <svg x-show="!showMap" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                <svg x-show="showMap" style="display: none;" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>
-            </button>
         </div>
         
         <div x-show="showMap" x-transition.opacity.duration.300ms style="display: none;" class="w-full relative z-0">
