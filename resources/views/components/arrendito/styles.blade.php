@@ -136,11 +136,6 @@
 
     /* --- 3. MASCOT WRAPPER --- */
     #mascot-wrapper {
-        position: fixed;
-        bottom: 120px;
-        left: 30px;
-        z-index: 9999;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         width: 160px;
         pointer-events: none;
         font-family: 'Inter', sans-serif;
@@ -190,9 +185,6 @@
 
     /* --- 5. BOTÓN MAXIMIZAR (TOGGLE) --- */
     .assistant-toggle-btn {
-        position: fixed;
-        bottom: 30px;
-        left: 30px;
         background: linear-gradient(135deg, var(--roco-primary) 0%, var(--roco-accent) 100%);
         border: none;
         padding: 12px 24px;
@@ -201,13 +193,16 @@
         font-size: 14px;
         color: white;
         box-shadow: 0 8px 30px rgba(31, 58, 95, 0.35);
-        z-index: 9999;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         display: flex;
         align-items: center;
         gap: 8px;
         letter-spacing: 0.3px;
+        position: relative !important;
+        left: auto !important;
+        bottom: auto !important;
+        margin: 0 auto;
     }
 
     .assistant-toggle-btn.hidden {
@@ -227,8 +222,8 @@
         padding: 14px 20px;
         border-radius: 18px;
         box-shadow: 0 4px 24px var(--roco-shadow), 0 0 0 1px var(--roco-border);
-        margin-bottom: -15px;
-        margin-left: 35px;
+        margin-bottom: 5px;
+        margin-left: 0;
         max-width: 240px;
         font-size: 0.85rem;
         color: var(--roco-dark);
@@ -251,12 +246,12 @@
         content: '';
         position: absolute;
         bottom: -6px;
-        left: 30px;
+        left: 50%;
         width: 12px;
         height: 12px;
         background: var(--roco-surface);
-        transform: rotate(45deg);
-        box-shadow: 3px 3px 6px var(--roco-shadow);
+        transform: translateX(-50%) rotate(45deg);
+        box-shadow: 2px 2px 3px var(--roco-shadow);
     }
 
     .mascot-name-highlight {
@@ -392,7 +387,42 @@
         font-weight: 500;
     }
 
-    /* --- 9. VENTANA DE CHAT IA (PREMIUM) --- */
+    /* --- 9. WIDGET CONTAINER --- */
+    #roco-widget-container {
+        position: fixed;
+        bottom: 30px;
+        left: 30px;
+        z-index: 99998;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 220px;
+        pointer-events: none;
+        transition: all 0.3s ease;
+    }
+
+    #roco-visual-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        pointer-events: auto;
+        transform-origin: bottom;
+    }
+
+    #roco-mascot-wrapper {
+        width: 140px;
+        height: 120px;
+        transition: all 0.3s ease;
+    }
+
+    #roco-lottie {
+        width: 140px;
+        height: 120px;
+    }
+
+    /* --- 10. VENTANA DE CHAT IA (PREMIUM) --- */
     #mascot-chat {
         position: fixed;
         bottom: 110px;
@@ -753,12 +783,29 @@
 
     /* === Tablets y móviles grandes (≤768px) === */
     @media (max-width: 768px) {
-        /* Mascota: más pequeña y en esquina inferior derecha */
-        #mascot-wrapper {
+        #roco-widget-container {
             bottom: 20px;
             left: auto;
-            right: 12px;
-            width: 90px;
+            right: 20px;
+            width: 180px;
+            transform-origin: bottom right;
+        }
+
+        #mascot-chat {
+            bottom: 20px;
+            left: 20px;
+            width: calc(100vw - 40px);
+            height: calc(100vh - 120px);
+        }
+
+        #roco-mascot-wrapper {
+            width: 100px !important;
+            height: 90px !important;
+        }
+
+        #roco-lottie {
+            width: 100px !important;
+            height: 90px !important;
         }
 
         .mascot-scene {
@@ -934,14 +981,20 @@
 
     /* === Móviles medianos (≤480px) === */
     @media (max-width: 480px) {
-        #mascot-wrapper {
+        #roco-widget-container {
             bottom: 15px;
-            right: 8px;
-            width: 75px;
+            right: 10px;
+            width: 150px;
         }
 
-        .mascot-scene {
-            height: 65px;
+        #roco-mascot-wrapper {
+            width: 85px !important;
+            height: 75px !important;
+        }
+
+        #roco-lottie {
+            width: 85px !important;
+            height: 75px !important;
         }
 
         .mascot-bubble {
@@ -950,56 +1003,44 @@
             padding: 6px 10px;
         }
 
-        .chat-tooltip {
-            font-size: 10px;
-            padding: 5px 12px;
-            bottom: -30px;
-        }
-
         .assistant-toggle-btn {
-            bottom: 15px;
-            right: 8px;
             padding: 8px 14px;
             font-size: 11px;
             gap: 6px;
         }
 
-        #mascot-menu {
-            width: calc(100vw - 24px);
-            left: 12px;
-            bottom: 90px;
-        }
-
         #mascot-chat {
-            width: 100vw;
-            left: 0;
-            bottom: 0;
-            height: calc(100vh - 56px);
-            height: calc(100dvh - 56px);
-            border-radius: 20px 20px 0 0;
+            width: calc(100vw - 20px);
+            left: 10px;
+            bottom: 10px;
+            height: calc(100vh - 80px);
+            height: calc(100dvh - 80px);
+            border-radius: 20px;
         }
     }
 
     /* === Móviles muy pequeños (≤380px) === */
     @media (max-width: 380px) {
-        #mascot-wrapper {
+        #roco-widget-container {
             bottom: 10px;
             right: 5px;
-            width: 65px;
+            width: 130px;
         }
 
-        .mascot-scene {
-            height: 55px;
+        #roco-mascot-wrapper {
+            width: 75px !important;
+            height: 65px !important;
+        }
+
+        #roco-lottie {
+            width: 75px !important;
+            height: 65px !important;
         }
 
         .mascot-bubble {
             max-width: 100px;
             font-size: 0.6rem;
             padding: 5px 8px;
-        }
-
-        .chat-tooltip {
-            display: none;
         }
 
         #mascot-chat {
@@ -1011,15 +1052,7 @@
             border-radius: 0;
         }
 
-        #mascot-menu {
-            width: calc(100vw - 16px);
-            left: 8px;
-            bottom: 80px;
-        }
-
         .assistant-toggle-btn {
-            bottom: 10px;
-            right: 5px;
             padding: 8px 12px;
             font-size: 10px;
         }

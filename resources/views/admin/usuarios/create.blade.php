@@ -1,12 +1,14 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Crear Usuario - Admin')
+@section('page-title', 'Crear Usuario')
+@section('page-subtitle', 'Registra un nuevo miembro en la plataforma')
 
 @section('content')
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <nav class="flex mb-8 text-sm font-medium text-muted-foreground" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a href="{{ route('inicio') }}" class="hover:text-primary transition-colors">Inicio</a></li>
+                <li><a href="{{ route('admin.dashboard') }}" class="hover:text-primary transition-colors">Inicio</a></li>
                 <li><span class="mx-2">/</span></li>
                 <li><a href="{{ route('admin.usuarios.index') }}" class="hover:text-primary transition-colors">Usuarios</a>
                 </li>
@@ -17,8 +19,7 @@
 
         <div class="bg-white rounded-3xl shadow-xl shadow-blue-900/5 border border-border overflow-hidden">
             <div class="bg-slate-50 border-b border-border p-8">
-                <h1 class="text-3xl font-black text-[#003049] mb-2">Crear Nuevo Usuario</h1>
-                <p class="text-muted-foreground italic">Registra un nuevo miembro en la plataforma <span
+                <p class="text-muted-foreground italic text-lg font-medium">Registra un nuevo miembro en la plataforma <span
                         class="text-[#669BBC] font-bold">ArrendaOco</span>. Todos los campos marcados con <span
                         class="text-red-500 font-bold">*</span> son obligatorios.</p>
             </div>

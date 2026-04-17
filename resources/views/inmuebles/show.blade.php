@@ -381,8 +381,10 @@
                         </svg>
                     </div>
 
-                    <div class="h-24 w-24 rounded-3xl bg-white shadow-xl shadow-orange-200/50 flex items-center justify-center p-4 border border-orange-100 shrink-0 transform group-hover:rotate-6 transition-all">
-                        <img src="{{ asset('logo1.png') }}" class="w-full h-auto" alt="ROCO">
+                    <div class="h-16 w-16 bg-[#FDF0D5] rounded-2xl flex items-center justify-center shrink-0 shadow-lg border-2 border-white/50">
+                         <svg class="h-10 w-10 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zM5 9c0 1.1-.9 2-2 2S1 10.1 1 9s.9-2 2-2 2 .9 2 2zm7 11c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm7-4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-14 0c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2z"/>
+                        </svg>
                     </div>
 
                     <div class="flex-1 text-center md:text-left">

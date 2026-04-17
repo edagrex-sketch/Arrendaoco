@@ -1,15 +1,15 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Gestión de Usuarios - Admin')
+@section('page-title', 'Gestión de Usuarios')
+@section('page-subtitle', 'Administra los usuarios registrados en la plataforma')
 
 @section('content')
-<div class="px-4">
+<div>
+    {{-- Header Row --}}
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-[#003049]">Gestión de Usuarios</h1>
-            <p class="text-sm text-slate-400 mt-1">{{ $usuarios->total() }} usuario(s) registrado(s) en la plataforma</p>
-        </div>
-        
+        <p class="text-sm text-slate-400">{{ $usuarios->total() }} usuario(s) registrado(s) en la plataforma</p>
+
         <div class="flex gap-2">
             <a href="{{ route('admin.usuarios.create') }}" class="bg-[#669BBC] text-white px-5 py-2 rounded-xl font-bold hover:bg-[#003049] transition-all shadow-md shadow-blue-100 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -17,33 +17,79 @@
                 </svg>
                 Crear Usuario
             </a>
-            <a href="{{ route('admin.usuarios.reporte') }}" class="bg-[#C1121F] text-white px-5 py-2 rounded-xl font-bold hover:bg-[#780000] transition-all shadow-md shadow-red-100 flex items-center gap-2">
+            <a href="{{ route('admin.usuarios.reporte', request()->all()) }}" class="bg-[#C1121F] text-white px-5 py-2 rounded-xl font-bold hover:bg-[#780000] transition-all shadow-md shadow-red-100 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                PDF
+                PDF Filtrado
             </a>
         </div>
     </div>
 
-    {{-- Buscador Full Width --}}
-    <div class="mb-6">
-        <form action="{{ route('admin.usuarios.index') }}" method="GET" class="relative w-full">
-            <input type="text" name="search" value="{{ request('search') }}" 
-                placeholder="Buscar usuarios por nombre completo o correo electrónico..." 
-                class="w-full pl-12 pr-12 py-3 rounded-2xl border-none bg-[#669BBC] focus:ring-4 focus:ring-[#669BBC]/20 outline-none transition-all shadow-md text-lg placeholder:text-white/70 text-white font-medium">
-            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-white/90">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+    {{-- Buscador y Filtros Avanzados --}}
+    <div class="bg-white rounded-3xl shadow-md p-6 mb-8 border border-slate-100">
+        <form action="{{ route('admin.usuarios.index') }}" method="GET">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                {{-- Búsqueda --}}
+                <div class="lg:col-span-2 relative">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Búsqueda rápida</label>
+                    <input type="text" name="search" value="{{ request('search') }}" 
+                        placeholder="Nombre o email..." 
+                        class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-[#669BBC]/10 focus:border-[#669BBC] outline-none transition-all text-sm font-medium">
+                    <div class="absolute left-3 top-[34px] text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </div>
+
+                {{-- Rol --}}
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Filtrar por Rol</label>
+                    <select name="rol" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-[#669BBC]/10 focus:border-[#669BBC] outline-none transition-all text-sm font-bold text-[#003049]">
+                        <option value="">Todos los roles</option>
+                        @foreach($roles as $role)
+                            <option value="{{ $role->nombre }}" {{ request('rol') == $role->nombre ? 'selected' : '' }}>{{ $role->etiqueta ?? ucfirst($role->nombre) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Estatus --}}
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Estatus</label>
+                    <select name="estatus" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-[#669BBC]/10 focus:border-[#669BBC] outline-none transition-all text-sm font-bold text-[#003049]">
+                        <option value="">Todos</option>
+                        <option value="activo" {{ request('estatus') == 'activo' ? 'selected' : '' }}>Activo</option>
+                        <option value="inactivo" {{ request('estatus') == 'inactivo' ? 'selected' : '' }}>Inactivo</option>
+                    </select>
+                </div>
+
+                {{-- Botones --}}
+                <div class="flex items-end gap-2">
+                    <button type="submit" class="flex-1 bg-[#003049] text-white py-2.5 rounded-xl font-bold hover:bg-[#001d2e] transition-all shadow-md shadow-blue-900/10 flex items-center justify-center gap-2 text-sm">
+                        Filtrar
+                    </button>
+                    @if(request()->anyFilled(['search', 'rol', 'estatus', 'desde', 'hasta']))
+                        <a href="{{ route('admin.usuarios.index') }}" class="p-2.5 bg-slate-100 text-slate-500 rounded-xl hover:bg-slate-200 transition-all shadow-sm" title="Limpiar filtros">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    @endif
+                </div>
             </div>
-            @if(request('search'))
-                <a href="{{ route('admin.usuarios.index') }}" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                    </svg>
-                </a>
-            @endif
+
+            {{-- Filtros de Fecha --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4 pt-4 border-t border-slate-50">
+                <div class="lg:col-span-1">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Registrado desde</label>
+                    <input type="date" name="desde" value="{{ request('desde') }}" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-[#669BBC]/10 focus:border-[#669BBC] outline-none transition-all text-sm font-medium">
+                </div>
+                <div class="lg:col-span-1">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Registrado hasta</label>
+                    <input type="date" name="hasta" value="{{ request('hasta') }}" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-[#669BBC]/10 focus:border-[#669BBC] outline-none transition-all text-sm font-medium">
+                </div>
+            </div>
         </form>
     </div>
 
@@ -141,12 +187,11 @@
         </div>
     </div>
 </div>
-</div>
+@endsection
 
 @push('scripts')
 <script>
 function confirmToggleStatus(id, nombre, estatusActual, inmueblesCount, contratosActivos, esAdmin) {
-    // Bloquear si es admin
     if (esAdmin) {
         Swal.fire({
             title: 'Acción no permitida',
@@ -159,7 +204,6 @@ function confirmToggleStatus(id, nombre, estatusActual, inmueblesCount, contrato
         return;
     }
 
-    // Checking constraints when deactivating
     if (estatusActual === 'activo' && (contratosActivos > 0 || inmueblesCount > 0)) {
         Swal.fire({
             title: 'Acción no permitida',
@@ -174,7 +218,6 @@ function confirmToggleStatus(id, nombre, estatusActual, inmueblesCount, contrato
     let nuevoEstatus = estatusActual === 'activo' ? 'inactivo' : 'activo';
     let accionTexto = estatusActual === 'activo' ? 'Desactivar' : 'Activar';
 
-    // Confirmación con información detallada
     Swal.fire({
         title: `¿${accionTexto} este usuario?`,
         html: `
@@ -201,4 +244,3 @@ function confirmToggleStatus(id, nombre, estatusActual, inmueblesCount, contrato
 }
 </script>
 @endpush
-@endsection

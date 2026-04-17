@@ -6,20 +6,66 @@ use App\Models\Inmueble;
 use App\Models\Resena;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ResenaController extends Controller
 {
     /**
      * Muestra todas las reseñas para moderación (Admin).
      */
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::user()->es_admin && !Auth::user()->tieneRol('admin')) {
             abort(403);
         }
 
-        $resenas = Resena::with(['usuario', 'inmueble'])->latest()->paginate(20);
+        $query = Resena::with(['usuario', 'inmueble']);
+        $this->applyFilters($query, $request);
+
+        $resenas = $query->latest()->paginate(10)->withQueryString();
         return view('admin.resenas.index', compact('resenas'));
+    }
+
+    public function reporte(Request $request)
+    {
+        if (!Auth::user()->es_admin && !Auth::user()->tieneRol('admin')) {
+            abort(403);
+        }
+
+        $query = Resena::with(['usuario', 'inmueble']);
+        $this->applyFilters($query, $request);
+
+        $resenas = $query->latest()->get();
+        $pdf = Pdf::loadView('admin.resenas.reporte', compact('resenas'));
+        return $pdf->download('reporte_resenas.pdf');
+    }
+
+    private function applyFilters($query, Request $request)
+    {
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('comentario', 'like', "%$search%")
+                    ->orWhereHas('usuario', function ($sq) use ($search) {
+                        $sq->where('nombre', 'like', "%$search%");
+                    })
+                    ->orWhereHas('inmueble', function ($sq) use ($search) {
+                        $sq->where('titulo', 'like', "%$search%");
+                    });
+            });
+        }
+
+        if ($request->filled('puntuacion')) {
+            $query->where('puntuacion', $request->puntuacion);
+        }
+
+        if ($request->filled('desde')) {
+            $query->whereDate('created_at', '>=', $request->desde);
+        }
+
+        if ($request->filled('hasta')) {
+            $query->whereDate('created_at', '<=', $request->hasta);
+        }
     }
 
     /**
