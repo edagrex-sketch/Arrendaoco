@@ -93,8 +93,35 @@
     {{-- 
         2. MAPA DE EXPLORACIÓN
     --}}
-    <section class="container mx-auto px-4 mb-16" x-data="mapExploration()">
-        <div class="flex items-center mb-6 cursor-pointer group w-fit" @click="toggleMap">
+    <section class="container mx-auto px-4 mb-16" x-data="mapExploration({{ session('login_success') ? 'true' : 'false' }})">
+        <div class="relative w-fit">
+            {{-- Burbuja Flotante y Roco (Solo tras Login) --}}
+            <div x-show="showHint"
+                 x-transition:enter="transition ease-out duration-700 transform"
+                 x-transition:enter-start="opacity-0 translate-y-8 scale-50"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="transition ease-in duration-500 transform"
+                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 scale-75"
+                 class="absolute z-20 flex items-end gap-2 pointer-events-none"
+                 style="bottom: 100%; left: 0; padding-bottom: 8px; display: none;">
+                 
+                 <!-- Roco Mascota (Izquierda) -->
+                 <div class="w-16 h-16 origin-bottom transform scale-x-[-1]">
+                     <lottie-player src="https://assets4.lottiefiles.com/packages/lf20_syqnfe7c.json"
+                         background="transparent" speed="1" loop autoplay renderer="svg" style="width: 100%; height: 100%;">
+                     </lottie-player>
+                 </div>
+
+                 <!-- Burbuja de Texto -->
+                 <div class="bg-[#FDF0D5] px-5 py-3 rounded-2xl shadow-xl relative animate-[bounce_2s_infinite]">
+                     <span class="text-[#003049] font-black text-sm tracking-wide">Prueba el mapa</span>
+                     <!-- Triangulito de la burbuja -->
+                     <div class="absolute -bottom-2 left-6 w-4 h-4 bg-[#FDF0D5] rotate-45 transform"></div>
+                 </div>
+            </div>
+
+            <div class="flex items-center mb-6 cursor-pointer group w-fit" @click="toggleMap">
             <div class="flex items-center gap-3">
                 <div class="h-10 w-10 rounded-xl bg-brand-dark flex items-center justify-center text-white shadow-lg transition-transform duration-300 group-hover:scale-105">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
@@ -110,7 +137,9 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
+        
         
         <div x-show="showMap" x-transition.opacity.duration.300ms style="display: none;" class="w-full relative z-0">
             <div id="map-inicio" class="w-full h-[500px] rounded-[2.5rem] border border-slate-100 shadow-2xl relative z-0"></div>
@@ -122,22 +151,36 @@
 
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('mapExploration', () => ({
+            Alpine.data('mapExploration', (shouldShowHint = false) => ({
                 map: null,
                 userMarker: null,
                 userCircle: null,
                 showMap: false,
+                showHint: false,
                 toggleMap() {
                     this.showMap = !this.showMap;
                     if (this.showMap) {
-                        setTimeout(() => {
+                        this.showHint = false;
+                        // Forzar el redibujado repetidamente durante la transición para evitar Leaflet render glitch
+                        let count = 0;
+                        let interval = setInterval(() => {
                             if (this.map) {
                                 this.map.invalidateSize();
                             }
-                        }, 100);
+                            if (++count > 10) clearInterval(interval); // 500ms total
+                        }, 50);
                     }
                 },
                 init() {
+                    if (shouldShowHint) {
+                        setTimeout(() => {
+                            this.showHint = true;
+                            setTimeout(() => {
+                                this.showHint = false;
+                            }, 12000);
+                        }, 1500);
+                    }
+
                     setTimeout(() => {
                         // Capas Base
                         const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

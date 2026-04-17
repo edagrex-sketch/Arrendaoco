@@ -158,10 +158,12 @@ Route::match(['get', 'post'], '/logout', function (Request $request) {
 })->name('logout');
 
 
+// Rutas públicas de Inmuebles
+Route::get('/buscar', [App\Http\Controllers\InmuebleController::class, 'publicSearch'])->name('inmuebles.public_search');
+Route::get('/inmuebles/{inmueble}', [App\Http\Controllers\InmuebleController::class, 'show'])->name('inmuebles.show');
+
 Route::middleware('auth')->group(function () {
     Route::get('/inicio', [InmuebleController::class, 'home'])->name('inicio');
-    Route::get('/buscar', [InmuebleController::class, 'publicSearch'])->name('inmuebles.public_search');
-    Route::get('/inmuebles/{inmueble}', [InmuebleController::class, 'show'])->name('inmuebles.show');
     Route::get('/inmuebles/{inmueble}/rentar', [InmuebleController::class, 'rentar'])->name('inmuebles.rentar');
     // Fase 2 — Nuevo flujo físico: «Ver Contrato» (reemplaza el wizard contrato-pago)
     Route::get('/inmuebles/{inmueble}/ver-contrato',

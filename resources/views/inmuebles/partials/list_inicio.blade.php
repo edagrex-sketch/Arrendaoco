@@ -115,7 +115,6 @@
                             </div>
                         </div>
 
-                        @auth
                             @if(Auth::id() === $inmueble->propietario_id)
                                 <a href="{{ route('inmuebles.show', $inmueble) }}"
                                     class="flex w-full py-4 items-center justify-center rounded-2xl bg-gradient-to-br from-[#003049] to-[#004e7a] text-sm font-black text-white transition-all hover:-translate-y-1 shadow-lg shadow-[#003049]/20 uppercase tracking-widest">
@@ -127,14 +126,6 @@
                                     Ver Detalles
                                 </a>
                             @endif
-                        @else
-                            <button onclick="window.location.href='{{ route('login') }}'"
-                                class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 text-xs font-black text-slate-400 transition-all hover:bg-slate-100 uppercase tracking-widest gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                                    <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
-                                </svg> Inicia Sesión para Ver
-                            </button>
-                        @endauth
                     </div>
                 </div>
             @empty

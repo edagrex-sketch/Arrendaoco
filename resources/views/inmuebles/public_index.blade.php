@@ -127,8 +127,77 @@
             @endguest
         </div>
     </section>
+    {{-- 2. MAPA DE EXPLORACIÓN (Invitados) --}}
+    <section class="container mx-auto px-4 mb-16" x-data="{ 
+        showHint: false,
+        init() {
+            setTimeout(() => {
+                this.showHint = true;
+                setTimeout(() => {
+                    this.showHint = false;
+                }, 12000);
+            }, 1500);
+        }
+    }">
+        <div class="relative w-fit">
+            {{-- Burbuja Flotante y Roco --}}
+            <div x-show="showHint"
+                 x-transition:enter="transition ease-out duration-700 transform"
+                 x-transition:enter-start="opacity-0 translate-y-8 scale-50"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="transition ease-in duration-500 transform"
+                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 scale-75"
+                 class="absolute z-20 flex items-end gap-2 pointer-events-none"
+                 style="bottom: 100%; left: 0; padding-bottom: 8px; display: none;">
+                 
+                 <!-- Roco Mascota (Izquierda) -->
+                 <div class="w-16 h-16 origin-bottom transform scale-x-[-1]">
+                     <lottie-player src="https://assets4.lottiefiles.com/packages/lf20_syqnfe7c.json"
+                         background="transparent" speed="1" loop autoplay renderer="svg" style="width: 100%; height: 100%;">
+                     </lottie-player>
+                 </div>
 
-    <section class="max-w-7xl mx-auto px-4 mb-20">
+                 <!-- Burbuja de Texto -->
+                 <div class="bg-[#FDF0D5] px-5 py-3 rounded-2xl shadow-xl relative animate-[bounce_2s_infinite]">
+                     <span class="text-[#003049] font-black text-sm tracking-wide">Puedes buscar en el mapa</span>
+                     <!-- Triangulito de la burbuja -->
+                     <div class="absolute -bottom-2 left-6 w-4 h-4 bg-[#FDF0D5] rotate-45 transform"></div>
+                 </div>
+            </div>
+
+            <div class="flex items-center mb-6 cursor-pointer group w-fit" onclick="Swal.fire({
+                icon: 'info',
+                title: '¡Inicia sesión!',
+                text: 'Para buscar y explorar propiedades directamente en el mapa interactivo, necesitas acceder a tu cuenta.',
+                confirmButtonText: 'Iniciar Sesión',
+                confirmButtonColor: '#003049',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    window.location.href = '{{ route('login') }}';
+                }
+            })">
+                <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-xl bg-brand-dark flex items-center justify-center text-white shadow-lg transition-transform duration-300 group-hover:scale-105" style="background-color: #003049;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-brand-dark tracking-tight transition-colors duration-300 group-hover:text-brand-light" style="color: #003049;">Explora el Mapa</h2>
+                    <div class="flex items-center gap-2">
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest hidden md:block transition-colors duration-300 group-hover:text-slate-500">Encuentra disponibilidad cerca de ti con vista satelital</p>
+                        
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-dark transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" style="color: #003049;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-4 mb-20 -mt-8">
         @if ($inmuebles->isEmpty())
             <div class="bg-white rounded-[3rem] p-20 text-center border border-slate-100 shadow-xl shadow-[#003049]/5 max-w-4xl mx-auto">
                 <div class="bg-slate-50 w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-8 text-[#003049] shadow-inner">
@@ -168,7 +237,7 @@
                         {{-- Imagen --}}
                         <div class="relative h-56 overflow-hidden">
                             @if ($inmueble->imagen)
-                                <img src="{{ $inmueble->imagen_url }}" alt="{{ $inmueble->titulo }}"
+                                <img src="{{ str_starts_with($inmueble->imagen, 'http') ? $inmueble->imagen : (str_contains($inmueble->imagen, 'storage/') ? asset($inmueble->imagen) : asset('storage/' . $inmueble->imagen)) }}" alt="{{ $inmueble->titulo }}"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                             @else
                                 <div class="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300">
@@ -186,7 +255,7 @@
                             @auth
                                 @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
                                 <div class="absolute top-4 left-4 z-10" x-data="{ 
-                                    isFavorited: {{ in_array($inmueble->id, $favoritosIds) ? 'true' : 'false' }},
+                                    isFavorited: {{ in_array($inmueble->id, $favoritosIds ?? []) ? 'true' : 'false' }},
                                     loading: false,
                                     toggle() {
                                         if (this.loading) return;
@@ -203,16 +272,31 @@
                                         .then(data => {
                                             if(data.success) {
                                                 this.isFavorited = data.agregado;
+                                                
+                                                // Toast de confirmación premium
+                                                 const Toast = Swal.mixin({
+                                                     toast: true,
+                                                     position: 'top-end',
+                                                     showConfirmButton: false,
+                                                     timer: 1500
+                                                 });
+
+                                                 Toast.fire({
+                                                     icon: 'success',
+                                                     title: data.agregado ? 'Agregado' : 'Eliminado'
+                                                 });
                                             }
                                         })
                                         .finally(() => this.loading = false);
                                     }
                                 }">
                                     <button @click.prevent="toggle()" 
-                                        class="h-9 w-9 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white transition-all hover:bg-white hover:text-red-500"
-                                        :class="isFavorited ? 'bg-white !text-red-500 shadow-sm' : ''">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :fill="isFavorited ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        class="h-10 w-10 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-lg transition-all hover:scale-110 active:scale-95 group/fav"
+                                        :class="isFavorited ? 'text-red-500' : 'text-slate-400'">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-all duration-300" 
+                                             :class="isFavorited ? 'fill-current' : 'fill-none'" 
+                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                         </svg>
                                     </button>
                                 </div>
@@ -233,30 +317,37 @@
                             </p>
 
                             <div class="flex items-center gap-4 py-4 border-t border-slate-100 mb-6">
-                                <div class="flex items-center gap-1.5 text-slate-600">
-                                    <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M22 13V19C22 19.5523 21.5523 20 21 20H3C2.44772 20 2 19.5523 2 19V13C2 11.3431 3.34315 10 5 10H19C20.6569 10 22 11.3431 22 13ZM19 12H5C4.44772 12 4 12.4477 4 13V15H20V13C20 12.4477 19.5523 12 19 12ZM20 6H4V9H20V6Z" />
+                                <div class="flex items-center gap-1.5 text-slate-500" title="Habitaciones">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 11v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path><path d="M5 16v2"></path><path d="M19 16v2"></path><path d="M5 11V7a2 2 0 012-2h10a2 2 0 012 2v4"></path><path d="M5 11h14"></path>
                                     </svg>
-                                    <span class="text-sm font-bold">{{ $inmueble->habitaciones }} <span class="text-[10px] uppercase font-medium text-slate-400">Hab</span></span>
+                                    <span class="text-base font-bold text-slate-700">{{ $inmueble->habitaciones }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Hab</span></span>
                                 </div>
-                                <div class="flex items-center gap-1.5 text-slate-600">
-                                    <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M19 11C19.5523 11 20 11.4477 20 12V14C20 15.6569 18.6569 17 17 17H7C5.34315 17 4 15.6569 4 14V12C4 11.4477 4.44772 11 5 11H19ZM16 4H8V10H16V4ZM18 18H6V20H18V18Z" />
+                                <div class="flex items-center gap-1.5 text-slate-500" title="Baños">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><line x1="10" x2="8" y1="5" y2="7"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="7" x2="7" y1="19" y2="21"/><line x1="17" x2="17" y1="19" y2="21"/>
                                     </svg>
-                                    <span class="text-sm font-bold">{{ $inmueble->banos }} <span class="text-[10px] uppercase font-medium text-slate-400">Baño</span></span>
+                                    <span class="text-base font-bold text-slate-700">{{ $inmueble->banos }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Baño</span></span>
                                 </div>
-                                <div class="flex items-center gap-1.5 text-slate-600">
-                                    <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7M17 3H19C20.1046 3 21 3.89543 21 5V7M21 17V19C21 20.1046 20.1046 21 19 21H17M7 21H5C3.89543 21 3 20.1046 3 19V17M9 9H15V15H9V9Z" />
+                                <div class="flex items-center gap-1.5 text-slate-500" title="Superficie">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/>
                                     </svg>
-                                    <span class="text-sm font-bold">{{ number_format($inmueble->metros, 0) }} <span class="text-[10px] uppercase font-medium text-slate-400">m²</span></span>
+                                    <span class="text-base font-bold text-slate-700">{{ number_format($inmueble->metros ?? 0, 0) }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">M²</span></span>
                                 </div>
                             </div>
 
-                            <a href="{{ route('inmuebles.show', $inmueble) }}"
-                                class="flex w-full py-3 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-[#003049] transition-all hover:bg-slate-200">
-                                Ver Detalles
-                            </a>
+                            @if(Auth::id() === $inmueble->propietario_id)
+                                <a href="{{ route('inmuebles.show', $inmueble) }}"
+                                    class="flex w-full py-4 items-center justify-center rounded-2xl bg-gradient-to-br from-[#003049] to-[#004e7a] text-sm font-black text-white transition-all hover:-translate-y-1 shadow-lg shadow-[#003049]/20 uppercase tracking-widest">
+                                    Gestionar Propiedad
+                                </a>
+                            @else
+                                <a href="{{ route('inmuebles.show', $inmueble) }}"
+                                    class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-100 text-sm font-black text-[#003049] transition-all hover:bg-slate-200 uppercase tracking-widest">
+                                    Ver Detalles
+                                </a>
+                            @endif
                         </div>
                     </div>
                 @endforeach

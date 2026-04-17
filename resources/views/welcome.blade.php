@@ -24,8 +24,7 @@
             <h2 class="mb-6 text-center text-3xl font-semibold text-card-foreground">
                 Encuentra tu próximo hogar en Ocosingo
             </h2>
-            @auth
-                <form id="form-busqueda" action="{{ route('inmuebles.public_search') }}" method="GET"
+            <form id="form-busqueda" action="{{ route('inmuebles.public_search') }}" method="GET"
                     class="flex flex-col gap-4 md:flex-row items-end">
                     <div class="relative flex-1 w-full">
                         <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Ubicación</label>
@@ -40,7 +39,7 @@
                             </svg>
                             <input type="text" name="ubicacion" value="{{ request('ubicacion') }}"
                                 placeholder="Ej: Centro, Las Margaritas..."
-                                class="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                class="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                         </div>
                     </div>
 
@@ -54,7 +53,7 @@
                                     d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <select name="rango_precio"
-                                class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-リング focus-visible:ring-offset-2">
+                                class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                                 <option value="">Cualquiera</option>
                                 <option value="0-2000" {{ request('rango_precio') == '0-2000' ? 'selected' : '' }}>$0 - $2,000
                                 </option>
@@ -96,143 +95,213 @@
                         Buscar
                     </button>
                 </form>
-            @else
-                <div class="relative group">
-                    <div
-                        class="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-20 rounded-xl flex items-center justify-center transition-all group-hover:bg-white/40">
-                        <a href="{{ route('login') }}"
-                            class="bg-[#003049] text-white px-8 py-4 rounded-xl font-black shadow-2xl hover:scale-105 transition-all uppercase tracking-widest text-xs flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            Inicia sesión para buscar
-                        </a>
-                    </div>
-                    <div class="flex flex-col gap-4 md:flex-row items-end opacity-40 grayscale pointer-events-none">
-                        <div class="relative flex-1 w-full">
-                            <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Ubicación</label>
-                            <div class="h-12 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm">
-                            </div>
-                        </div>
-                        <div class="relative w-full md:w-48">
-                            <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Precio</label>
-                            <div class="h-12 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm">
-                            </div>
-                        </div>
-                        <div class="relative w-full md:w-48">
-                            <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Categoría</label>
-                            <div class="h-12 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm">
-                            </div>
-                        </div>
-                        <div class="h-12 w-32 bg-primary rounded-md"></div>
-                    </div>
-                </div>
-            @endauth
         </div>
     </section>
 
-    {{-- 2. SECCIÓN DE PROPIEDADES --}}
-    <section class="container mx-auto px-4 mb-16" id="resultados-busqueda">
+    {{-- 2. MAPA DE EXPLORACIÓN (Invitados) --}}
+    <section class="container mx-auto px-4 mb-16" x-data="{ 
+        showHint: false,
+        init() {
+            setTimeout(() => {
+                this.showHint = true;
+                setTimeout(() => {
+                    this.showHint = false;
+                }, 12000);
+            }, 1500);
+        }
+    }">
+        <div class="relative w-fit">
+            {{-- Burbuja Flotante y Roco --}}
+            <div x-show="showHint"
+                 x-transition:enter="transition ease-out duration-700 transform"
+                 x-transition:enter-start="opacity-0 translate-y-8 scale-50"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="transition ease-in duration-500 transform"
+                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 scale-75"
+                 class="absolute z-20 flex items-end gap-2 pointer-events-none"
+                 style="bottom: 100%; left: 0; padding-bottom: 8px; display: none;">
+                 
+                 <!-- Roco Mascota (Izquierda) -->
+                 <div class="w-16 h-16 origin-bottom transform scale-x-[-1]">
+                     <lottie-player src="https://assets4.lottiefiles.com/packages/lf20_syqnfe7c.json"
+                         background="transparent" speed="1" loop autoplay renderer="svg" style="width: 100%; height: 100%;">
+                     </lottie-player>
+                 </div>
+
+                 <!-- Burbuja de Texto -->
+                 <div class="bg-[#FDF0D5] px-5 py-3 rounded-2xl shadow-xl relative animate-[bounce_2s_infinite]">
+                     <span class="text-[#003049] font-black text-sm tracking-wide">Puedes buscar en el mapa</span>
+                     <!-- Triangulito de la burbuja -->
+                     <div class="absolute -bottom-2 left-6 w-4 h-4 bg-[#FDF0D5] rotate-45 transform"></div>
+                 </div>
+            </div>
+
+            <div class="flex items-center mb-6 cursor-pointer group w-fit" onclick="Swal.fire({
+                icon: 'info',
+                title: '¡Inicia sesión!',
+                text: 'Para buscar y explorar propiedades directamente en el mapa interactivo, necesitas acceder a tu cuenta.',
+                confirmButtonText: 'Iniciar Sesión',
+                confirmButtonColor: '#003049',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    window.location.href = '{{ route('login') }}';
+                }
+            })">
+                <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-xl bg-brand-dark flex items-center justify-center text-white shadow-lg transition-transform duration-300 group-hover:scale-105" style="background-color: #003049;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-brand-dark tracking-tight transition-colors duration-300 group-hover:text-brand-light" style="color: #003049;">Explora el Mapa</h2>
+                    <div class="flex items-center gap-2">
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest hidden md:block transition-colors duration-300 group-hover:text-slate-500">Encuentra disponibilidad cerca de ti con vista satelital</p>
+                        
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-brand-dark transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" style="color: #003049;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- 3. SECCIÓN DE PROPIEDADES --}}
+    <section class="container mx-auto px-4 mb-16 -mt-8" id="resultados-busqueda">
         <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl font-bold text-foreground">Propiedades Disponibles</h2>
             <span class="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full">
-                @guest Mostrando primeros resultados (Invitado) @else {{ $inmuebles->total() }} resultados @endguest
+                {{ $inmuebles->total() }} resultados
             </span>
         </div>
 
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            @forelse ($inmuebles as $index => $inmueble)
-                @php $isLocked = auth()->guest() && $index >= 3; @endphp
-                <div class="group relative overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all hover:shadow-lg hover:-translate-y-1">
-                    <div class="relative h-52 w-full overflow-hidden bg-muted">
-                        <div class="w-full h-full {{ $isLocked ? 'blur-content' : '' }}">
-                            @if ($inmueble->imagen)
-                                <img src="{{ $inmueble->imagen_url }}" alt="{{ $inmueble->titulo }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                            @else
-                                <div class="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground bg-secondary/30">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    <span class="text-xs font-medium">Sin imagen</span>
-                                </div>
-                            @endif
-                        </div>
-                        @if($isLocked)
-                        <div class="card-lock-overlay">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 lock-icon-hover" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                        </div>
-                        @endif
-                        <div class="absolute top-3 right-3 bg-background/90 backdrop-blur-md px-3 py-1 rounded-full border border-border/50 shadow-sm">
-                            <span class="font-bold text-primary">${{ number_format($inmueble->renta_mensual ?? 0) }}</span>
-                            <span class="text-xs text-muted-foreground">/mes</span>
-                        </div>
-                    </div>
-                    <div class="p-5">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h3 class="font-semibold text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors">{{ $inmueble->titulo ?? 'Inmueble' }}</h3>
-                                <div class="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                    <span class="line-clamp-1">{{ $inmueble->direccion ?? 'Ocosingo, Chiapas' }}</span>
-                                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+            @forelse ($inmuebles as $inmueble)
+                <div class="group bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+                    {{-- Imagen --}}
+                    <div class="relative h-56 overflow-hidden">
+                        @if ($inmueble->imagen)
+                            <img src="{{ str_starts_with($inmueble->imagen, 'http') ? $inmueble->imagen : (str_contains($inmueble->imagen, 'storage/') ? asset($inmueble->imagen) : asset('storage/' . $inmueble->imagen)) }}" alt="{{ $inmueble->titulo }}"
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        @else
+                            <div class="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300">
+                                <span class="text-xs font-bold uppercase tracking-widest">Sin imagen</span>
                             </div>
+                        @endif
+
+                        {{-- Badge de Precio --}}
+                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-slate-100">
+                            <span class="font-bold text-[#003049]">${{ number_format($inmueble->renta_mensual ?? 0) }}</span>
+                            <span class="text-[10px] text-slate-500">/ mes</span>
                         </div>
-                        <div class="flex items-center gap-4 py-4 border-t border-slate-100 mt-4">
+
+                        {{-- Botón Favorito --}}
+                        @auth
+                            @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
+                            <div class="absolute top-4 left-4 z-10" x-data="{ 
+                                isFavorited: {{ in_array($inmueble->id, $favoritosIds ?? []) ? 'true' : 'false' }},
+                                loading: false,
+                                toggle() {
+                                    if (this.loading) return;
+                                    this.loading = true;
+                                    fetch('{{ route('favoritos.toggle', $inmueble) }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Accept': 'application/json',
+                                            'X-Requested-With': 'XMLHttpRequest'
+                                        }
+                                    })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if(data.success) {
+                                            this.isFavorited = data.agregado;
+                                            
+                                            // Toast de confirmación premium
+                                             const Toast = Swal.mixin({
+                                                 toast: true,
+                                                 position: 'top-end',
+                                                 showConfirmButton: false,
+                                                 timer: 1500
+                                             });
+
+                                             Toast.fire({
+                                                 icon: 'success',
+                                                 title: data.agregado ? 'Agregado' : 'Eliminado'
+                                             });
+                                        }
+                                    })
+                                    .finally(() => this.loading = false);
+                                }
+                            }">
+                                <button @click.prevent="toggle()" 
+                                    class="h-10 w-10 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-lg transition-all hover:scale-110 active:scale-95 group/fav"
+                                    :class="isFavorited ? 'text-red-500' : 'text-slate-400'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-all duration-300" 
+                                         :class="isFavorited ? 'fill-current' : 'fill-none'" 
+                                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            @endunless
+                        @endauth
+                    </div>
+
+                    {{-- Contenido --}}
+                    <div class="p-6">
+                        <h3 class="font-bold text-lg text-[#003049] line-clamp-1 mb-1">
+                            {{ $inmueble->titulo }}</h3>
+                        <p class="text-sm text-slate-400 flex items-center gap-1.5 mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {{ $inmueble->direccion }}
+                        </p>
+
+                        <div class="flex items-center gap-4 py-4 border-t border-slate-100 mb-6">
                             <div class="flex items-center gap-1.5 text-slate-500" title="Habitaciones">
-                                <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M22 13V19C22 19.5523 21.5523 20 21 20H3C2.44772 20 2 19.5523 2 19V13C2 11.3431 3.34315 10 5 10H19C20.6569 10 22 11.3431 22 13ZM19 12H5C4.44772 12 4 12.4477 4 13V15H20V13C20 12.4477 19.5523 12 19 12ZM20 6H4V9H20V6Z" />
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 11v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path><path d="M5 16v2"></path><path d="M19 16v2"></path><path d="M5 11V7a2 2 0 012-2h10a2 2 0 012 2v4"></path><path d="M5 11h14"></path>
                                 </svg>
-                                <span class="text-base font-bold text-slate-700">{{ $inmueble->habitaciones ?? 2 }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Hab</span></span>
+                                <span class="text-base font-bold text-slate-700">{{ $inmueble->habitaciones }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Hab</span></span>
                             </div>
                             <div class="flex items-center gap-1.5 text-slate-500" title="Baños">
-                                <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M19 11C19.5523 11 20 11.4477 20 12V14C20 15.6569 18.6569 17 17 17H7C5.34315 17 4 15.6569 4 14V12C4 11.4477 4.44772 11 5 11H19ZM16 4H8V10H16V4ZM18 18H6V20H18V18Z" />
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><line x1="10" x2="8" y1="5" y2="7"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="7" x2="7" y1="19" y2="21"/><line x1="17" x2="17" y1="19" y2="21"/>
                                 </svg>
-                                <span class="text-base font-bold text-slate-700">{{ $inmueble->banos ?? 1 }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Baño</span></span>
+                                <span class="text-base font-bold text-slate-700">{{ $inmueble->banos }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Baño</span></span>
                             </div>
                             <div class="flex items-center gap-1.5 text-slate-500" title="Superficie">
-                                <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7M17 3H19C20.1046 3 21 3.89543 21 5V7M21 17V19C21 20.1046 20.1046 21 19 21H17M7 21H5C3.89543 21 3 20.1046 3 19V17M9 9H15V15H9V9Z" />
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/>
                                 </svg>
                                 <span class="text-base font-bold text-slate-700">{{ number_format($inmueble->metros ?? 0, 0) }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">M²</span></span>
                             </div>
                         </div>
-                        @auth
-                            <a href="{{ route('inmuebles.show', $inmueble) }}" class="mt-4 flex w-full items-center justify-center rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                                Ver Detalles
-                            </a>
-                        @else
-                            <button type="button" onclick="window.location.href='{{ route('login') }}'" 
-                                class="mt-4 flex w-full items-center justify-center rounded-lg bg-slate-50 border border-dashed border-slate-200 px-4 py-2.5 text-xs font-black text-slate-400 hover:bg-slate-100 transition-all duration-300 cursor-pointer uppercase tracking-widest gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                                    <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
-                                </svg> Sesión para Ver
-                            </button>
-                        @endauth
+
+                            @if(Auth::id() === $inmueble->propietario_id)
+                                <a href="{{ route('inmuebles.show', $inmueble) }}"
+                                    class="flex w-full py-4 items-center justify-center rounded-2xl bg-gradient-to-br from-[#003049] to-[#004e7a] text-sm font-black text-white transition-all hover:-translate-y-1 shadow-lg shadow-[#003049]/20 uppercase tracking-widest">
+                                    Gestionar Propiedad
+                                </a>
+                            @else
+                                <a href="{{ route('inmuebles.show', $inmueble) }}"
+                                    class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-100 text-sm font-black text-[#003049] transition-all hover:bg-slate-200 uppercase tracking-widest">
+                                    Ver Detalles
+                                </a>
+                            @endif
                     </div>
                 </div>
             @empty
-                <div class="col-span-full py-16 text-center rounded-2xl border border-dashed border-border bg-card/50">
-                    <div class="mx-auto mb-4 h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-foreground">No se encontraron inmuebles</h3>
-                    <p class="text-muted-foreground mb-6 max-w-sm mx-auto">Intenta ajustar los filtros de búsqueda o sé el primero en publicar una propiedad.</p>
-                </div>
+                <div class="col-span-full py-16 text-center text-slate-400 font-medium uppercase tracking-widest opacity-50">No hay propiedades disponibles.</div>
             @endforelse
         </div>
         
-        @auth
         <div class="mt-12">{{ $inmuebles->links() }}</div>
-        @else
-            @if($inmuebles->count() >= 15)
-                <div class="mt-12 text-center bg-amber-50 p-6 rounded-lg border border-amber-200">
-                    <p class="text-amber-800 font-semibold mb-2">¿Quieres ver más inmuebles?</p>
-                    <p class="text-sm text-amber-700 mb-4">Regístrate para desbloquear la paginación completa y todos los filtros.</p>
-                    <a href="{{ route('registro') }}" class="inline-block bg-[#5D4037] text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-[#3E2723] transition-colors">Registrarse ahora</a>
-                </div>
-            @endif
-        @endauth
     </section>
 
     {{-- 3. CTA: Publicar Inmueble --}}
