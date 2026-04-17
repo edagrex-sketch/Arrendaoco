@@ -11,6 +11,7 @@ use App\Mail\RentaRespondidaMail;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\InmuebleController;
 use App\Http\Controllers\Admin\UsuarioController;
+use App\Http\Controllers\Admin\ContratoController as AdminContratoController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ArrenditoController;
 use App\Http\Controllers\ResenaController;
@@ -333,10 +334,17 @@ Route::middleware('auth')->group(function () {
 
     // Admin Usuarios
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+        Route::get('/', [UsuarioController::class, 'dashboard'])->name('dashboard');
         Route::get('usuarios/reporte', [UsuarioController::class, 'reporte'])->name('usuarios.reporte');
         Route::resource('usuarios', UsuarioController::class);
+        Route::get('inmuebles', [InmuebleController::class, 'adminIndex'])->name('inmuebles.index');
         Route::get('inmuebles/reporte', [InmuebleController::class, 'reporte'])->name('inmuebles.reporte');
+        
         Route::get('resenas', [ResenaController::class, 'index'])->name('resenas.index');
+        Route::get('resenas/reporte', [ResenaController::class, 'reporte'])->name('resenas.reporte');
+
+        Route::get('contratos', [AdminContratoController::class, 'index'])->name('contratos.index');
+        Route::get('contratos/reporte', [AdminContratoController::class, 'reporte'])->name('contratos.reporte');
     });
 
     Route::get(

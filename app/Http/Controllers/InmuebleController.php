@@ -16,68 +16,109 @@ class InmuebleController extends Controller
     public function index(Request $request)
     {
         $search  = $request->search;
-        $estatus = $request->estatus; // 'disponible' | 'rentado' | 'proceso' | null (todos)
 
+        // Admin users should use adminIndex() via /admin/inmuebles
         if (auth()->user()->es_admin || auth()->user()->tieneRol('admin')) {
-            $query = Inmueble::with('propietario');
-
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('titulo', 'like', "%$search%")
-                        ->orWhere('direccion', 'like', "%$search%")
-                        ->orWhere('tipo', 'like', "%$search%")
-                        ->orWhereHas('propietario', function ($sq) use ($search) {
-                            $sq->where('nombre', 'like', "%$search%")
-                                ->orWhere('email', 'like', "%$search%");
-                        });
-                });
-            }
-
-            $inmuebles = $query->paginate(10)->withQueryString();
-            return view('admin.inmuebles.index', compact('inmuebles'));
-        } else {
-            $query = Inmueble::with(['contratos' => function ($q) {
-                // Incluir 'pdf_descargado' para que el landlord vea quién descargó el PDF
-                $q->with('inquilino')->whereIn('estatus', ['pendiente_aprobacion', 'pdf_descargado', 'activo'])->latest();
-            }])->where('propietario_id', auth()->id());
-
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('titulo', 'like', "%$search%")
-                        ->orWhere('direccion', 'like', "%$search%")
-                        ->orWhere('tipo', 'like', "%$search%");
-                });
-            }
-
-            // Ordenamiento prioridad:
-            // 0: En proceso (pendiente_aprobacion o pdf_descargado)
-            // 1: Disponibles
-            // 2: Otros (Rentados, etc)
-            $query->orderByRaw("
-                CASE
-                    WHEN EXISTS (
-                        SELECT 1 FROM contratos
-                        WHERE contratos.inmueble_id = inmuebles.id
-                          AND contratos.estatus IN ('pendiente_aprobacion', 'pdf_descargado')
-                    ) THEN 0
-                    WHEN inmuebles.estatus = 'disponible' THEN 1
-                    ELSE 2
-                END ASC
-            ")->orderBy('created_at', 'desc');
-
-            $inmuebles = $query->paginate(12)->withQueryString();
-
-            return view('inmuebles.index', compact('inmuebles'));
+            return redirect()->route('admin.inmuebles.index');
         }
+
+        $query = Inmueble::with(['contratos' => function ($q) {
+            // Incluir 'pdf_descargado' para que el landlord vea quién descargó el PDF
+            $q->with('inquilino')->whereIn('estatus', ['pendiente_aprobacion', 'pdf_descargado', 'activo'])->latest();
+        }])->where('propietario_id', auth()->id());
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('titulo', 'like', "%$search%")
+                    ->orWhere('direccion', 'like', "%$search%")
+                    ->orWhere('tipo', 'like', "%$search%");
+            });
+        }
+
+        // Ordenamiento prioridad:
+        // 0: En proceso (pendiente_aprobacion o pdf_descargado)
+        // 1: Disponibles
+        // 2: Otros (Rentados, etc)
+        $query->orderByRaw("
+            CASE
+                WHEN EXISTS (
+                    SELECT 1 FROM contratos
+                    WHERE contratos.inmueble_id = inmuebles.id
+                      AND contratos.estatus IN ('pendiente_aprobacion', 'pdf_descargado')
+                ) THEN 0
+                WHEN inmuebles.estatus = 'disponible' THEN 1
+                ELSE 2
+            END ASC
+        ")->orderBy('created_at', 'desc');
+
+        $inmuebles = $query->paginate(12)->withQueryString();
+
+        return view('inmuebles.index', compact('inmuebles'));
     }
 
-    public function reporte()
+    public function adminIndex(Request $request)
     {
         if (!auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
             abort(403);
         }
 
-        $inmuebles = Inmueble::with('propietario')->get();
+        $query = Inmueble::with('propietario');
+        $this->applyAdminFilters($query, $request);
+
+        $inmuebles = $query->latest()->paginate(10)->withQueryString();
+        return view('admin.inmuebles.index', compact('inmuebles'));
+    }
+
+    private function applyAdminFilters($query, Request $request)
+    {
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('titulo', 'like', "%$search%")
+                    ->orWhere('direccion', 'like', "%$search%")
+                    ->orWhere('tipo', 'like', "%$search%")
+                    ->orWhereHas('propietario', function ($sq) use ($search) {
+                        $sq->where('nombre', 'like', "%$search%")
+                            ->orWhere('email', 'like', "%$search%");
+                    });
+            });
+        }
+
+        if ($request->filled('tipo')) {
+            $query->where('tipo', $request->tipo);
+        }
+
+        if ($request->filled('estatus')) {
+            $query->where('estatus', $request->estatus);
+        }
+
+        if ($request->filled('precio_min')) {
+            $query->where('renta_mensual', '>=', $request->precio_min);
+        }
+
+        if ($request->filled('precio_max')) {
+            $query->where('renta_mensual', '<=', $request->precio_max);
+        }
+
+        if ($request->filled('desde')) {
+            $query->whereDate('created_at', '>=', $request->desde);
+        }
+
+        if ($request->filled('hasta')) {
+            $query->whereDate('created_at', '<=', $request->hasta);
+        }
+    }
+
+    public function reporte(Request $request)
+    {
+        if (!auth()->user()->es_admin && !auth()->user()->tieneRol('admin')) {
+            abort(403);
+        }
+
+        $query = Inmueble::with('propietario');
+        $this->applyAdminFilters($query, $request);
+
+        $inmuebles = $query->get();
         $pdf = Pdf::loadView('admin.inmuebles.reporte', compact('inmuebles'));
         return $pdf->download('reporte_inmuebles.pdf');
     }
@@ -165,6 +206,11 @@ class InmuebleController extends Controller
     //cargar las ultimas 9 casas disponibles
     public function home()
     {
+        // Admin users get redirected to their dedicated dashboard
+        if (auth()->user()->es_admin || auth()->user()->tieneRol('admin')) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $inmuebles = Inmueble::where('estatus', 'disponible')->latest()->paginate(9);
         $inmueblesMapa = Inmueble::where('estatus', 'disponible')->get();
 

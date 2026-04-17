@@ -1,13 +1,15 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Editar Usuario - Admin')
+@section('page-title', 'Editar Usuario')
+@section('page-subtitle', 'Modifica la información del usuario seleccionado')
 
 @section('content')
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {{-- Navegación de migas de pan --}}
         <nav class="flex mb-8 text-sm font-medium text-muted-foreground" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a href="{{ route('inicio') }}" class="hover:text-primary transition-colors">Inicio</a></li>
+                <li><a href="{{ route('admin.dashboard') }}" class="hover:text-primary transition-colors">Inicio</a></li>
                 <li><span class="mx-2">/</span></li>
                 <li><a href="{{ route('admin.usuarios.index') }}" class="hover:text-primary transition-colors">Usuarios</a>
                 </li>
@@ -34,8 +36,7 @@
             <div class="bg-slate-50 border-b border-border p-8">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 class="text-3xl font-black text-[#003049] mb-2">Editar Usuario</h1>
-                        <p class="text-muted-foreground italic">Modifica la información de: <span
+                        <p class="text-muted-foreground italic text-lg font-medium">Modifica la información de: <span
                                 class="text-[#669BBC] font-bold">{{ $usuario->nombre }}</span></p>
                     </div>
                     <div class="flex items-center gap-2">

@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Propiedades — ArrendaOco</title>
+    <title>Reporte de Contratos — ArrendaOco</title>
     <style>
         body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10px; color: #333; margin: 0; padding: 20px; }
         .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #003049; padding-bottom: 15px; position: relative; }
@@ -16,11 +16,8 @@
         
         .price { font-weight: bold; color: #003049; }
         .status-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 8px; text-transform: uppercase; }
-        .status-disponible { background-color: #dcfce7; color: #16a34a; }
-        .status-rentado { background-color: #fef9c3; color: #a16207; }
         
-        .owner-info { font-size: 9px; }
-        .owner-email { color: #64748b; font-size: 8px; }
+        .date-range { font-size: 9px; color: #64748b; }
         
         .footer { position: fixed; bottom: 0; width: 100%; text-align: center; color: #94a3b8; font-size: 8px; padding: 15px 0; border-top: 1px solid #f1f5f9; }
         .page-number:after { content: counter(page); }
@@ -29,38 +26,35 @@
 <body>
     <div class="header">
         <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('logo1.png'))) }}" class="logo" alt="Logo">
-        <h1>Reporte de Inventario de Propiedades</h1>
+        <h1>Reporte Detallado de Contratos</h1>
         <p>Sistema ArrendaOco — Generado el: {{ date('d/m/Y') }}</p>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th width="30%">Título de la Propiedad</th>
-                <th width="10%">Tipo</th>
-                <th width="15%">Precio Renta</th>
-                <th width="25%">Propietario</th>
-                <th width="10%">Estatus</th>
-                <th width="10%">Publicación</th>
+                <th width="20%">Propiedad</th>
+                <th width="20%">Propietario</th>
+                <th width="20%">Inquilino</th>
+                <th width="15%">Vigencia</th>
+                <th width="10%">Monto Renta</th>
+                <th width="15%">Estatus</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($inmuebles as $inmueble)
+            @foreach($contratos as $contrato)
             <tr>
-                <td style="font-weight: bold;">{{ $inmueble->titulo }}</td>
-                <td>{{ ucfirst($inmueble->tipo) }}</td>
-                <td class="price">${{ number_format($inmueble->renta_mensual, 2) }}</td>
-                <td>
-                    <div class="owner-info">{{ $inmueble->propietario->nombre ?? 'N/A' }}</div>
-                    <div class="owner-email">{{ $inmueble->propietario->email ?? '' }}</div>
+                <td style="font-weight: bold;">{{ $contrato->inmueble->titulo }}</td>
+                <td>{{ $contrato->propietario->nombre }}</td>
+                <td>{{ $contrato->inquilino->nombre }}</td>
+                <td class="date-range">
+                    {{ $contrato->fecha_inicio->format('d/m/Y') }}<br>al {{ $contrato->fecha_fin->format('d/m/Y') }}
                 </td>
+                <td class="price">${{ number_format($contrato->renta_mensual, 2) }}</td>
                 <td>
-                    <span class="status-badge status-{{ $inmueble->estatus }}">
-                        {{ ucfirst($inmueble->estatus) }}
+                    <span class="status-badge">
+                        {{ str_replace('_', ' ', ucfirst($contrato->estatus)) }}
                     </span>
-                </td>
-                <td style="color: #64748b;">
-                    {{ $inmueble->created_at->format('d/m/Y') }}
                 </td>
             </tr>
             @endforeach

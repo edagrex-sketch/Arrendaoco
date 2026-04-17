@@ -12,10 +12,50 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class UsuarioController extends Controller
 {
+    public function dashboard()
+    {
+        $totalUsuarios = Usuario::count();
+        $usuariosActivos = Usuario::where('estatus', 'activo')->count();
+        $usuariosInactivos = Usuario::where('estatus', 'inactivo')->count();
+
+        $totalInmuebles = \App\Models\Inmueble::count();
+        $inmueblesDisponibles = \App\Models\Inmueble::where('estatus', 'disponible')->count();
+        $inmueblesRentados = \App\Models\Inmueble::where('estatus', 'rentado')->count();
+
+        $contratosActivos = \App\Models\Contrato::where('estatus', 'activo')->count();
+        $contratosPendientes = \App\Models\Contrato::whereIn('estatus', ['pendiente_aprobacion', 'pdf_descargado'])->count();
+
+        $totalResenas = \App\Models\Resena::count();
+        $promedioCalificacion = \App\Models\Resena::avg('puntuacion') ?? 0;
+
+        $ultimosUsuarios = Usuario::with('roles')->latest()->take(5)->get();
+
+        $rolesDistribucion = Role::withCount(['usuarios as users_count'])->get();
+
+        return view('admin.dashboard', compact(
+            'totalUsuarios', 'usuariosActivos', 'usuariosInactivos',
+            'totalInmuebles', 'inmueblesDisponibles', 'inmueblesRentados',
+            'contratosActivos', 'contratosPendientes',
+            'totalResenas', 'promedioCalificacion',
+            'ultimosUsuarios', 'rolesDistribucion'
+        ));
+    }
+
+
     public function index(Request $request)
     {
         $query = Usuario::with('roles');
 
+        $this->applyFilters($query, $request);
+
+        $usuarios = $query->latest()->paginate(10)->withQueryString();
+        $roles = \App\Models\Role::all();
+
+        return view('admin.usuarios.index', compact('usuarios', 'roles'));
+    }
+
+    private function applyFilters($query, Request $request)
+    {
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -24,8 +64,23 @@ class UsuarioController extends Controller
             });
         }
 
-        $usuarios = $query->paginate(10)->withQueryString();
-        return view('admin.usuarios.index', compact('usuarios'));
+        if ($request->filled('rol')) {
+            $query->whereHas('roles', function($q) use ($request) {
+                $q->where('nombre', $request->rol);
+            });
+        }
+
+        if ($request->filled('estatus')) {
+            $query->where('estatus', $request->estatus);
+        }
+
+        if ($request->filled('desde')) {
+            $query->whereDate('created_at', '>=', $request->desde);
+        }
+
+        if ($request->filled('hasta')) {
+            $query->whereDate('created_at', '<=', $request->hasta);
+        }
     }
 
     public function create()
@@ -253,9 +308,13 @@ class UsuarioController extends Controller
         return redirect()->route('admin.usuarios.index')->with('success', 'Usuario "' . $usuario->nombre . '" ' . $texto . ' correctamente.');
     }
 
-    public function reporte()
+    public function reporte(Request $request)
     {
-        $usuarios = Usuario::with('roles')->get();
+        $query = Usuario::with('roles');
+
+        $this->applyFilters($query, $request);
+
+        $usuarios = $query->get();
         $pdf = Pdf::loadView('admin.usuarios.reporte', compact('usuarios'));
         return $pdf->download('reporte_usuarios.pdf');
     }
