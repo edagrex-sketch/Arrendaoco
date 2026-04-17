@@ -471,35 +471,25 @@
 
             {{-- Leaflet y Scripts de Mapa --}}
             <div x-data="{ showMap: false }" class="mt-12">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="h-12 w-12 rounded-xl bg-[#003049] flex items-center justify-center text-white shadow-xl shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                <div class="flex items-center mb-6 cursor-pointer group w-fit" @click="showMap = !showMap; if(showMap) setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 300)">
+                    <div class="flex items-center gap-3 sm:gap-4">
+                        <div class="h-12 w-12 rounded-xl bg-[#003049] flex items-center justify-center text-white shadow-xl shrink-0 transition-transform duration-300 group-hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-black text-[#003049] tracking-tight">Explora el Mapa</h3>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Encuentra
-                                disponibilidad cerca de ti con vista satelital</p>
+                            <h3 class="text-xl font-black text-[#003049] tracking-tight transition-colors duration-300 group-hover:text-[#669BBC]">Explora el Mapa</h3>
+                            <div class="flex items-center gap-2">
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 transition-colors duration-300 group-hover:text-slate-500 line-clamp-1 sm:line-clamp-none">Encuentra disponibilidad cerca de ti con vista satelital</p>
+                                
+                                <svg :class="{'rotate-180': showMap}" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#003049] transition-transform duration-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
                         </div>
                     </div>
-                    <button
-                        @click="showMap = !showMap; if(showMap) setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 300)"
-                        class="flex items-center gap-2 px-5 py-2.5 bg-amber-50 text-[#003049] font-bold text-xs rounded-xl hover:bg-amber-100 transition border border-amber-200/50 shadow-sm whitespace-nowrap self-start sm:self-auto">
-                        <span x-text="showMap ? 'Contraer Mapa' : 'Ver en el Mapa'"></span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-300"
-                            :class="showMap ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
                 </div>
 
                 <div x-show="showMap" x-transition x-cloak>
