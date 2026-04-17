@@ -101,10 +101,30 @@
                             <span class="line-clamp-1">{{ $inmueble->direccion }}</span>
                         </p>
 
-                        <div class="flex items-center justify-between py-4 border-t border-slate-50">
+                        <div class="flex items-center justify-between py-4 border-t border-b border-slate-50 mb-2">
                             <div class="text-2xl font-black text-[#003049]">
                                 ${{ number_format($inmueble->renta_mensual) }}
                                 <span class="text-xs font-medium text-gray-400 lowercase">/mes</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-1 group/feat" title="Habitaciones">
+                                    <svg class="w-4 h-4 text-[#003049]/40" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M22 13V19C22 19.5523 21.5523 20 21 20H3C2.44772 20 2 19.5523 2 19V13C2 11.3431 3.34315 10 5 10H19C20.6569 10 22 11.3431 22 13ZM19 12H5C4.44772 12 4 12.4477 4 13V15H20V13C20 12.4477 19.5523 12 19 12ZM20 6H4V9H20V6Z" />
+                                    </svg>
+                                    <span class="text-sm font-black text-slate-700">{{ $inmueble->habitaciones }}</span>
+                                </div>
+                                <div class="flex items-center gap-1 group/feat" title="Baños">
+                                    <svg class="w-4 h-4 text-[#003049]/40" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M19 11C19.5523 11 20 11.4477 20 12V14C20 15.6569 18.6569 17 17 17H7C5.34315 17 4 15.6569 4 14V12C4 11.4477 4.44772 11 5 11H19ZM16 4H8V10H16V4ZM18 18H6V20H18V18Z" />
+                                    </svg>
+                                    <span class="text-sm font-black text-slate-700">{{ $inmueble->banos }}</span>
+                                </div>
+                                <div class="flex items-center gap-1 group/feat" title="Metros">
+                                    <svg class="w-4 h-4 text-[#003049]/40" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7M17 3H19C20.1046 3 21 3.89543 21 5V7M21 17V19C21 20.1046 20.1046 21 19 21H17M7 21H5C3.89543 21 3 20.1046 3 19V17M9 9H15V15H9V9Z" />
+                                    </svg>
+                                    <span class="text-sm font-black text-slate-700">{{ number_format($inmueble->metros, 0) }}</span>
+                                </div>
                             </div>
                         </div>
 

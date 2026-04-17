@@ -3,7 +3,7 @@
 @section('title', $inmueble->titulo)
 
 @section('content')
-    <div class="max-w-4xl mx-auto px-4 py-8 lg:py-12" x-data="{ 
+    <div class="max-w-7xl mx-auto px-4 py-8 lg:py-12" x-data="{ 
                         active: 0, 
                         showFullscreen: false,
                         images: [
@@ -60,7 +60,7 @@
 
                 {{-- Tira de Miniaturas Estilizada --}}
                 <div
-                    class="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-4xl flex gap-4 px-8 py-5 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 overflow-x-auto no-scrollbar scroll-smooth">
+                    class="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-7xl flex gap-4 px-8 py-5 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 overflow-x-auto no-scrollbar scroll-smooth">
                     <template x-for="(img, index) in images" :key="index">
                         <button @click="active = index"
                             class="h-20 w-32 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300"
@@ -74,8 +74,8 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-4">
             {{-- Left Box: Image Gallery --}}
-            <div class="lg:col-span-5 bg-white rounded-3xl p-3 shadow-sm border border-slate-200 flex flex-col">
-                <div class="relative group w-full flex-1 min-h-[400px] lg:min-h-[500px] rounded-2xl grid gap-2 overflow-hidden"
+            <div class="lg:col-span-5 bg-white rounded-3xl p-4 shadow-sm border border-slate-200 flex flex-col">
+                <div class="relative group w-full flex-1 min-h-[450px] lg:min-h-[600px] rounded-2xl grid gap-2 overflow-hidden"
                     :class="images.length >= 4 ? 'grid-cols-2 grid-rows-4' : (images.length >= 2 ? 'grid-cols-2 grid-rows-3' : 'grid-cols-2 grid-rows-2')">
 
                     {{-- Grid 5 posiciones --}}
@@ -120,230 +120,172 @@
                 <div>
                     <h1 class="text-3xl lg:text-4xl font-semibold text-slate-800 mb-6">{{ $inmueble->titulo }}</h1>
 
-                    <div class="mb-6">
-                        <h3 class="text-lg font-bold text-slate-700 mb-2">Descripción</h3>
-                        <p class="text-[12px] font-semibold text-slate-500 leading-relaxed">
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-slate-700 mb-3 underline decoration-brand-light/30 decoration-4 underline-offset-8">Descripción</h3>
+                        <p class="text-sm md:text-base font-medium text-slate-600 leading-relaxed text-justify">
                             {{ $inmueble->descripcion ?? 'Sin descripción proporcionada.' }}
                         </p>
                     </div>
 
-                    <div class="mb-8">
-                        <h3 class="text-lg font-bold text-slate-700 mb-2">Dirección</h3>
-                        <p class="text-[12px] font-semibold text-slate-500 leading-relaxed">{{ $inmueble->direccion }}</p>
+                    <div class="mb-10">
+                        <h3 class="text-xl font-bold text-slate-700 mb-3 underline decoration-brand-light/30 decoration-4 underline-offset-8">Dirección</h3>
+                        <p class="text-sm md:text-base font-medium text-slate-600 leading-relaxed">{{ $inmueble->direccion }}</p>
                     </div>
-
-                    <div class="grid grid-cols-3 gap-6 mb-8">
-                        {{-- Habitaciones -> Servicios --}}
-                        <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3">Servicios</h4>
-                            <ul class="space-y-3">
-                                <li class="flex flex-col text-sm font-bold text-slate-600">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                            stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        {{ $inmueble->habitaciones }} <span class="ml-1">Hab.</span>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-
-                        {{-- Baños -> Áreas --}}
-                        <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3">Áreas</h4>
-                            <ul class="space-y-3">
-                                <li class="flex flex-col text-sm font-bold text-slate-600">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        <span>
-                                            @if($inmueble->banos == 0 && ($inmueble->medios_banos ?? 0) > 0)
-                                                @if($inmueble->medios_banos == 1)
-                                                    Medio Baño
-                                                @else
-                                                    {{ $inmueble->medios_banos }} Medios Baños
-                                                @endif
-                                            @elseif($inmueble->banos == 1)
-                                                1 Baño Completo
-                                            @elseif($inmueble->banos > 1)
-                                                {{ $inmueble->banos }} Baños Completos
-                                            @else
-                                                Sin Baño
-                                            @endif
-                                        </span>
-                                    </div>
-                                    @if($inmueble->tipo == 'Cuarto')
-                                        <span class="text-[10px] text-slate-400 mt-1 ml-7 whitespace-nowrap">
-                                            {{ $inmueble->bano_compartido ? '* Compartido' : '* No compartido' }}
-                                        </span>
-                                    @endif
-                                    @if($inmueble->banos > 0 && ($inmueble->medios_banos ?? 0) > 0)
-                                        <span class="text-[10px] text-slate-400 mt-1 ml-7 whitespace-nowrap">
-                                            y {{ $inmueble->medios_banos }} Medio Baño
-                                        </span>
-                                    @endif
-                                </li>
-                            </ul>
+                    {{-- Nuevo Diseño: Gallery Dashboard --}}
+                    <div class="mt-8 mb-12">
+                        {{-- BLOQUE 1: Estadísticas de Impacto (Upper Header) --}}
+                        <div class="grid grid-cols-3 gap-0 mb-12 rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm">
+                            <div class="p-8 bg-white flex flex-col items-center justify-center text-center border-r border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Habitaciones</span>
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-8 h-8 text-[#003049]" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M22 13V19C22 19.5523 21.5523 20 21 20H3C2.44772 20 2 19.5523 2 19V13C2 11.3431 3.34315 10 5 10H19C20.6569 10 22 11.3431 22 13ZM19 12H5C4.44772 12 4 12.4477 4 13V15H20V13C20 12.4477 19.5523 12 19 12ZM20 6H4V9H20V6Z" />
+                                    </svg>
+                                    <span class="text-3xl font-black text-[#003049]">{{ $inmueble->habitaciones }}</span>
+                                </div>
+                                <span class="text-[11px] font-bold text-slate-500 mt-2">Dormitorios</span>
+                            </div>
+                            <div class="p-8 bg-white flex flex-col items-center justify-center text-center border-r border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Servicios Sanitarios</span>
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-8 h-8 text-[#003049]" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M19 11C19.5523 11 20 11.4477 20 12V14C20 15.6569 18.6569 17 17 17H7C5.34315 17 4 15.6569 4 14V12C4 11.4477 4.44772 11 5 11H19ZM16 4H8V10H16V4ZM18 18H6V20H18V18Z" />
+                                    </svg>
+                                    <span class="text-3xl font-black text-[#003049]">{{ $inmueble->banos + ($inmueble->medios_banos * 0.5) }}</span>
+                                </div>
+                                <span class="text-[11px] font-bold text-slate-500 mt-2">Baños Totales</span>
+                            </div>
+                            <div class="p-8 bg-white flex flex-col items-center justify-center text-center hover:bg-slate-50/50 transition-colors">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Dimensión Total</span>
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-7 h-7 text-[#003049]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7M17 3H19C20.1046 3 21 3.89543 21 5V7M21 17V19C21 20.1046 20.1046 21 19 21H17M7 21H5C3.89543 21 3 20.1046 3 19V17M9 9H15V15H9V9Z" />
+                                    </svg>
+                                    <span class="text-3xl font-black text-[#003049]">{{ number_format($inmueble->metros, 0) }}</span>
+                                </div>
+                                <span class="text-[11px] font-bold text-slate-500 mt-2">Metros Cuadrados</span>
+                            </div>
                         </div>
 
-                        {{-- Superficie -> Medidas --}}
-                        <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3">Medidas</h4>
-                            <ul class="space-y-3">
-                                <li class="flex flex-col text-sm font-bold text-slate-600">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        {{ number_format($inmueble->metros, 0) }}m²
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                        {{-- BLOQUE 2: Cuadrícula de Detalles Operativos --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-4 mb-12">
+                            {{-- Mobiliario --}}
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 shrink-0 rounded-2xl bg-[#003049]/5 flex items-center justify-center text-[#003049]">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 18V20M20 18V20M19 18V9C19 7.89543 18.1046 7 17 7H7C5.89543 7 5 7.89543 5 9V18M4 18H20M9 11V14M15 11V14" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Mobiliario</h4>
+                                    <p class="text-base font-bold text-slate-700 capitalize">{{ $inmueble->estado_mobiliario ?? 'No especificado' }}</p>
+                                </div>
+                            </div>
 
-                    {{-- Detalles Extendidos Nuevos --}}
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8 pt-6 border-t border-slate-100">
-                        <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3 block">Mobiliario</h4>
-                            <ul class="space-y-3">
-                                <li class="flex items-center text-sm font-bold text-slate-600 capitalize">
-                                    <svg class="w-5 h-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $inmueble->estado_mobiliario !== 'no amueblada' ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12' }}" />
+                            {{-- Estacionamiento --}}
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 shrink-0 rounded-2xl bg-[#003049]/5 flex items-center justify-center text-[#003049]">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path d="M7 11.5V14.5M10 11.5V14.5M14 11.5V14.5M17 11.5V14.5M5 18H19M5 7H19C20.1046 7 21 7.89543 21 9V18H3V9C3 7.89543 3.89543 7 5 7Z" />
                                     </svg>
-                                    {{ $inmueble->estado_mobiliario ?? 'No especificado' }}
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3 block">Estacionamiento</h4>
-                            <ul class="space-y-3">
-                                <li class="flex items-center text-sm font-bold text-slate-600">
-                                    <svg class="w-5 h-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $inmueble->tiene_estacionamiento ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12' }}" />
-                                    </svg>
-                                    {{ $inmueble->tiene_estacionamiento ? 'Sí' : 'No' }}
-                                </li>
-                            </ul>
-                        </div>
-                        @if($inmueble->tipo === 'Cuarto')
-                        <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3 block">Cerradura</h4>
-                            <ul class="space-y-3">
-                                <li class="flex items-center text-sm font-bold text-slate-600">
-                                    <svg class="w-5 h-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $inmueble->tiene_cerradura_propia ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12' }}" />
-                                    </svg>
-                                    {{ $inmueble->tiene_cerradura_propia ? 'Propia' : 'No' }}
-                                </li>
-                            </ul>
-                        </div>
-                        @endif
-                        <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3 block">Renta</h4>
-                            <ul class="space-y-3">
-                                <li class="flex items-center text-sm font-bold text-slate-600 capitalize">
-                                    <svg class="w-5 h-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Pago {{ $inmueble->momento_pago ?? 'Adelantado' }}
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3 block">Tolerancia</h4>
-                            <ul class="space-y-3">
-                                <li class="flex items-center text-sm font-bold text-slate-600">
-                                    <svg class="w-5 h-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    {{ $inmueble->dias_tolerancia ?? 0 }} días
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3 block">Preaviso</h4>
-                            <ul class="space-y-3">
-                                <li class="flex items-center text-sm font-bold text-slate-600">
-                                    <svg class="w-5 h-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    {{ $inmueble->dias_preaviso ?? 30 }} días
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Estacionamiento</h4>
+                                    <p class="text-base font-bold text-slate-700">{{ $inmueble->tiene_estacionamiento ? 'Cochera Incluida' : 'No disponible' }}</p>
+                                </div>
+                            </div>
 
-                    {{-- MASCOTAS y ZONAS COMUNES --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 pt-6 border-t border-slate-100">
-                        {{-- Mascotas --}}
-                        <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3 block">
-                                Mascotas
-                            </h4>
-                            <ul class="space-y-3">
-                                <li class="flex flex-col text-sm font-bold text-slate-600">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 mr-2 shrink-0 {{ $inmueble->permite_mascotas ? 'text-slate-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $inmueble->permite_mascotas ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12' }}" />
-                                        </svg>
-                                        <span>
-                                        @if($inmueble->permite_mascotas && $inmueble->mascotas->isNotEmpty())
-                                            Permitidas ciertas especies
-                                        @elseif($inmueble->permite_mascotas)
-                                            Permitidas
-                                        @else
-                                            No permitidas
-                                        @endif
-                                        </span>
-                                    </div>
-                                    @if($inmueble->permite_mascotas && $inmueble->mascotas->isNotEmpty())
-                                    <div class="mt-2 ml-7 flex flex-wrap gap-2">
-                                        @foreach($inmueble->mascotas as $mascota)
-                                            <span class="bg-slate-100/80 text-[#003049] px-2.5 py-1.5 rounded-md text-[11px] uppercase tracking-wider font-extrabold border border-slate-200">{{ $mascota->nombre }}</span>
-                                        @endforeach
-                                    </div>
-                                    @endif
-                                </li>
-                            </ul>
+                            {{-- Renta --}}
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 shrink-0 rounded-2xl bg-[#003049]/5 flex items-center justify-center text-[#003049]">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path d="M17 9V7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7V9M5 9H19C20.1046 9 21 9.89543 21 11V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V11C3 9.89543 3.89543 9 5 9ZM12 14V16" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Esquema Renta</h4>
+                                    <p class="text-base font-bold text-slate-700 capitalize">Pago {{ $inmueble->momento_pago ?? 'Adelantado' }}</p>
+                                </div>
+                            </div>
+
+                            {{-- Mascotas --}}
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 shrink-0 rounded-2xl bg-[#003049]/5 flex items-center justify-center text-[#003049]">
+                                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 14c-2.209 0-4 1.791-4 4s1.791 4 4 4 4-1.791 4-4-1.791-4-4-4zm-5-3c-1.105 0-2 .895-2 2s.895 2 2 2 2-.895 2-2-.895-2-2-2zm10 0c-1.105 0-2 .895-2 2s.895 2 2 2 2-.895 2-2-.895-2-2-2zm-5-3c-1.105 0-2 .895-2 2s.895 2 2 2 2-.895 2-2-.895-2-2-2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Mascotas</h4>
+                                    <p class="text-base font-bold text-slate-700">{{ $inmueble->permite_mascotas ? 'Permitidas' : 'No permitidas' }}</p>
+                                </div>
+                            </div>
+
+                            {{-- Tolerancia --}}
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 shrink-0 rounded-2xl bg-[#003049]/5 flex items-center justify-center text-[#003049]">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Días de Tolerancia</h4>
+                                    <p class="text-base font-bold text-slate-700">{{ $inmueble->dias_tolerancia ?? 0 }} Días hábiles</p>
+                                </div>
+                            </div>
+
+                            {{-- Preaviso --}}
+                            <div class="flex items-start gap-4">
+                                <div class="w-12 h-12 shrink-0 rounded-2xl bg-[#003049]/5 flex items-center justify-center text-[#003049]">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Días de Preaviso</h4>
+                                    <p class="text-base font-bold text-slate-700">{{ $inmueble->dias_preaviso ?? 30 }} Días naturales</p>
+                                </div>
+                            </div>
                         </div>
 
-                        {{-- Zonas Comunes --}}
-                        @if($inmueble->tipo === 'Cuarto' && $inmueble->zonasComunes->isNotEmpty())
-                        <div>
-                            <h4 class="text-base font-bold text-slate-700 mb-3 block">
-                                Zonas Comunes
-                            </h4>
-                            <ul class="space-y-3">
-                                <li class="flex flex-col text-sm font-bold text-slate-600">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        <span>Áreas accesibles:</span>
-                                    </div>
-                                    <div class="mt-2 ml-7 flex flex-wrap gap-2">
-                                        @foreach($inmueble->zonasComunes as $zona)
-                                            <span class="bg-slate-100/80 text-[#003049] px-2.5 py-1.5 rounded-md text-[11px] uppercase tracking-wider font-extrabold border border-slate-200">{{ $zona->nombre }}</span>
-                                        @endforeach
-                                    </div>
-                                </li>
-                            </ul>
+                        {{-- BLOQUE 3: Tags Detallados (Si existen) --}}
+                        @if(($inmueble->permite_mascotas && $inmueble->mascotas->isNotEmpty()) || ($inmueble->tipo === 'Cuarto' && $inmueble->zonasComunes->isNotEmpty()))
+                        <div class="bg-slate-50 rounded-[1.5rem] p-8 mt-10 border border-slate-100/50 flex flex-col gap-6">
+                            @if($inmueble->permite_mascotas && $inmueble->mascotas->isNotEmpty())
+                            <div class="flex items-center gap-6">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0 w-32">Especies OK</span>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach($inmueble->mascotas as $m)
+                                        <span class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-[#003049] text-[10px] font-black uppercase tracking-wider">{{ $m->nombre }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
+
+                            @if($inmueble->tipo === 'Cuarto' && $inmueble->zonasComunes->isNotEmpty())
+                            <div class="flex items-center gap-6">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0 w-32">Áreas Comunes</span>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach($inmueble->zonasComunes as $z)
+                                        <span class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-[#003049] text-[10px] font-black uppercase tracking-wider">{{ $z->nombre }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
                         </div>
                         @endif
                     </div>
+
+
+
 
                     {{-- Matriz de Servicios Relacional --}}
                     @if($inmueble->servicios && $inmueble->servicios->isNotEmpty())
-                    <div class="mb-8 pt-6 border-t border-slate-100">
-                        <h4 class="text-base font-bold text-slate-700 mb-3 block">
+                    <div class="mb-8 pt-8 border-t border-slate-100">
+                        <h4 class="text-xl font-bold text-slate-700 mb-5 block">
                             Servicios del Inmueble
                         </h4>
-                        <ul class="space-y-3 grid md:grid-cols-2 gap-x-6 gap-y-1">
+                        <ul class="space-y-4 grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
                             @foreach($inmueble->servicios as $pivot)
                                 @php
                                     $pago = $pivot->paga;

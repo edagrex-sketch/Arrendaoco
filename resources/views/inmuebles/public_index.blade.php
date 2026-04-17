@@ -234,20 +234,20 @@
 
                             <div class="flex items-center gap-4 py-4 border-t border-slate-100 mb-6">
                                 <div class="flex items-center gap-1.5 text-slate-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 11V9a3 3 0 013-3h10a3 3 0 013 3v2M4 11H2a1 1 0 00-1 1v3a2 2 0 002 2h1M20 11h2a1 1 0 011 1v3a2 2 0 01-2 2h-1M4 11h16v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM8 17v2M16 17v2" />
+                                    <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M22 13V19C22 19.5523 21.5523 20 21 20H3C2.44772 20 2 19.5523 2 19V13C2 11.3431 3.34315 10 5 10H19C20.6569 10 22 11.3431 22 13ZM19 12H5C4.44772 12 4 12.4477 4 13V15H20V13C20 12.4477 19.5523 12 19 12ZM20 6H4V9H20V6Z" />
                                     </svg>
                                     <span class="text-sm font-bold">{{ $inmueble->habitaciones }} <span class="text-[10px] uppercase font-medium text-slate-400">Hab</span></span>
                                 </div>
                                 <div class="flex items-center gap-1.5 text-slate-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18v3a4 4 0 01-4 4H7a4 4 0 01-4-4v-3zM3 12h18M21 12v-1a2 2 0 00-2-2h-3M7 12V7a3 3 0 013-3h2M12 2v4M14 3l-2 2M10 3l2 2M6 19v2M18 19v2" />
+                                    <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M19 11C19.5523 11 20 11.4477 20 12V14C20 15.6569 18.6569 17 17 17H7C5.34315 17 4 15.6569 4 14V12C4 11.4477 4.44772 11 5 11H19ZM16 4H8V10H16V4ZM18 18H6V20H18V18Z" />
                                     </svg>
                                     <span class="text-sm font-bold">{{ $inmueble->banos }} <span class="text-[10px] uppercase font-medium text-slate-400">Baño</span></span>
                                 </div>
                                 <div class="flex items-center gap-1.5 text-slate-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                    <svg class="w-4 h-4 text-[#003049]/60" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 7V5C3 3.89543 3.89543 3 5 3H7M17 3H19C20.1046 3 21 3.89543 21 5V7M21 17V19C21 20.1046 20.1046 21 19 21H17M7 21H5C3.89543 21 3 20.1046 3 19V17M9 9H15V15H9V9Z" />
                                     </svg>
                                     <span class="text-sm font-bold">{{ number_format($inmueble->metros, 0) }} <span class="text-[10px] uppercase font-medium text-slate-400">m²</span></span>
                                 </div>
