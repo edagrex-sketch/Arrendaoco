@@ -476,16 +476,15 @@ class InmuebleController extends Controller
 
         $request->validate([
             'nombre' => 'required|string|max:255',
-            'tipo' => 'required|string',
             'precio' => [
                 'required',
                 'numeric',
                 'min:0',
-                function ($attribute, $value, $fail) use ($request) {
-                    if ($request->tipo === 'Cuarto' && $value < 300) {
+                function ($attribute, $value, $fail) use ($inmueble) {
+                    if ($inmueble->tipo === 'Cuarto' && $value < 300) {
                         $fail('La renta mínima para cuartos es de $300.');
                     }
-                    if (in_array($request->tipo, ['Departamento', 'Casa']) && $value < 500) {
+                    if (in_array($inmueble->tipo, ['Departamento', 'Casa']) && $value < 500) {
                         $fail('La renta mínima para este tipo de propiedad es de $500.');
                     }
                 },
@@ -494,55 +493,55 @@ class InmuebleController extends Controller
                 'nullable',
                 'numeric',
                 'min:0',
-                function ($attribute, $value, $fail) use ($request) {
-                    if ($request->tipo === 'Cuarto' && $value < 300) {
+                function ($attribute, $value, $fail) use ($inmueble) {
+                    if ($inmueble->tipo === 'Cuarto' && $value < 300) {
                         $fail('El depósito mínimo para cuartos es de $300.');
                     }
-                    if (in_array($request->tipo, ['Departamento', 'Casa']) && $value < 500) {
+                    if (in_array($inmueble->tipo, ['Departamento', 'Casa']) && $value < 500) {
                         $fail('El depósito mínimo para este tipo de propiedad es de $500.');
                     }
                 },
             ],
-            'habitaciones' => 'required|integer|min:0',
-            'banos_casa' => 'required|string',
-            'bano_compartido' => 'nullable|boolean',
-            'metros' => 'required|numeric|min:0',
-            'direccion' => 'required|string',
             'contrato_documento' => 'nullable|file|mimes:pdf|max:5120',
         ]);
 
-        $parts = explode(',', $request->banos_casa);
-        $banos = isset($parts[0]) ? (int) $parts[0] : 0;
-        $medios_banos = isset($parts[1]) ? (int) $parts[1] : 0;
-        $bano_compartido = $request->tipo === 'Cuarto' ? ($request->has('bano_compartido') ? true : false) : false;
+        // Campos protegidos: siempre usar los valores originales de la BD,
+        // ignorar cualquier valor enviado en el request.
+        $banos         = $inmueble->banos;
+        $medios_banos  = $inmueble->medios_banos;
+        $bano_compartido = $inmueble->bano_compartido;
 
         $inmueble->update([
-            'titulo' => $request->nombre,
-            'tipo' => $request->tipo,
-            'renta_mensual' => $request->precio,
-            'deposito' => $request->deposito ?: 0,
-            'descripcion' => $request->descripcion,
-            'direccion' => $request->direccion,
-            'habitaciones' => $request->habitaciones,
-            'banos' => $banos,
-            'medios_banos' => $medios_banos,
-            'bano_compartido' => $bano_compartido,
-            'metros' => $request->metros,
-            'latitud' => $request->latitud,
-            'longitud' => $request->longitud,
-            
-            // Nuevos campos extendidos
-            'requiere_deposito' => $request->requiere_deposito === 'si',
-            'tiene_cerradura_propia' => $request->has('tiene_cerradura') ? $request->tiene_cerradura === 'si' : false,
-            'cantidad_llaves' => $request->cantidad_llaves ?? 0,
-            'permite_mascotas' => $request->permite_mascotas === 'si',
-            'incluir_clausulas' => $request->incluir_clausulas === 'si',
-            'clausulas_extra' => $request->clausulas_extra ?? '',
-            'estado_mobiliario' => $request->estado_mobiliario ?? 'no amueblada',
-            'tiene_estacionamiento' => $request->tiene_estacionamiento == 1,
-            'momento_pago' => $request->momento_pago ?? 'adelantado',
-            'dias_tolerancia' => $request->dias_tolerancia ?? 0,
-            'dias_preaviso' => $request->dias_preaviso ?? 30,
+            // Campos editables libremente
+            'titulo'           => $request->nombre,
+            'renta_mensual'    => $request->precio,
+            'deposito'         => $request->deposito ?: 0,
+            'descripcion'      => $request->descripcion,
+
+            // Campos protegidos: se restauran desde la BD (no se toman del request)
+            'tipo'             => $inmueble->tipo,
+            'direccion'        => $inmueble->direccion,
+            'habitaciones'     => $inmueble->habitaciones,
+            'banos'            => $banos,
+            'medios_banos'     => $medios_banos,
+            'bano_compartido'  => $bano_compartido,
+            'metros'           => $inmueble->metros,
+            'latitud'          => $inmueble->latitud,
+            'longitud'         => $inmueble->longitud,
+
+            // Nuevos campos extendidos (editables)
+            'requiere_deposito'      => $request->requiere_deposito === 'si',
+            'tiene_cerradura_propia' => $inmueble->tiene_cerradura_propia, // protegido
+            'cantidad_llaves'        => $request->cantidad_llaves ?? 0,
+            'permite_mascotas'       => $request->permite_mascotas === 'si',
+            'incluir_clausulas'      => $request->incluir_clausulas === 'si',
+            'clausulas_extra'        => $request->clausulas_extra ?? '',
+            'estado_mobiliario'      => $request->estado_mobiliario ?? 'no amueblada',
+            'tiene_estacionamiento'  => $request->tiene_estacionamiento == 1,
+            'momento_pago'           => $request->momento_pago ?? 'adelantado',
+            'dias_tolerancia'        => $request->dias_tolerancia ?? 0,
+            'dias_preaviso'          => $request->dias_preaviso ?? 30,
+            'duracion_contrato_meses' => $request->duracion_contrato_meses ?? $inmueble->duracion_contrato_meses,
         ]);
 
         // Sincronizar Zonas Comunes
