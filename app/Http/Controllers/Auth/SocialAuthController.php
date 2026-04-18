@@ -87,6 +87,8 @@ class SocialAuthController extends Controller
                 'error' => 'Error al procesar tu cuenta: ' . $e->getMessage()
             ]);
         }
+    }
+
     /**
      * Maneja el login desde la API (App Móvil) usando un token de Google.
      */
