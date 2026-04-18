@@ -419,9 +419,17 @@
             }
         } catch (error) {
             console.error('Error enviando mensaje:', error);
-            // Si falla, podrías marcar el mensaje en rojo
             const tempEl = document.querySelector(`[data-id="${tempId}"]`);
-            if (tempEl) tempEl.classList.add('bg-red-500');
+            if (tempEl) {
+                tempEl.classList.remove('opacity-70');
+                tempEl.classList.add('border-red-400', 'border-2'); // Borde rojo sutil
+                
+                // Añadir texto de error pequeño
+                const errorText = document.createElement('p');
+                errorText.className = 'text-[10px] text-red-500 font-bold mt-1 text-right';
+                errorText.innerText = '⚠️ Error al enviar. Por favor reintenta.';
+                tempEl.after(errorText);
+            }
         }
     });
 
