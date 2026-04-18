@@ -342,11 +342,11 @@
     window.addEventListener('load', () => {
         if (window.Echo) {
             window.Echo.private(`chat.{{ $chat->id }}`)
-                .listen('MessageSent', (e) => {
+                .listen('.MessageSent', (e) => {
                     appendMessage(e.mensaje, false);
                     container.scrollTop = container.scrollHeight;
                 })
-                .listen('MessagesRead', (e) => {
+                .listen('.MessagesRead', (e) => {
                     // Si nosotros enviamos los mensajes, marcarlos como leídos (doble tick)
                     document.querySelectorAll('.message-status').forEach(el => {
                         el.innerHTML = `

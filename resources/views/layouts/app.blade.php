@@ -520,7 +520,7 @@
                     
                     @foreach($userChats as $userChat)
                         window.Echo.private(`chat.{{ $userChat->id }}`)
-                            .listen('MessageSent', (e) => {
+                            .listen('.MessageSent', (e) => {
                                 // e.mensaje ya viene estructurado por el cambio anterior en el evento
                                 const msg = e.mensaje;
                                 

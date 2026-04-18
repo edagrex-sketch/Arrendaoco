@@ -30,4 +30,9 @@ class MessagesRead implements ShouldBroadcastNow
             new PrivateChannel('chat.' . $this->chatId),
         ];
     }
+
+    public function broadcastAs(): string
+    {
+        return 'MessagesRead';
+    }
 }
