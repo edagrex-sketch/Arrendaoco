@@ -371,6 +371,23 @@
         const parentId = parentInput.value;
         if (!contenido) return;
 
+        // --- OPTIMISTIC UI: Añadir mensaje al instante ---
+        const tempId = 'temp-' + Date.now();
+        const tempMsg = {
+            id: tempId,
+            contenido: contenido,
+            sender_id: {{ Auth::id() }},
+            created_at: new Date().toISOString(),
+            isTemp: true,
+            parent: parentId ? {
+                sender_nombre: replySender.innerText,
+                contenido: replyContent.innerText
+            } : null
+        };
+        
+        appendMessage(tempMsg, true);
+        container.scrollTop = container.scrollHeight;
+        
         input.value = '';
         cancelReply();
         
@@ -387,11 +404,24 @@
 
             const data = await response.json();
             if (data.success) {
-                appendMessage(data.mensaje, true);
-                container.scrollTop = container.scrollHeight;
+                // Reemplazar el mensaje temporal con el real
+                const tempEl = document.querySelector(`[data-id="${tempId}"]`);
+                if (tempEl) {
+                    tempEl.dataset.id = data.mensaje.id;
+                    tempEl.classList.remove('opacity-70'); // Quitar efecto de "enviando"
+                    
+                    // Actualizar el status (ticks)
+                    const statusDiv = tempEl.closest('.max-w-\[85\%\]').querySelector('.message-status');
+                    if(statusDiv) {
+                        statusDiv.dataset.messageId = data.mensaje.id;
+                    }
+                }
             }
         } catch (error) {
             console.error('Error enviando mensaje:', error);
+            // Si falla, podrías marcar el mensaje en rojo
+            const tempEl = document.querySelector(`[data-id="${tempId}"]`);
+            if (tempEl) tempEl.classList.add('bg-red-500');
         }
     });
 
@@ -452,12 +482,15 @@
     }
 
     const appendMessage = (msg, isMe) => {
-        if (msg.id && document.querySelector(`[data-id="${msg.id}"]`)) return;
+        // No duplicar si ya existe (evitar conflicto entre Optimistic UI y Echo)
+        if (msg.id && !msg.isTemp && document.querySelector(`[data-id="${msg.id}"]`)) return;
 
         const div = document.createElement('div');
         div.className = `flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in`;
         
         let bgColor = isMe ? 'bg-[#003049] text-white' : 'bg-white text-gray-800 border-gray-100 border';
+        if (msg.isTemp) bgColor += ' opacity-70';
+        
         let timeAlign = isMe ? 'justify-end text-right' : 'justify-start text-left';
         
         // Manejo de Respuestas (Parent Message)
