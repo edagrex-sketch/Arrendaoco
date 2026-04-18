@@ -12,15 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('inmuebles', function (Blueprint $table) {
-            $table->json('tipos_mascotas')->nullable();
-            $table->json('servicios_incluidos')->nullable(); // agua, luz, etc.
-            $table->json('pago_servicio')->nullable(); // quien paga que
-            $table->string('clabe_interbancaria', 18)->nullable();
-            $table->string('banco')->nullable();
-            $table->double('largo')->nullable();
-            $table->double('ancho')->nullable();
-            $table->integer('dias_tolerancia')->default(3)->change(); // ensure matches web
-            $table->integer('dias_preaviso')->default(30)->change(); // ensure matches web
+            if (!Schema::hasColumn('inmuebles', 'tipos_mascotas')) {
+                $table->json('tipos_mascotas')->nullable();
+            }
+            if (!Schema::hasColumn('inmuebles', 'servicios_incluidos')) {
+                $table->json('servicios_incluidos')->nullable();
+            }
+            if (!Schema::hasColumn('inmuebles', 'pago_servicio')) {
+                $table->json('pago_servicio')->nullable();
+            }
+            if (!Schema::hasColumn('inmuebles', 'clabe_interbancaria')) {
+                $table->string('clabe_interbancaria', 18)->nullable();
+            }
+            if (!Schema::hasColumn('inmuebles', 'banco')) {
+                $table->string('banco')->nullable();
+            }
+            if (!Schema::hasColumn('inmuebles', 'largo')) {
+                $table->double('largo')->nullable();
+            }
+            if (!Schema::hasColumn('inmuebles', 'ancho')) {
+                $table->double('ancho')->nullable();
+            }
         });
     }
 
