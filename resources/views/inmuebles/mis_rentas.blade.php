@@ -10,7 +10,21 @@
                 <p class="text-muted-foreground mt-2 text-lg">Consulta las propiedades que rentas y gestiona tus mensualidades de forma segura.</p>
             </div>
 
-            @if(!$contratos->isEmpty())
+            @php
+                $contratoActualActivo = $contratos->where('estatus', 'activo')->first();
+                $proximoPagoVencimiento = null;
+                if ($contratoActualActivo) {
+                    $proximoPendiente = \App\Models\Pago::where('contrato_id', $contratoActualActivo->id)
+                        ->where('estatus', 'pendiente')
+                        ->orderBy('anio')->orderBy('mes')
+                        ->first();
+                    if ($proximoPendiente) {
+                        $diaPago = \Carbon\Carbon::parse($contratoActualActivo->fecha_inicio)->day;
+                        $proximoPagoVencimiento = \Carbon\Carbon::create($proximoPendiente->anio, $proximoPendiente->mes, $diaPago);
+                    }
+                }
+            @endphp
+            @if($contratoActualActivo && $proximoPagoVencimiento)
                 <div class="bg-[#FDF0D5] px-6 py-4 rounded-3xl border-2 border-[#669BBC]/20 flex items-center gap-4">
                     <div class="h-12 w-12 bg-white rounded-full flex items-center justify-center text-2xl shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-yellow-500">
@@ -20,16 +34,12 @@
                     </div>
                     <div>
                         <p class="text-xs font-bold text-[#669BBC] uppercase tracking-wider">Próximo Vencimiento</p>
-                        @php
-                            $proximoContrato = $contratos->first();
-                            $diaPago = \Carbon\Carbon::parse($proximoContrato->fecha_inicio)->day;
-                            $mesAct = now()->month;
-                            $fechaVencimiento = now()->setDay($diaPago);
-                            if (now()->day > $diaPago) {
-                                $fechaVencimiento->addMonth();
-                            }
-                        @endphp
-                        <p class="text-xl font-black text-[#003049]">{{ $fechaVencimiento->translatedFormat('d \d\e F, Y') }}</p>
+                        <p class="text-xl font-black text-[#003049]">{{ $proximoPagoVencimiento->translatedFormat('d \d\e F, Y') }}</p>
+                        @if($proximoPagoVencimiento->isPast())
+                            <p class="text-xs font-bold text-red-500 mt-0.5">¡Atrasado!</p>
+                        @elseif($proximoPagoVencimiento->diffInDays(now()) <= 5)
+                            <p class="text-xs font-bold text-orange-500 mt-0.5">Vence en {{ now()->diffInDays($proximoPagoVencimiento) }} días</p>
+                        @endif
                     </div>
                 </div>
             @endif
@@ -351,6 +361,7 @@
                                             ? '¿Cancelar esta solicitud de renta? El inmueble quedará disponible nuevamente.'
                                             : '¿Estás seguro de que deseas cancelar tu renta? El inmueble quedará disponible nuevamente.';
                                     @endphp
+
                                     @if(in_array($contrato->estatus, $estatusCancelable))
                                         <form action="{{ route('rentas.cancelar', $contrato) }}" method="POST" class="w-full">
                                             @csrf
@@ -561,6 +572,115 @@
                             </ul>
                         </div>
                     </div>
+
+                    <!-- Progreso de Renta (Moved here) -->
+                    @php
+                        $contratosMostrados = $contratos->whereIn('estatus', ['activo', 'cancelado']);
+                    @endphp
+                    @if($contratosMostrados->count() > 0)
+                        <div class="mt-14">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="h-8 w-1.5 bg-[#FDF0D5] rounded-full"></div>
+                                <h2 class="text-2xl font-black text-[#003049] tracking-tight">Progreso de tus Rentas</h2>
+                            </div>
+                            
+                            <div class="grid gap-6">
+                                @foreach($contratosMostrados as $contrato)
+                                    @if($contrato->fecha_inicio && $contrato->fecha_fin)
+                                        <details class="bg-white rounded-3xl shadow-sm border border-slate-200 group overflow-hidden">
+                                            <summary class="flex items-center justify-between p-6 cursor-pointer select-none outline-none hover:bg-slate-50/50 transition-colors list-none [&::-webkit-details-marker]:hidden">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="h-10 w-10 rounded-full bg-[#669BBC]/10 flex items-center justify-center shrink-0">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#669BBC]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <h3 class="font-bold text-[#003049] text-base leading-tight">{{ $contrato->inmueble->titulo ?? 'Propiedad' }}</h3>
+                                                        <p class="text-xs text-slate-400 mt-0.5">Click para ver calendario de pagos</p>
+                                                    </div>
+                                                </div>
+                                                <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-open:-scale-y-100 transition-transform duration-300 shrink-0">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                            </summary>
+                                            
+                                            <div class="p-6 pt-0 border-t border-slate-100">
+                                                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 pt-6">
+                                                    @php
+                                                        $inicio = \Carbon\Carbon::parse($contrato->fecha_inicio)->startOfMonth();
+                                                        $fin = \Carbon\Carbon::parse($contrato->fecha_fin)->startOfMonth();
+                                                        $mesesTotal = $inicio->diffInMonths($fin) + 1;
+                                                        $nombresMeses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+                                                    @endphp
+                                                    @for($i = 0; $i < $mesesTotal; $i++)
+                                                        @php
+                                                            $mesActual = $inicio->copy()->addMonths($i);
+                                                            // El primer mes está pagado por defecto al crear el contrato (Depósito y 1er Mes)
+                                                            $esPrimerMes = ($i === 0);
+                                                            $pagadoBackend = $contrato->pagos && $contrato->pagos->where('mes', $mesActual->month)->where('anio', $mesActual->year)->where('estatus', 'pagado')->isNotEmpty();
+                                                            $pagado = $esPrimerMes || $pagadoBackend;
+                                                            
+                                                            $esFuturo = now()->startOfMonth()->lt($mesActual);
+                                                            
+                                                            if ($pagado) {
+                                                                $headerClass = 'bg-[#669BBC] text-white';
+                                                                $bodyClass = 'bg-white opacity-90 border-[#669BBC]/20';
+                                                                $statusText = 'Pagado';
+                                                                $statusColor = 'text-[#669BBC]';
+                                                            } elseif ($contrato->estatus === 'cancelado') {
+                                                                $headerClass = 'bg-slate-200 text-slate-400';
+                                                                $bodyClass = 'bg-slate-50 border-slate-200/50 opacity-60';
+                                                                $statusText = 'Cancelado';
+                                                                $statusColor = 'text-slate-400';
+                                                            } elseif ($esFuturo) {
+                                                                $headerClass = 'bg-slate-100 text-slate-500';
+                                                                $bodyClass = 'bg-slate-50 border-slate-200';
+                                                                $statusText = 'Próximo';
+                                                                $statusColor = 'text-slate-400';
+                                                            } else {
+                                                                $headerClass = 'bg-[#C1121F] text-white';
+                                                                $bodyClass = 'bg-white border-[#C1121F]/20 shadow-[0_4px_12px_rgba(193,18,31,0.15)]';
+                                                                $statusText = 'Pendiente';
+                                                                $statusColor = 'text-[#C1121F]';
+                                                            }
+                                                        @endphp
+                                                        <div class="group/mes relative rounded-xl overflow-hidden border {{ $bodyClass }} flex flex-col transition-all hover:-translate-y-1 hover:shadow-lg">
+                                                            <!-- Top header that looks like a calendar binding -->
+                                                            <div class="{{ $headerClass }} text-[10px] font-black tracking-widest uppercase text-center py-1.5 flex items-center justify-center gap-1.5 border-b border-black/5">
+                                                                <div class="h-1 w-1 bg-white/50 rounded-full"></div>
+                                                                {{ $nombresMeses[$mesActual->month - 1] }}
+                                                                <div class="h-1 w-1 bg-white/50 rounded-full"></div>
+                                                            </div>
+                                                            <!-- Calendar body -->
+                                                            <div class="flex-1 flex flex-col items-center justify-center py-3 px-2">
+                                                                <p class="text-2xl font-black text-[#003049] leading-none mb-1">{{ $mesActual->year }}</p>
+                                                                
+                                                                <div class="flex items-center gap-1 mt-1 {{ $statusColor }}">
+                                                                    @if($pagado)
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                                                                    @elseif($contrato->estatus === 'cancelado')
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M13.414 12l2.293 2.293a1 1 0 01-1.414 1.414L12 13.414l-2.293 2.293a1 1 0 01-1.414-1.414L10.586 12 8.293 9.707a1 1 0 011.414-1.414L12 10.586l2.293-2.293a1 1 0 011.414 1.414L13.414 12z" clip-rule="evenodd" /><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                                                                    @elseif(!$esFuturo)
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                                                                    @else
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
+                                                                    @endif
+                                                                    <span class="text-[10px] font-bold uppercase tracking-wider">{{ $statusText }}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endfor
+                                                </div>
+                                            </div>
+                                        </details>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
 
                 </div>
             </div>

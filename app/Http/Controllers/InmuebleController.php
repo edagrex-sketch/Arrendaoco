@@ -15,17 +15,19 @@ class InmuebleController extends Controller
 {
     public function index(Request $request)
     {
-        $search  = $request->search;
+        $search = $request->search;
 
         // Admin users should use adminIndex() via /admin/inmuebles
         if (auth()->user()->es_admin || auth()->user()->tieneRol('admin')) {
             return redirect()->route('admin.inmuebles.index');
         }
 
-        $query = Inmueble::with(['contratos' => function ($q) {
-            // Incluir 'pdf_descargado' para que el landlord vea quién descargó el PDF
-            $q->with('inquilino')->whereIn('estatus', ['pendiente_aprobacion', 'pdf_descargado', 'activo'])->latest();
-        }])->where('propietario_id', auth()->id());
+        $query = Inmueble::with([
+            'contratos' => function ($q) {
+                // Incluir 'pdf_descargado' para que el landlord vea quién descargó el PDF
+                $q->with('inquilino')->whereIn('estatus', ['pendiente_aprobacion', 'pdf_descargado', 'activo'])->latest();
+            }
+        ])->where('propietario_id', auth()->id());
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -127,12 +129,25 @@ class InmuebleController extends Controller
     {
         $userId = auth()->id();
 
-        // Contratos activos/pendientes — excluimos 'rechazado' y 'cancelado' del listado
-        $contratos = \App\Models\Contrato::with('inmueble.propietario')
+        // Prioridad: si tiene un contrato activo, mostrar solo ese.
+        // Si no, mostrar el más reciente (cancelado, etc.) como historial.
+        $contratoActivo = \App\Models\Contrato::with(['inmueble.propietario', 'pagos'])
             ->where('inquilino_id', $userId)
-            ->whereNotIn('estatus', ['rechazado', 'cancelado'])
+            ->where('estatus', 'activo')
             ->latest()
-            ->get();
+            ->first();
+
+        if ($contratoActivo) {
+            $contratos = collect([$contratoActivo]);
+        } else {
+            // Ningún activo: mostrar el contrato más reciente (solo 1)
+            $ultimo = \App\Models\Contrato::with(['inmueble.propietario', 'pagos'])
+                ->where('inquilino_id', $userId)
+                ->whereNotIn('estatus', ['rechazado'])
+                ->latest()
+                ->first();
+            $contratos = $ultimo ? collect([$ultimo]) : collect();
+        }
 
         // Detectar si hay contrato rechazado que el inquilino aún no ha visto
         // Usamos session para mostrarlo solo una vez
@@ -151,17 +166,17 @@ class InmuebleController extends Controller
         }
 
         $pagosPendientes = \App\Models\Pago::with('contrato.inmueble')
-                            ->whereIn('contrato_id', $contratos->pluck('id'))
-                            ->where('estatus', 'pendiente')
-                            ->orderBy('anio', 'asc')
-                            ->orderBy('mes', 'asc')
-                            ->get();
+            ->whereIn('contrato_id', $contratos->pluck('id'))
+            ->where('estatus', 'pendiente')
+            ->orderBy('anio', 'asc')
+            ->orderBy('mes', 'asc')
+            ->get();
 
         $historialPagos = \App\Models\Pago::with('contrato.inmueble')
-                            ->whereIn('contrato_id', $contratos->pluck('id'))
-                            ->where('estatus', 'pagado')
-                            ->orderBy('fecha_pago', 'desc')
-                            ->get();
+            ->whereIn('contrato_id', $contratos->pluck('id'))
+            ->where('estatus', 'pagado')
+            ->orderBy('fecha_pago', 'desc')
+            ->get();
 
         // Marco como visto para quitar el punto rojo de notificación
         session()->put('renta_visto_' . auth()->id(), true);
@@ -182,7 +197,7 @@ class InmuebleController extends Controller
         try {
             DB::beginTransaction();
             $contrato->estatus = 'cancelado';
-            
+
             // Set end date to now if it isn't set, otherwise maybe it already has one.
             if (!$contrato->fecha_fin) {
                 // If the user wants to keep a history of what the intended end date was, they might not zero it out. But typically cancelling happens now.
@@ -371,7 +386,7 @@ class InmuebleController extends Controller
             $inmueble->metros = $request->metros;
             $inmueble->latitud = $request->latitud;
             $inmueble->longitud = $request->longitud;
-            
+
             // Nuevos campos extendidos
             $inmueble->requiere_deposito = $request->requiere_deposito === 'si';
             $inmueble->tiene_cerradura_propia = $request->tiene_cerradura === 'si'; // Fallback if old name comes through
@@ -475,40 +490,40 @@ class InmuebleController extends Controller
 
         // Campos protegidos: siempre usar los valores originales de la BD,
         // ignorar cualquier valor enviado en el request.
-        $banos         = $inmueble->banos;
-        $medios_banos  = $inmueble->medios_banos;
+        $banos = $inmueble->banos;
+        $medios_banos = $inmueble->medios_banos;
         $bano_compartido = $inmueble->bano_compartido;
 
         $inmueble->update([
             // Campos editables libremente
-            'titulo'           => $request->nombre,
-            'renta_mensual'    => $request->precio,
-            'deposito'         => $request->deposito ?: 0,
-            'descripcion'      => $request->descripcion,
+            'titulo' => $request->nombre,
+            'renta_mensual' => $request->precio,
+            'deposito' => $request->deposito ?: 0,
+            'descripcion' => $request->descripcion,
 
             // Campos protegidos: se restauran desde la BD (no se toman del request)
-            'tipo'             => $inmueble->tipo,
-            'direccion'        => $inmueble->direccion,
-            'habitaciones'     => $inmueble->habitaciones,
-            'banos'            => $banos,
-            'medios_banos'     => $medios_banos,
-            'bano_compartido'  => $bano_compartido,
-            'metros'           => $inmueble->metros,
-            'latitud'          => $inmueble->latitud,
-            'longitud'         => $inmueble->longitud,
+            'tipo' => $inmueble->tipo,
+            'direccion' => $inmueble->direccion,
+            'habitaciones' => $inmueble->habitaciones,
+            'banos' => $banos,
+            'medios_banos' => $medios_banos,
+            'bano_compartido' => $bano_compartido,
+            'metros' => $inmueble->metros,
+            'latitud' => $inmueble->latitud,
+            'longitud' => $inmueble->longitud,
 
             // Nuevos campos extendidos (editables)
-            'requiere_deposito'      => $request->requiere_deposito === 'si',
+            'requiere_deposito' => $request->requiere_deposito === 'si',
             'tiene_cerradura_propia' => $inmueble->tiene_cerradura_propia, // protegido
-            'cantidad_llaves'        => $request->cantidad_llaves ?? 0,
-            'permite_mascotas'       => $request->permite_mascotas === 'si',
-            'incluir_clausulas'      => $request->incluir_clausulas === 'si',
-            'clausulas_extra'        => $request->clausulas_extra ?? '',
-            'estado_mobiliario'      => $request->estado_mobiliario ?? 'no amueblada',
-            'tiene_estacionamiento'  => $request->tiene_estacionamiento == 1,
-            'momento_pago'           => $request->momento_pago ?? 'adelantado',
-            'dias_tolerancia'        => $request->dias_tolerancia ?? 0,
-            'dias_preaviso'          => $request->dias_preaviso ?? 30,
+            'cantidad_llaves' => $request->cantidad_llaves ?? 0,
+            'permite_mascotas' => $request->permite_mascotas === 'si',
+            'incluir_clausulas' => $request->incluir_clausulas === 'si',
+            'clausulas_extra' => $request->clausulas_extra ?? '',
+            'estado_mobiliario' => $request->estado_mobiliario ?? 'no amueblada',
+            'tiene_estacionamiento' => $request->tiene_estacionamiento == 1,
+            'momento_pago' => $request->momento_pago ?? 'adelantado',
+            'dias_tolerancia' => $request->dias_tolerancia ?? 0,
+            'dias_preaviso' => $request->dias_preaviso ?? 30,
             'duracion_contrato_meses' => $request->duracion_contrato_meses ?? $inmueble->duracion_contrato_meses,
         ]);
 
