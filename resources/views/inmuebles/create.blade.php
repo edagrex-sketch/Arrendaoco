@@ -217,11 +217,11 @@
                     <div class="mb-6 bg-slate-50 p-5 rounded-xl border border-gray-200">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end mb-2 gap-2">
                             <label class="block text-sm font-medium">Descripción <span class="text-red-500">*</span></label>
-                            <span class="text-xs font-bold px-2 py-1 rounded-md" :class="{'bg-red-100 text-red-700': numPalabras < 30 || numPalabras > 120, 'bg-slate-100 text-[#003049]': numPalabras >= 30 && numPalabras <= 120}">
-                                <span x-text="numPalabras"></span> / 120 palabras (Mín. 30)
+                            <span class="text-xs font-bold px-2 py-1 rounded-md" :class="{'bg-red-100 text-red-700': numPalabras < 20 || numPalabras > 120, 'bg-slate-100 text-[#003049]': numPalabras >= 20 && numPalabras <= 120}">
+                                <span x-text="numPalabras"></span> / 120 palabras (Mín. 20)
                             </span>
                         </div>
-                        <textarea name="descripcion" x-model="descripcion" @input="validarDescripcion($event.target)" rows="4" placeholder="Cuéntanos más detalles del inmueble (Mínimo 30 palabras)..." required oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s.,?!;:/\-áéíóúÁÉÍÓÚñÑüÜ\r\n]/g, '')" class="w-full rounded-lg border-input bg-white border py-3 px-4 focus:ring-[#003049]/20 focus:border-[#003049] transition-all" x-init="validarDescripcion($el)"></textarea>
+                        <textarea name="descripcion" x-model="descripcion" @input="validarDescripcion($event.target)" rows="4" placeholder="Cuéntanos más detalles del inmueble (Mínimo 20 palabras)..." required oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s.,?!;:/\-áéíóúÁÉÍÓÚñÑüÜ\r\n]/g, '')" class="w-full rounded-lg border-input bg-white border py-3 px-4 focus:ring-[#003049]/20 focus:border-[#003049] transition-all" x-init="validarDescripcion($el)"></textarea>
                     </div>
 
                     {{-- NUEVO: Opciones Específicas para Cuarto  --}}
@@ -738,8 +738,8 @@
 
                 validarDescripcion(el) {
                     const count = this.numPalabras;
-                    if (count < 30) {
-                        el.setCustomValidity("La descripción debe tener al menos 30 palabras.");
+                    if (count < 20) {
+                        el.setCustomValidity("La descripción debe tener al menos 20 palabras.");
                     } else if (count > 120) {
                         el.setCustomValidity("La descripción no puede exceder las 120 palabras.");
                     } else {
