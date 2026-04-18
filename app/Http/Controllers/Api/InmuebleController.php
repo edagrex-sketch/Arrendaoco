@@ -74,17 +74,38 @@ class InmuebleController extends Controller
             'latitud'         => 'nullable|numeric',
             'longitud'        => 'nullable|numeric',
             'imagenes'        => 'nullable|array',
-            'imagenes.*'      => 'image|max:5120', // Max 5MB
+            'imagenes.*'      => 'image|max:5120',
+            'registrado_desde'    => 'nullable|string',
+            'plataforma_metadata' => 'nullable|array',
+            'estatus'         => 'nullable|string|in:disponible,inactivo,rentado',
+            // Nuevos campos de paridad
+            'tiene_estacionamiento' => 'nullable|boolean',
+            'permite_mascotas'      => 'nullable|boolean',
+            'tipos_mascotas'        => 'nullable|array',
+            'estado_mobiliario'     => 'nullable|string',
+            'servicios_incluidos'   => 'nullable|array',
+            'pago_servicio'         => 'nullable|array',
+            'momento_pago'          => 'nullable|string',
+            'dias_tolerancia'       => 'nullable|integer',
+            'dias_preaviso'         => 'nullable|integer',
+            'duracion_contrato_meses' => 'nullable|integer',
+            'clabe_interbancaria'    => 'nullable|string|max:18',
+            'banco'                 => 'nullable|string',
+            'incluir_clausulas'     => 'nullable|boolean',
+            'clausulas_extra'       => 'nullable|string',
         ]);
 
+
         $inmueble = Inmueble::create([
-            ...collect($data)->except('imagenes')->toArray(),
+            ...collect($data)->except(['imagenes', 'estatus'])->toArray(),
             'propietario_id' => $request->user()->id,
             'ciudad'         => 'Ocosingo',
             'estado'         => 'Chiapas',
             'codigo_postal'  => '29950',
-            'estatus'        => 'disponible',
+            'estatus'        => $data['estatus'] ?? 'disponible',
+            'registrado_desde' => $data['registrado_desde'] ?? ($request->header('User-Agent') ? 'mobile' : 'web'),
         ]);
+
 
         if ($request->hasFile('imagenes')) {
             foreach ($request->file('imagenes') as $index => $file) {
@@ -136,9 +157,17 @@ class InmuebleController extends Controller
             'metros'          => 'sometimes|numeric|min:0',
             'imagenes'        => 'nullable|array',
             'imagenes.*'      => 'image|max:5120',
+            'plataforma_metadata' => 'nullable|array',
+            'tiene_estacionamiento' => 'nullable|boolean',
+            'permite_mascotas'      => 'nullable|boolean',
+            'estado_mobiliario'     => 'nullable|string',
+            'momento_pago'          => 'nullable|string',
+            'clabe_interbancaria'    => 'nullable|string',
         ]);
 
+
         $inmueble->update(collect($data)->except('imagenes')->toArray());
+
 
         if ($request->hasFile('imagenes')) {
             // Opcional: Eliminar imagenes anteriores or keep them

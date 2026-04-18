@@ -53,7 +53,12 @@ class Inmueble extends Model
         'pago_servicio',
         'incluir_clausulas',
         'clausulas_extra',
+        'clabe_interbancaria',
+        'banco',
+        'registrado_desde',
+        'plataforma_metadata',
     ];
+
 
     protected $casts = [
         'tipos_mascotas'          => 'array',
@@ -65,7 +70,9 @@ class Inmueble extends Model
         'permite_mascotas'        => 'boolean',
         'incluir_clausulas'       => 'boolean',
         'duracion_contrato_meses' => 'integer',
+        'plataforma_metadata'     => 'array',
     ];
+
 
     public function propietario()
     {
