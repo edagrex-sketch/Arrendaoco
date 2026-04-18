@@ -39,8 +39,15 @@
     </div>
     @endif
 
-    <div class="p-6 border-b border-gray-100 bg-white flex items-center justify-between shadow-sm z-10">
-        <div class="flex items-center gap-4">
+    <div class="p-4 sm:p-6 border-b border-gray-100 bg-white flex items-center justify-between shadow-sm z-30">
+        <div class="flex items-center gap-3 sm:gap-4 overflow-hidden">
+            {{-- Botón Regresar (Móvil) --}}
+            <a href="{{ route('chats.index') }}" class="md:hidden p-2 -ml-2 text-gray-400 hover:text-[#003049] transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+
             <div class="flex-shrink-0 relative">
                 @if($otroUsuario->foto_perfil)
                     <img src="{{ str_starts_with($otroUsuario->foto_perfil, 'http') ? $otroUsuario->foto_perfil : asset('storage/'.$otroUsuario->foto_perfil) }}" 
@@ -97,27 +104,26 @@
         @if($chat->inmueble)
             @php $estaRentado = $chat->inmueble->estatus === 'rentado'; @endphp
             <a href="{{ route('inmuebles.show', $chat->inmueble) }}" class="block group/banner">
-                <div class="{{ $estaRentado ? 'bg-red-50 border-red-200' : 'bg-[#003049]/5 border-[#003049]/10 hover:bg-[#003049]/10' }} backdrop-blur-md border-b px-6 py-3 flex items-center justify-between z-20 sticky top-0 shadow-sm transition-all duration-300">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl overflow-hidden border-2 {{ $estaRentado ? 'border-red-200' : 'border-white' }} shadow-sm flex-shrink-0 grayscale-[{{ $estaRentado ? '0.8' : '0' }}] group-hover/banner:scale-105 transition-transform">
+                <div class="{{ $estaRentado ? 'bg-red-50 border-red-200' : 'bg-[#003049]/5 border-[#003049]/10 hover:bg-[#003049]/10' }} backdrop-blur-md border-b px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-between z-20 sticky top-0 shadow-sm transition-all duration-300">
+                    <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl overflow-hidden border-2 {{ $estaRentado ? 'border-red-200' : 'border-white' }} shadow-sm flex-shrink-0 grayscale-[{{ $estaRentado ? '0.8' : '0' }}] group-hover/banner:scale-105 transition-transform">
                             <img src="{{ \App\Support\MediaUrl::fromStoragePath($chat->inmueble->imagen) }}" class="w-full h-full object-cover">
                         </div>
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2">
-                                <p class="text-[10px] font-bold {{ $estaRentado ? 'text-red-500' : 'text-[#669BBC]' }} uppercase tracking-widest leading-none">
-                                    {{ $estaRentado ? 'Propiedad No Disponible' : 'Negociando renta de:' }}
+                        <div class="min-w-0 overflow-hidden">
+                            <div class="flex items-center gap-1.5">
+                                <p class="text-[8px] sm:text-[10px] font-bold {{ $estaRentado ? 'text-red-500' : 'text-[#669BBC]' }} uppercase tracking-widest leading-none truncate">
+                                    {{ $estaRentado ? 'No Disponible' : 'Negociando:' }}
                                 </p>
                                 @if($estaRentado)
-                                    <span class="px-1.5 py-0.5 bg-red-600 text-white text-[8px] font-black rounded-md animate-pulse">RENTADO</span>
+                                    <span class="px-1 py-0.5 bg-red-600 text-white text-[7px] font-black rounded-md animate-pulse">RENTADO</span>
                                 @endif
-                                <svg class="w-3 h-3 text-[#669BBC] opacity-0 group-hover/banner:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
                             </div>
-                            <h4 class="font-extrabold {{ $estaRentado ? 'text-red-900 opacity-60' : 'text-[#003049]' }} text-sm truncate uppercase">{{ $chat->inmueble->titulo }}</h4>
+                            <h4 class="font-extrabold {{ $estaRentado ? 'text-red-900 opacity-60' : 'text-[#003049]' }} text-xs sm:text-sm truncate uppercase tracking-tight">{{ $chat->inmueble->titulo }}</h4>
                         </div>
                     </div>
-                    <div class="text-right flex-shrink-0">
-                        <p class="text-[10px] text-gray-400 font-bold">Precio mensual</p>
-                        <p class="font-extrabold {{ $estaRentado ? 'text-red-900/40 line-through' : 'text-[#003049]' }} text-sm">${{ number_format($chat->inmueble->renta_mensual) }}</p>
+                    <div class="text-right flex-shrink-0 ml-2">
+                        <p class="text-[8px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Renta</p>
+                        <p class="font-extrabold {{ $estaRentado ? 'text-red-900/40 line-through' : 'text-[#003049]' }} text-xs sm:text-sm tracking-tighter">${{ number_format($chat->inmueble->renta_mensual) }}</p>
                     </div>
                 </div>
             </a>
@@ -246,7 +252,7 @@
     </div>
 
     <!-- Formulario de Envío -->
-    <div class="p-6 bg-white relative">
+    <div class="p-4 sm:p-6 bg-white relative">
         {{-- Menú de Acciones Rápidas (Modal pequeño) --}}
         <div id="actions-menu" class="hidden absolute bottom-[100px] left-6 bg-white border border-gray-100 rounded-2xl shadow-2xl p-2 w-64 z-50 animate-slide-up">
             @if(Auth::id() != $chat->inmueble->propietario_id)
