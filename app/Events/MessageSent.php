@@ -55,5 +55,10 @@ class MessageSent implements ShouldBroadcastNow
             ]
         ];
     }
+
+    public function broadcastAs(): string
+    {
+        return 'MessageSent';
+    }
 }
 

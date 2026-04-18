@@ -56,14 +56,7 @@
             @endif
         }
 
-        // 3. Restaurar estado de visibilidad de ROCO
-        const rocoHidden = localStorage.getItem('rocoHidden') === 'true';
-        if (rocoHidden) {
-            const wrapper = document.getElementById('mascot-wrapper');
-            const btn = document.getElementById('maximize-assistant-btn');
-            if (wrapper) wrapper.classList.add('hidden');
-            if (btn) btn.classList.remove('hidden');
-        }
+
 
         // 4. Sistema de Mensajes Contextuales
         setTimeout(() => {
@@ -121,18 +114,7 @@
         }
     }
 
-    function toggleMascotVisibility() {
-        const wrapper = document.getElementById('mascot-wrapper');
-        const btn = document.getElementById('maximize-assistant-btn');
-        const isHidden = wrapper.classList.toggle('hidden');
 
-        if (btn) {
-            if (isHidden) btn.classList.remove('hidden');
-            else btn.classList.add('hidden');
-        }
-
-        localStorage.setItem('rocoHidden', isHidden);
-    }
 
     function sendMascotMessage() {
         const input = document.getElementById('chat-input');

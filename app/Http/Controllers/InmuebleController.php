@@ -455,6 +455,8 @@ class InmuebleController extends Controller
                 ]);
             }
 
+            event(new \App\Events\NuevoInmueblePublicado($inmueble));
+
             DB::commit();
             return redirect()->route('inmuebles.index')->with('success', '¡Propiedad publicada correctamente!');
         } catch (\Exception $e) {

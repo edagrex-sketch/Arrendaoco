@@ -2,18 +2,21 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\Storage;
-
 class MediaUrl
 {
+    /**
+     * Convierte una ruta de almacenamiento en una URL pública válida.
+     */
     public static function fromStoragePath(?string $path): ?string
     {
         if (!is_string($path) || trim($path) === '') {
             return null;
         }
 
+        // Normalizar barras y espacios
         $normalizedPath = ltrim(str_replace('\\', '/', trim($path)), '/');
 
+        // Si ya es una URL completa, devolverla tal cual
         if (
             str_starts_with($normalizedPath, 'http://') ||
             str_starts_with($normalizedPath, 'https://') ||
@@ -23,44 +26,13 @@ class MediaUrl
             return $normalizedPath;
         }
 
+        // Si la ruta ya incluye 'storage/', limpiarla para evitar duplicados
         if (str_starts_with($normalizedPath, 'storage/')) {
-            self::ensurePublicStorageCopy(substr($normalizedPath, strlen('storage/')));
-
-            return url($normalizedPath);
+            $normalizedPath = substr($normalizedPath, strlen('storage/'));
         }
 
-        self::ensurePublicStorageCopy($normalizedPath);
-
-        return url('storage/' . $normalizedPath);
-    }
-
-    public static function ensurePublicStorageCopy(?string $relativePath): void
-    {
-        if (!is_string($relativePath) || trim($relativePath) === '') {
-            return;
-        }
-
-        $normalizedPath = ltrim(str_replace('\\', '/', trim($relativePath)), '/');
-
-        if ($normalizedPath === '' || str_contains($normalizedPath, '..')) {
-            return;
-        }
-
-        $publicPath = public_path('storage/' . $normalizedPath);
-        if (is_file($publicPath)) {
-            return;
-        }
-
-        $disk = Storage::disk('public');
-        if (!$disk->exists($normalizedPath)) {
-            return;
-        }
-
-        $directory = dirname($publicPath);
-        if (!is_dir($directory)) {
-            mkdir($directory, 0777, true);
-        }
-
-        copy($disk->path($normalizedPath), $publicPath);
+        // Usar asset() para garantizar que la URL sea completa y segura (https)
+        return asset('storage/' . $normalizedPath);
     }
 }
+

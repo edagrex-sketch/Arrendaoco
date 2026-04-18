@@ -66,6 +66,9 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
         'foto_perfil' => $path,
     ]);
 
+    // Disparar evento para tiempo real en el panel de administrador
+    event(new \App\Events\NuevoUsuarioRegistrado($usuario));
+
     // Asignar rol de inquilino por defecto
     $usuario->asignarRol('inquilino');
     // Iniciar sesión y redirigir

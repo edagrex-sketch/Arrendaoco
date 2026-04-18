@@ -9,9 +9,9 @@
         <p class="text-gray-500 mt-2">Gestiona tus dudas y acuerdos con arrendadores e inquilinos.</p>
     </div>
 
-    <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 h-[650px] flex flex-col md:flex-row">
+    <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 h-[700px] flex flex-col md:flex-row shadow-slate-200">
         <!-- Sidebar: Lista de Chats -->
-        <div class="w-full md:w-80 border-r border-gray-100 bg-gray-50/50 flex flex-col h-full">
+        <div class="{{ isset($currentChat) ? 'hidden' : 'flex' }} md:flex w-full md:w-80 border-r border-gray-100 bg-gray-50/50 flex flex-col h-full">
             <div class="p-6 border-b border-gray-100 bg-white">
                 <div class="relative">
                     <input type="text" placeholder="Buscar chat..." 
@@ -83,7 +83,7 @@
         </div>
 
         <!-- Main Chat Area -->
-        <div class="flex-1 flex flex-col bg-white">
+        <div class="{{ isset($currentChat) ? 'flex' : 'hidden md:flex' }} flex-1 flex flex-col bg-white overflow-hidden">
             @yield('chat_content')
             
             @if(!View::hasSection('chat_content'))

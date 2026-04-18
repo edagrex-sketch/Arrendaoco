@@ -507,6 +507,33 @@
                     window.scrollTo({ top: offsetTop, behavior: 'smooth' });
                 }
             });
+            // TIEMPO REAL: Escuchar nuevas publicaciones
+            if (typeof window.Echo !== 'undefined') {
+                window.Echo.channel('admin-updates')
+                    .listen('.nuevo-inmueble', (e) => {
+                        console.log('Nueva publicación detectada:', e);
+                        
+                        // 1. Notificación premium
+                        if (window.Swal) {
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 6000,
+                                timerProgressBar: true
+                            });
+
+                            Toast.fire({
+                                icon: 'info',
+                                title: '¡Nueva propiedad disponible!',
+                                text: e.inmueble.titulo
+                            });
+                        }
+
+                        // 2. Refrescar la lista automáticamente
+                        triggerBusqueda();
+                    });
+            }
         });
     </script>
 @endsection

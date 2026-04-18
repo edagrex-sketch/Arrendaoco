@@ -59,23 +59,24 @@
 
 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 <script>
-    let isRocoVisible = true;
-    let isChatOpen = false;
+    let isRocoVisible = localStorage.getItem('rocoVisible') !== 'false';
+    let isChatOpen = localStorage.getItem('rocoChatOpen') === 'true';
 
-    function toggleRoco() {
+    function updateRocoUI() {
         const group = document.getElementById('roco-visual-group');
         const arrow = document.getElementById('roco-arrow-path');
         const player = document.getElementById('roco-lottie');
-        
-        isRocoVisible = !isRocoVisible;
+        const chat = document.getElementById('mascot-chat');
+        const container = document.getElementById('roco-widget-container');
 
+        // Visibilidad de Roco (Mascota + Burbuja)
         if (isRocoVisible) {
             group.style.opacity = '1';
             group.style.visibility = 'visible';
             group.style.height = 'auto';
             group.style.transform = 'scale(1)';
             arrow.setAttribute('d', 'M19 9l-7 7-7-7');
-            if(player.play) player.play();
+            if(player && player.play) player.play();
         } else {
             group.style.opacity = '0';
             group.style.visibility = 'hidden';
@@ -83,21 +84,35 @@
             group.style.transform = 'scale(0.8)';
             arrow.setAttribute('d', 'M5 15l7-7 7 7');
         }
-    }
 
-    function toggleMascotChat() {
-        const chat = document.getElementById('mascot-chat');
-        const container = document.getElementById('roco-widget-container');
-        isChatOpen = !isChatOpen;
+        // Estado del Chat
         if (isChatOpen) {
             chat.classList.remove('hidden-chat');
             container.style.display = 'none';
-            document.getElementById('chat-input').focus();
         } else {
             chat.classList.add('hidden-chat');
             container.style.display = 'flex';
         }
     }
+
+    function toggleRoco() {
+        isRocoVisible = !isRocoVisible;
+        localStorage.setItem('rocoVisible', isRocoVisible);
+        updateRocoUI();
+    }
+
+    function toggleMascotChat() {
+        isChatOpen = !isChatOpen;
+        localStorage.setItem('rocoChatOpen', isChatOpen);
+        updateRocoUI();
+        
+        if (isChatOpen) {
+            setTimeout(() => document.getElementById('chat-input').focus(), 100);
+        }
+    }
+
+    // Inicializar al cargar
+    document.addEventListener('DOMContentLoaded', updateRocoUI);
 
     async function sendRocoMsg() {
         const input = document.getElementById('chat-input');
