@@ -526,68 +526,49 @@
         }
     </script>
     @auth
-        <script>
-            window.addEventListener('load', () => {
-                if (window.Echo) {
-                    // Escuchar todos los chats del usuario para notificaciones globales
-                    @php
-                        $userChats = Auth::user()->chats()->get();
-                    @endphp
-                    
-                    @foreach($userChats as $userChat)
-                        window.Echo.private(`chat.{{ $userChat->id }}`)
-                            .listen('.MessageSent', (e) => {
-                                // e.mensaje ya viene estructurado por el cambio anterior en el evento
-                                const msg = e.mensaje;
-                                
-                                if (msg.sender_id != {{ Auth::id() }}) {
-                                    // 1. Actualizar contadores de burbujas en el layout
-                                    const dotDesktop = document.getElementById('unread-count');
-                                    const dotMobile = document.getElementById('unread-count-mobile');
-                                    const dotChatSidebar = document.getElementById(`badge-chat-${msg.chat_id}`);
-                                    
-                                    if (dotDesktop) {
-                                        let current = parseInt(dotDesktop.innerText) || 0;
-                                        dotDesktop.innerText = current + 1;
-                                        dotDesktop.classList.remove('hidden');
-                                    }
-                                    if (dotMobile) {
-                                        let current = parseInt(dotMobile.innerText) || 0;
-                                        dotMobile.innerText = current + 1;
-                                        dotMobile.classList.remove('hidden');
-                                    }
-                                    if (dotChatSidebar) {
-                                        let current = parseInt(dotChatSidebar.innerText) || 0;
-                                        dotChatSidebar.innerText = current + 1;
-                                        dotChatSidebar.classList.remove('hidden');
-                                    }
+    <script>
+        window.addEventListener('load', () => {
+            if (window.FirebaseChat) {
+                const myId = "{{ Auth::id() }}";
+                console.log('🔔 Escuchando notificaciones globales en Firebase para:', myId);
+                
+                window.FirebaseChat.listenToAllChats(myId, (chatData, chatId) => {
+                    // Solo notificar si el último mensaje NO lo enviamos nosotros
+                    if (chatData.last_sender_id != myId && chatData.last_message) {
+                        
+                        // 1. Actualizar burbujas en el layout
+                        const dotDesktop = document.getElementById('unread-count');
+                        const dotMobile = document.getElementById('unread-count-mobile');
+                        const dotChatSidebar = document.getElementById(`badge-chat-${chatId}`);
+                        
+                        if (dotDesktop) dotDesktop.classList.remove('hidden');
+                        if (dotMobile) dotMobile.classList.remove('hidden');
+                        if (dotChatSidebar) dotChatSidebar.classList.remove('hidden');
 
-                                    // 2. Solo mostrar alerta si NO estamos en la página de ese chat específico
-                                    if (!document.getElementById('mensajes-container')) {
-                                        Swal.fire({
-                                            title: 'Nuevo Mensaje',
-                                            text: msg.contenido,
-                                            icon: 'info',
-                                            toast: true,
-                                            position: 'top-end',
-                                            showConfirmButton: false,
-                                            timer: 4000,
-                                            timerProgressBar: true,
-                                            didOpen: (toast) => {
-                                                toast.addEventListener('mouseenter', Swal.stopTimer)
-                                                toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                                toast.addEventListener('click', () => {
-                                                    window.location.href = `/chats/${msg.chat_id}`;
-                                                })
-                                            }
-                                        });
-                                    }
+                        // 2. Alerta visual (Toast) si no estamos viendo ese chat
+                        const urlParams = window.location.pathname;
+                        if (!urlParams.includes(`/chats/${chatId}`)) {
+                             Swal.fire({
+                                title: 'Nuevo Mensaje',
+                                text: chatData.last_message,
+                                icon: 'info',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 4000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('click', () => {
+                                        window.location.href = `/chats/${chatId}`;
+                                    })
                                 }
                             });
-                    @endforeach
-                }
-            });
-        </script>
+                        }
+                    }
+                });
+            }
+        });
+    </script>
     @endauth
     @stack('scripts')
     @auth

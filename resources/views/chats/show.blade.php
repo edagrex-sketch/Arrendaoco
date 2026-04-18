@@ -344,92 +344,54 @@
         replyPreview.classList.add('hidden');
     }
 
-    // Escucha de tiempo real con Laravel Echo
+    // Escucha de tiempo real con Firebase Firestore
     window.addEventListener('load', () => {
-        if (window.Echo) {
-            window.Echo.private(`chat.{{ $chat->id }}`)
-                .listen('.MessageSent', (e) => {
-                    appendMessage(e.mensaje, false);
-                    container.scrollTop = container.scrollHeight;
-                })
-                .listen('.MessagesRead', (e) => {
-                    // Si nosotros enviamos los mensajes, marcarlos como leídos (doble tick)
-                    document.querySelectorAll('.message-status').forEach(el => {
-                        el.innerHTML = `
-                            <svg class="w-3.5 h-3.5 text-[#669BBC]" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M17.41,6.59L15,9.17L11,5.17L9.59,6.58L15,12L18.83,8.17L17.41,6.59M11.59,12.59L9,15.17L5,11.17L3.59,12.58L9,18L13,14L11.59,12.59Z"/>
-                            </svg>
-                        `;
-                    });
+        const myId = "{{ Auth::id() }}";
+        const otroId = "{{ $chat->getOtroUsuario(Auth::id())->id }}";
+        
+        if (window.FirebaseChat) {
+            console.log('🔥 Conectando a Firebase para chat:', myId, 'y', otroId);
+            window.FirebaseChat.listenToMessages(myId, otroId, (messages) => {
+                // Limpiar container antes de renderizar (o manejar deltas)
+                // Para simplificar ahora, si hay mensajes nuevos, los agregamos.
+                // Pero Firestore devuelve toda la colección en orden.
+                container.innerHTML = ''; 
+                messages.forEach(msg => {
+                    appendMessage({
+                        id: msg.id,
+                        contenido: msg.text,
+                        sender_id: msg.sender_id,
+                        created_at: msg.created_at?.toDate() || new Date(),
+                        tipo: msg.tipo || 'texto'
+                    }, msg.sender_id == myId);
                 });
+                container.scrollTop = container.scrollHeight;
+            });
+        } else {
+            console.error('❌ FirebaseChat no está disponible. Asegúrate de que los assets estén compilados.');
         }
     });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const contenido = input.value.trim();
-        const parentId = parentInput.value;
         if (!contenido) return;
 
-        // --- OPTIMISTIC UI: Añadir mensaje al instante ---
-        const tempId = 'temp-' + Date.now();
-        const tempMsg = {
-            id: tempId,
-            contenido: contenido,
-            sender_id: {{ Auth::id() }},
-            created_at: new Date().toISOString(),
-            isTemp: true,
-            parent: parentId ? {
-                sender_nombre: replySender.innerText,
-                contenido: replyContent.innerText
-            } : null
-        };
-        
-        appendMessage(tempMsg, true);
-        container.scrollTop = container.scrollHeight;
+        const myId = "{{ Auth::id() }}";
+        const otroId = "{{ $chat->getOtroUsuario(Auth::id())->id }}";
         
         input.value = '';
         cancelReply();
         
         try {
-            const response = await fetch("{{ route('chats.messages.send', $chat->id) }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': "{{ csrf_token() }}",
-                    'X-Socket-ID': window.Echo ? window.Echo.socketId() : null
-                },
-                body: JSON.stringify({ contenido, parent_id: parentId })
+            await window.FirebaseChat.sendFirebaseMessage(myId, otroId, contenido, {
+                inmueble_id: "{{ $chat->inmueble_id }}",
+                otro_nombre: "{{ $chat->getOtroUsuario(Auth::id())->nombre }}"
             });
-
-            const data = await response.json();
-            if (data.success) {
-                // Reemplazar el mensaje temporal con el real
-                const tempEl = document.querySelector(`[data-id="${tempId}"]`);
-                if (tempEl) {
-                    tempEl.dataset.id = data.mensaje.id;
-                    tempEl.classList.remove('opacity-70'); // Quitar efecto de "enviando"
-                    
-                    // Actualizar el status (ticks)
-                    const statusDiv = tempEl.closest('.max-w-\[85\%\]').querySelector('.message-status');
-                    if(statusDiv) {
-                        statusDiv.dataset.messageId = data.mensaje.id;
-                    }
-                }
-            }
+            console.log('✅ Mensaje enviado a Firebase');
         } catch (error) {
-            console.error('Error enviando mensaje:', error);
-            const tempEl = document.querySelector(`[data-id="${tempId}"]`);
-            if (tempEl) {
-                tempEl.classList.remove('opacity-70');
-                tempEl.classList.add('border-red-400', 'border-2'); // Borde rojo sutil
-                
-                // Añadir texto de error pequeño
-                const errorText = document.createElement('p');
-                errorText.className = 'text-[10px] text-red-500 font-bold mt-1 text-right';
-                errorText.innerText = '⚠️ Error al enviar. Por favor reintenta.';
-                tempEl.after(errorText);
-            }
+            console.error('❌ Error enviando mensaje a Firebase:', error);
+            alert('Error al enviar el mensaje. Intenta de nuevo.');
         }
     });
 

@@ -87,5 +87,76 @@ class SocialAuthController extends Controller
                 'error' => 'Error al procesar tu cuenta: ' . $e->getMessage()
             ]);
         }
+    /**
+     * Maneja el login desde la API (App Móvil) usando un token de Google.
+     */
+    public function handleApiGoogleLogin(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'access_token' => 'required',
+        ]);
+
+        try {
+            // Usamos stateless para que no intente usar sesiones
+            // userFromToken funciona con el access_token obtenido en el móvil
+            $socialUser = Socialite::driver('google')->stateless()->userFromToken($request->access_token);
+        } catch (\Exception $e) {
+            Log::error('Error Google API login: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Token de Google inválido o expirado.'
+            ], 401);
+        }
+
+        try {
+            $user = Usuario::where('google_id', $socialUser->getId())
+                ->orWhere('email', $socialUser->getEmail())
+                ->first();
+
+            if ($user) {
+                if (!$user->google_id) {
+                    $user->update(['google_id' => $socialUser->getId()]);
+                }
+                if ($socialUser->getAvatar() && !$user->foto_perfil) {
+                    $user->update(['foto_perfil' => $socialUser->getAvatar()]);
+                }
+            } else {
+                $user = Usuario::create([
+                    'nombre' => $socialUser->getName() ?? $socialUser->getNickname() ?? 'Usuario Google',
+                    'email' => $socialUser->getEmail(),
+                    'google_id' => $socialUser->getId(),
+                    'foto_perfil' => $socialUser->getAvatar(),
+                    'password' => null,
+                    'estatus' => 'activo',
+                ]);
+                $user->asignarRol('inquilino');
+            }
+
+            if ($user->estatus !== 'activo') {
+                return response()->json(['message' => 'Cuenta desactivada.'], 403);
+            }
+
+            // Generar token de Sanctum
+            $token = $user->createToken('mobile-auth')->plainTextToken;
+
+            return response()->json([
+                'success' => true,
+                'token' => $token,
+                'usuario' => [
+                    'id' => $user->id,
+                    'nombre' => $user->nombre,
+                    'email' => $user->email,
+                    'rol' => $user->roles()->first()?->nombre ?? 'inquilino',
+                    'roles' => $user->roles()->pluck('nombre'),
+                    'public_id' => (string)$user->id,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar el usuario: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

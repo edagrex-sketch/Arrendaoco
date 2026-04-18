@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\ChatController;
 // Auth
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/google-login', [\App\Http\Controllers\Auth\SocialAuthController::class, 'handleApiGoogleLogin']);
 
 // Inmuebles Públicos
 Route::get('/inmuebles/public-list', [InmuebleController::class, 'publicList']);
