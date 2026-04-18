@@ -261,10 +261,10 @@
 
                     <div class="pt-6 mt-4 border-t border-white/10 space-y-4">
                         @auth
-                            <div class="flex items-center gap-3 px-4 py-2">
+                            <a href="{{ route('perfil.index') }}" class="flex items-center gap-3 px-4 py-2 hover:bg-white/5 rounded-2xl transition-all">
                                 @if (Auth::user()->foto_perfil)
                                     <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}"
-                                        alt="Perfil" class="h-12 w-12 rounded-full border-2 border-[#669BBC]">
+                                        alt="Perfil" class="h-12 w-12 rounded-full border-2 border-[#669BBC] object-cover">
                                 @else
                                     <div class="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center text-xl">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -279,21 +279,27 @@
                                     <div class="text-white font-bold">{{ Auth::user()->nombre }}</div>
                                     <div class="text-gray-400 text-xs">{{ Auth::user()->email }}</div>
                                 </div>
-                            </div>
+                            </a>
 
-                            @if (Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
-                                <div class="bg-white/5 rounded-2xl p-2 space-y-1">
-                                    <div class="px-4 py-2 text-[10px] font-black text-[#669BBC] uppercase tracking-widest">
-                                        Panel Admin</div>
+                            <div class="bg-white/5 rounded-2xl p-1 space-y-1">
+                                <a href="{{ route('perfil.index') }}"
+                                    class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-white hover:bg-white/5 rounded-xl">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12c0 2.754 1.144 5.24 2.993 7.025l.023.023c.311.311.751.487 1.25.487h11.166c.499 0 .939-.176 1.25-.487l.023-.023zm-6.935-4.347a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                                    </svg>
+                                    Mi Perfil
+                                </a>
+
+                                @if (Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
                                     <a href="{{ route('admin.dashboard') }}"
                                         class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-white hover:bg-white/5 rounded-xl">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#669BBC]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                                         </svg>
-                                        Ir al Panel de Administración
+                                        Panel de Administración
                                     </a>
-                                </div>
-                            @endif
+                                @endif
+                            </div>
 
                             @if (Auth::user()->tieneRol('propietario'))
                                 <a href="{{ route('inmuebles.create') }}"
