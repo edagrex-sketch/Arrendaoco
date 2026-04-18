@@ -4,6 +4,51 @@
 
 @section('content')
     <div class="max-w-4xl mx-auto" x-data="wizardForm">
+        {{-- Alerta de Configuración Bancaria (Usuarios Nuevos / Propietarios) --}}
+        @if(auth()->check() && !auth()->user()->stripe_onboarding_completed)
+        <div x-data="{ showBankingModal: true }" 
+             x-show="showBankingModal" 
+             class="fixed inset-0 z-[100] flex items-center justify-center bg-[#003049]/80 backdrop-blur-sm px-4"
+             style="display: none;" x-cloak>
+            
+            <div x-show="showBankingModal"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-90 translate-y-8"
+                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                 <!-- El modal ahora es obligatorio form-bloqueante al no tener función de cierre -->
+                 class="bg-white rounded-[2rem] shadow-2xl max-w-2xl w-full relative overflow-hidden mt-10">
+                 
+                 <div class="flex flex-col md:flex-row items-stretch">
+                     <!-- Columna Izquierda: Texto -->
+                     <div class="p-8 pb-10 md:w-3/5">
+                         <h2 class="text-2xl font-black text-[#003049] mb-4 leading-tight">¡Estás a un paso de recibir pagos! 💸</h2>
+                         <p class="text-gray-600 mb-6 leading-relaxed text-sm">
+                             Al publicar tu primer inmueble comenzarás tu camino como <strong>propietario</strong>.<br><br>
+                             <strong>Necesitamos que vincules una cuenta bancaria o CLABE</strong> de forma segura con Stripe para que te lleguen tus pagos. Sin una cuenta configurada, tus inquilinos no podrán realizar transferencias automáticas desde la App.
+                         </p>
+                         
+                         <div class="flex flex-col sm:flex-row gap-3 relative z-20 mt-4">
+                             <a href="{{ route('stripe.connect.onboard') }}" class="w-full bg-[#C1121F] text-white font-bold py-3 px-4 rounded-xl text-center hover:bg-[#780000] shadow-lg shadow-[#C1121F]/30 transition-all text-sm flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg> 
+                                Vincular Cuenta Ahora
+                             </a>
+                         </div>
+                     </div>
+    
+                     <!-- Columna Derecha: Lottie Animation -->
+                     <div class="md:w-2/5 bg-[#FDF0D5]/40 hidden md:flex items-center justify-center relative overflow-hidden">
+                         <!-- Círculo decorativo -->
+                         <div class="absolute inset-0 m-auto w-40 h-40 bg-[#FDF0D5] rounded-full blur-2xl"></div>
+                         
+                         <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+                         <div class="w-64 h-64 relative z-10 translate-y-6 -translate-x-2">
+                             <lottie-player src="https://assets4.lottiefiles.com/packages/lf20_syqnfe7c.json" background="transparent" speed="1" style="width: 100%; height: 100%;" loop autoplay></lottie-player>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+        </div>
+        @endif
 
         {{-- Encabezado de Steppers (Actualizado a 4 pasos) --}}
         <div class="mb-8 text-center">
@@ -446,96 +491,8 @@
                         <input type="hidden" name="clausulas_extra" x-bind:value="incluirClausulas === 'si' ? clausulas.filter(c => c.trim() !== '').join('\n\n') : ''">
                     </div>
 
-                    {{-- Datos Bancarios (Verificación/Captura) --}}
-                    @if(auth()->check())
-                    <div class="mt-8 bg-slate-50 p-5 rounded-xl border border-gray-200">
-                        <h3 class="font-bold text-[#003049] mb-2 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                            ¿Dónde recibirás tus pagos?
-                        </h3>
-                        
-                        <template x-if="tieneDatosBancarios">
-                            <div class="mb-5">
-                                <p class="text-sm text-slate-500 mb-4">Ya tienes datos bancarios registrados en tu perfil. ¿Qué deseas hacer?</p>
-                                <div class="flex flex-col sm:flex-row gap-4">
-                                    <label class="flex items-center gap-3 cursor-pointer bg-white px-4 py-3 rounded-lg border border-gray-200 flex-1 hover:border-[#003049] transition-colors shadow-sm">
-                                        <input type="radio" x-model="usarDatosExistentes" value="si" name="usar_datos_existentes" class="text-[#003049] focus:ring-[#003049] h-4 w-4">
-                                        <span class="text-sm font-medium text-slate-700">Usar cuenta actual</span>
-                                    </label>
-                                    <label class="flex items-center gap-3 cursor-pointer bg-white px-4 py-3 rounded-lg border border-gray-200 flex-1 hover:border-[#003049] transition-colors shadow-sm">
-                                        <input type="radio" x-model="usarDatosExistentes" value="no" name="usar_datos_existentes" class="text-[#003049] focus:ring-[#003049] h-4 w-4">
-                                        <span class="text-sm font-medium text-slate-700">Agregar nueva tarjeta o cuenta</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </template>
-                        
-                        <template x-if="!tieneDatosBancarios">
-                            <input type="hidden" name="usar_datos_existentes" value="no">
-                        </template>
-
-                        <div x-show="!tieneDatosBancarios || usarDatosExistentes === 'no'" x-transition :class="{'pt-4 border-t border-gray-200 mt-2': tieneDatosBancarios}">
-                            <p class="text-sm text-slate-500 mb-4" x-show="!tieneDatosBancarios">Ingresa tu CLABE interbancaria o datos de tarjeta para que los inquilinos puedan pagarte desde la App.</p>
-                            
-                            <div class="flex gap-4 mb-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" x-model="metodoPagoRegistro" value="clabe" name="metodo_registro" checked class="text-[#003049] focus:ring-[#003049]">
-                                    <span class="text-sm font-medium">Cuenta o CLABE</span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" x-model="metodoPagoRegistro" value="tarjeta" name="metodo_registro" class="text-[#003049] focus:ring-[#003049]">
-                                    <span class="text-sm font-medium">Tarjeta</span>
-                                </label>
-                            </div>
-
-                            {{-- Formulario Cuenta / CLABE --}}
-                            <div x-show="metodoPagoRegistro === 'clabe'" x-transition class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Banco <span class="text-red-500">*</span></label>
-                                    <select name="banco" class="w-full rounded-lg border-gray-300 bg-white border py-2 px-3 focus:ring-[#003049]/20 focus:border-[#003049]" x-bind:required="(!tieneDatosBancarios || usarDatosExistentes === 'no') && metodoPagoRegistro === 'clabe'">
-                                        <option value="" disabled selected>Selecciona un banco</option>
-                                        <option value="BBVA">BBVA</option>
-                                        <option value="Citibanamex">Citibanamex</option>
-                                        <option value="Santander">Santander</option>
-                                        <option value="Banorte">Banorte</option>
-                                        <option value="HSBC">HSBC</option>
-                                        <option value="Scotiabank">Scotiabank</option>
-                                        <option value="Inbursa">Inbursa</option>
-                                        <option value="Otro">Otro banco</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Cuenta o CLABE (10 a 18 dígitos) <span class="text-red-500">*</span></label>
-                                    <input type="text" name="clabe" pattern="\d{10,18}" maxlength="18" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Ej. 1234567890123456" class="w-full rounded-lg border-gray-300 bg-white border py-2 px-3 focus:ring-[#003049]/20 focus:border-[#003049]" x-bind:required="(!tieneDatosBancarios || usarDatosExistentes === 'no') && metodoPagoRegistro === 'clabe'">
-                                </div>
-                            </div>
-
-                            {{-- Formulario Tarjeta --}}
-                            <div x-show="metodoPagoRegistro === 'tarjeta'" x-transition class="mt-4 pt-4 border-t border-gray-200/50">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                    <div class="space-y-2">
-                                        <label class="block text-sm font-medium mb-1">Número de Tarjeta <span class="text-red-500">*</span></label>
-                                        <input type="text" name="tarjeta_numero" placeholder="**** **** **** ****"
-                                            class="w-full bg-white border-2 border-gray-300 rounded-xl px-4 py-2 focus:border-[#003049] focus:ring-0 transition-colors placeholder-gray-300 font-medium" x-bind:required="(!tieneDatosBancarios || usarDatosExistentes === 'no') && metodoPagoRegistro === 'tarjeta'">
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-5">
-                                        <div class="space-y-2">
-                                            <label class="block text-sm font-medium mb-1">Expiración <span class="text-red-500">*</span></label>
-                                            <input type="text" name="tarjeta_exp" placeholder="MM/YY"
-                                                class="w-full bg-white border-2 border-gray-300 rounded-xl px-4 py-2 focus:border-[#003049] focus:ring-0 transition-colors placeholder-gray-300 font-medium" x-bind:required="(!tieneDatosBancarios || usarDatosExistentes === 'no') && metodoPagoRegistro === 'tarjeta'">
-                                        </div>
-                                        <div class="space-y-2">
-                                            <label class="block text-sm font-medium mb-1">CVC <span class="text-red-500">*</span></label>
-                                            <input type="text" name="tarjeta_cvc" placeholder="123"
-                                                class="w-full bg-white border-2 border-gray-300 rounded-xl px-4 py-2 focus:border-[#003049] focus:ring-0 transition-colors placeholder-gray-300 font-medium" x-bind:required="(!tieneDatosBancarios || usarDatosExistentes === 'no') && metodoPagoRegistro === 'tarjeta'">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
                 </div>
+
 
                 {{-- ==========================================
                      PASO 4: ARCHIVOS
@@ -748,7 +705,7 @@
                 },
 
                 get minPrecio() {
-                    return this.tipo === 'Cuarto' ? 300 : 500;
+                    return 10;
                 },
 
                 calcularm2() {

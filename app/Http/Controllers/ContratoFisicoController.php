@@ -193,7 +193,7 @@ class ContratoFisicoController extends Controller
         });
 
         // Si ya tiene session de stripe... no generar de nuevo (en este caso lo pasamos si ya se registró el PI, pero como es en el success que lo registramos, aquí sólo mandamos a pagar) 
-        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
         try {
             $paymentIntentData = [
                 'capture_method' => 'manual',

@@ -273,7 +273,7 @@ Route::middleware('auth')->group(function () {
             } catch (\Exception $e) {}
 
             \Illuminate\Support\Facades\DB::commit();
-            return redirect()->route('inmuebles.index')->with('success', '¡Solicitud aprobada! El inquilino ha sido notificado y ahora podrá descargar el contrato PDF.');
+            return redirect()->route('inmuebles.index')->with('success', '¡Solicitud aprobada! El inquilino ha sido notificado y la descarga del contrato PDF va a comenzar.')->with('download_contrato', $contrato->id);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
             return back()->with('error', 'Error al aprobar: ' . $e->getMessage());

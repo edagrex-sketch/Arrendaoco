@@ -330,27 +330,11 @@ class InmuebleController extends Controller
                 'required',
                 'numeric',
                 'min:0',
-                function ($attribute, $value, $fail) use ($request) {
-                    if ($request->tipo === 'Cuarto' && $value < 300) {
-                        $fail('La renta mínima para cuartos es de $300.');
-                    }
-                    if (in_array($request->tipo, ['Departamento', 'Casa']) && $value < 500) {
-                        $fail('La renta mínima para este tipo de propiedad es de $500.');
-                    }
-                },
             ],
             'deposito' => [
                 'nullable',
                 'numeric',
                 'min:0',
-                function ($attribute, $value, $fail) use ($request) {
-                    if ($request->tipo === 'Cuarto' && $value < 300) {
-                        $fail('El depósito mínimo para cuartos es de $300.');
-                    }
-                    if (in_array($request->tipo, ['Departamento', 'Casa']) && $value < 500) {
-                        $fail('El depósito mínimo para este tipo de propiedad es de $500.');
-                    }
-                },
             ],
             'habitaciones' => 'required|integer|min:0',
             'banos_casa' => 'required|string',
@@ -480,27 +464,11 @@ class InmuebleController extends Controller
                 'required',
                 'numeric',
                 'min:0',
-                function ($attribute, $value, $fail) use ($inmueble) {
-                    if ($inmueble->tipo === 'Cuarto' && $value < 300) {
-                        $fail('La renta mínima para cuartos es de $300.');
-                    }
-                    if (in_array($inmueble->tipo, ['Departamento', 'Casa']) && $value < 500) {
-                        $fail('La renta mínima para este tipo de propiedad es de $500.');
-                    }
-                },
             ],
             'deposito' => [
                 'nullable',
                 'numeric',
                 'min:0',
-                function ($attribute, $value, $fail) use ($inmueble) {
-                    if ($inmueble->tipo === 'Cuarto' && $value < 300) {
-                        $fail('El depósito mínimo para cuartos es de $300.');
-                    }
-                    if (in_array($inmueble->tipo, ['Departamento', 'Casa']) && $value < 500) {
-                        $fail('El depósito mínimo para este tipo de propiedad es de $500.');
-                    }
-                },
             ],
             'contrato_documento' => 'nullable|file|mimes:pdf|max:5120',
         ]);
