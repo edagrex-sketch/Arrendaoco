@@ -316,7 +316,7 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <a href="{{ route('login') }}"
                                     class="flex items-center justify-center px-4 py-4 bg-white/5 text-white font-bold rounded-2xl border border-white/10">
-                                    Entrar
+                                    Iniciar sesión
                                 </a>
                                 <a href="{{ route('registro') }}"
                                     class="flex items-center justify-center px-4 py-4 bg-[#FDF0D5] text-[#003049] font-black rounded-2xl shadow-xl">
