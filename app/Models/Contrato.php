@@ -24,6 +24,7 @@ class Contrato extends Model
         'renta_mensual',
         'deposito',
         'estatus',
+        'stripe_payment_intent_id',
         // ── Flujo físico (firma digital eliminada) ──────────────────
         'archivo_firmado',      // Escaneo del contrato firmado (subido por propietario)
         'pdf_descargado_at',    // Timestamp de primer descarga del PDF

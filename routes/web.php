@@ -174,6 +174,27 @@ Route::middleware('auth')->group(function () {
     Route::post('/inmuebles/{inmueble}/confirmar-renta',
         [\App\Http\Controllers\ContratoFisicoController::class, 'confirmarYDescargar']
     )->name('contratos.confirmar');
+    Route::get('/contratos/{contrato}/stripe-reserva-success', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
+        if ($request->has('session_id')) {
+            \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+            $session = \Stripe\Checkout\Session::retrieve($request->session_id);
+            if ($session->payment_status !== 'paid' && $session->payment_status !== 'unpaid') {
+                return redirect()->route('inmuebles.mis_rentas')->with('error', 'La validación de fondos no fue completada.');
+            }
+            
+            if ($session->payment_intent) {
+                $pi = \Stripe\PaymentIntent::retrieve($session->payment_intent);
+                if ($pi->status === 'requires_capture') {
+                    $contrato->stripe_payment_intent_id = $pi->id;
+                    $contrato->save();
+                }
+            }
+        }
+
+        return redirect()->route('inmuebles.mis_rentas')
+            ->with('success', '¡Fondos verificados y solicitud enviada exitosamente! Se ha notificado al propietario de tu interés. Podrás descargar el contrato PDF en cuanto sea aprobado.');
+    })->name('contratos.stripe.reserva.success');
+
     Route::get('/contratos/{contrato}/descargar-registrar',
         [\App\Http\Controllers\ContratoFisicoController::class, 'registrarDescarga']
     )->name('contratos.descargar-registrar');
@@ -228,6 +249,19 @@ Route::middleware('auth')->group(function () {
                 $contrato->plazo = $plazoText;
             }
 
+            if ($contrato->stripe_payment_intent_id) {
+                \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+                try {
+                    $pi = \Stripe\PaymentIntent::retrieve($contrato->stripe_payment_intent_id);
+                    if ($pi->status === 'requires_capture') {
+                        $pi->capture();
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\DB::rollBack();
+                    return back()->with('error', 'Error al capturar los fondos en Stripe: ' . $e->getMessage());
+                }
+            }
+
             // 1. Aprobar la renta: pasa a estado donde el inquilino puede descargar
             $contrato->estatus = 'pdf_descargado';
             $contrato->save();
@@ -254,6 +288,18 @@ Route::middleware('auth')->group(function () {
 
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
+            if ($contrato->stripe_payment_intent_id) {
+                \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+                try {
+                    $pi = \Stripe\PaymentIntent::retrieve($contrato->stripe_payment_intent_id);
+                    if ($pi->status === 'requires_capture' || $pi->status === 'requires_action') {
+                        $pi->cancel();
+                    }
+                } catch (\Exception $e) {
+                    // Continuar en caso de error para asegurar cancelación de la solicitud
+                }
+            }
+            
             // 1. Marcar contrato como rechazado
             $contrato->update(['estatus' => 'rechazado']);
 
@@ -294,6 +340,17 @@ Route::middleware('auth')->group(function () {
 
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
+            if ($contrato->stripe_payment_intent_id && $contrato->estatus === 'pendiente_aprobacion') {
+                \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+                try {
+                    $pi = \Stripe\PaymentIntent::retrieve($contrato->stripe_payment_intent_id);
+                    if ($pi->status === 'requires_capture' || $pi->status === 'requires_action') {
+                        $pi->cancel();
+                    }
+                } catch (\Exception $e) {
+                }
+            }
+
             // 1. Marcar el contrato como cancelado (mantener historial)
             $contrato->update(['estatus' => 'cancelado']);
 
@@ -433,6 +490,13 @@ Route::post('/reset-password', function (\Illuminate\Http\Request $request) {
 })->name('password.update');
 
 
+// ─── Rutas Stripe Connect (Propietarios) ────────────────────────────────
+Route::middleware('auth')->prefix('stripe-connect')->group(function () {
+    Route::get('/onboard', [\App\Http\Controllers\StripeConnectController::class, 'onboard'])->name('stripe.connect.onboard');
+    Route::get('/return', [\App\Http\Controllers\StripeConnectController::class, 'handleReturn'])->name('stripe.connect.return');
+    Route::get('/refresh', [\App\Http\Controllers\StripeConnectController::class, 'handleRefresh'])->name('stripe.connect.refresh');
+});
+
 // ─── Rutas de Pago (flujo mensual vigente) ────────────────────────────────
 // NOTA: El checkout inicial (wizard + hold) fue eliminado en la Fase 0.
 // Los contratos ahora se inician desde ContratoFisicoController@verContrato.
@@ -442,7 +506,7 @@ Route::middleware('auth')->prefix('pagos')->group(function () {
         \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
 
         try {
-            $session = \Stripe\Checkout\Session::create([
+            $sessionData = [
                 'payment_method_types' => ['card', 'oxxo'], // Providing both to allow selection
                 'line_items' => [[
                     'price_data' => [
@@ -458,7 +522,17 @@ Route::middleware('auth')->prefix('pagos')->group(function () {
                 'mode' => 'payment',
                 'success_url' => route('pagos.stripe.mensualidad.success', ['contrato' => $contrato->id]) . '?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('inmuebles.mis_rentas'),
-            ]);
+            ];
+
+            if ($contrato->inmueble && $contrato->inmueble->propietario && $contrato->inmueble->propietario->stripe_account_id && $contrato->inmueble->propietario->stripe_onboarding_completed) {
+                $sessionData['payment_intent_data'] = [
+                    'transfer_data' => [
+                        'destination' => $contrato->inmueble->propietario->stripe_account_id
+                    ]
+                ];
+            }
+
+            $session = \Stripe\Checkout\Session::create($sessionData);
 
             return redirect()->away($session->url);
         } catch (\Exception $e) {

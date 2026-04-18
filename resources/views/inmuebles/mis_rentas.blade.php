@@ -378,144 +378,192 @@
 
                 <!-- Columna Derecha / Pagos y Transacciones -->
                 <div class="lg:w-2/3">
+                    
                     <!-- Sección de Pagos Pendientes -->
-                    <div class="mb-16">
-                        <div class="flex items-center gap-3 mb-8">
-                            <div class="h-8 w-1 bg-[#C1121F] rounded-full"></div>
-                            <h2 class="text-3xl font-black text-[#003049] tracking-tight">Pagos Pendientes</h2>
+                    <div class="mb-14">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="h-8 w-1.5 bg-[#C1121F] rounded-full"></div>
+                                <h2 class="text-2xl font-black text-[#003049] tracking-tight">Pagos Pendientes</h2>
+                            </div>
+                            @if($pagosPendientes->count() > 0)
+                                <div class="bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full border border-red-200">
+                                    {{ $pagosPendientes->count() }} por pagar
+                                </div>
+                            @endif
                         </div>
                         
-                        <div class="grid grid-cols-1 gap-6">
-                    @forelse($pagosPendientes as $pago)
-                        <!-- Card de Pago Pendiente (Ejemplo UI) -->
-                        <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-8 group hover:border-[#669BBC]/30 transition-all duration-300">
-                            <div class="flex items-center gap-6 w-full md:w-auto">
-                                <div class="h-20 w-20 rounded-3xl bg-[#FDF0D5] flex items-center justify-center text-3xl shadow-inner group-hover:scale-105 transition-transform shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-8 h-8 text-[#003049]">
-                                        <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div class="min-w-0">
-                                    <h3 class="text-xl font-bold text-[#003049] mb-1 line-clamp-1">{{ $pago->concepto }}</h3>
-                                    <p class="text-gray-500 text-sm font-medium line-clamp-1">{{ $pago->contrato->inmueble->titulo ?? 'Propiedad' }}</p>
-                                    <div class="flex items-center gap-2 mt-2">
-                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-[10px] font-black uppercase tracking-widest rounded-full">Pendiente</span>
+                        <div class="grid grid-cols-1 gap-5">
+                            @forelse($pagosPendientes as $pago)
+                                <!-- Card de Pago Pendiente -->
+                                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden group hover:shadow-md transition-shadow">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#C1121F]"></div>
+                                    
+                                    <div class="flex items-center gap-5 w-full sm:w-auto pl-2">
+                                        <div class="h-16 w-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500 shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h3 class="text-lg font-bold text-[#003049] mb-0.5 line-clamp-1">{{ $pago->concepto }}</h3>
+                                            <p class="text-slate-500 text-sm mb-2 line-clamp-1 truncatemax-w-[200px]">{{ $pago->contrato->inmueble->titulo ?? 'Propiedad' }}</p>
+                                            
+                                            @php
+                                                $diaPago = \Carbon\Carbon::parse($pago->contrato->fecha_inicio)->day;
+                                                $vence = \Carbon\Carbon::create($pago->anio, $pago->mes, $diaPago);
+                                                if (now()->day > $diaPago && $pago->mes == now()->month && $pago->anio == now()->year) {
+                                                    $vence->addMonth(); // Fallback date si ya pasó este mes
+                                                }
+                                                $diasRestantes = now()->startOfDay()->diffInDays($vence, false);
+                                            @endphp
+                                            
+                                            <div class="flex items-center gap-2">
+                                                <span class="px-2.5 py-1 bg-red-100/80 text-red-700 text-[10px] font-black uppercase tracking-widest rounded-lg border border-red-200">Pendiente</span>
+                                                <span class="text-xs font-semibold {{ $diasRestantes < 0 ? 'text-red-500' : 'text-slate-500' }}">
+                                                    {{ $diasRestantes < 0 ? 'Atrasado' : 'Vence el ' . $vence->format('d M, Y') }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col sm:items-end w-full sm:w-auto shrink-0 border-t sm:border-t-0 sm:border-l border-slate-100 pt-4 sm:pt-0 sm:pl-6">
+                                        <p class="text-sm font-semibold text-slate-400 mb-1">Monto a pagar</p>
+                                        <p class="text-2xl font-black text-[#003049] mb-4">${{ number_format($pago->monto, 2) }}</p>
+                                        
+                                        <form action="{{ route('pagos.stripe.mensualidad', $pago->contrato) }}" method="POST" class="w-full">
+                                            @csrf
+                                            <button type="submit" class="w-full text-center px-6 py-2.5 bg-[#003049] text-white font-bold rounded-xl shadow-lg shadow-[#003049]/20 hover:bg-[#002538] hover:-translate-y-0.5 transition-all outline-none">
+                                                Pagar Ahora
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="flex flex-col md:items-end w-full md:w-auto shrink-0 mt-4 md:mt-0">
-                                <p class="text-3xl font-black text-[#003049] mb-1">${{ number_format($pago->monto, 2) }} <span class="text-sm font-bold text-gray-400">MXN</span></p>
-                                @php
-                                    $diaPago = \Carbon\Carbon::parse($pago->contrato->fecha_inicio)->day;
-                                    $vence = \Carbon\Carbon::create($pago->anio, $pago->mes, $diaPago);
-                                    if (now()->day > $diaPago && $pago->mes == now()->month && $pago->anio == now()->year) {
-                                        $vence->addMonth(); // Fallback date if already passed this month
-                                    }
-                                @endphp
-                                <p class="text-xs text-gray-400 font-bold mb-4">Vence el {{ $vence->format('d/m/Y') }}</p>
-                                <form action="{{ route('pagos.stripe.mensualidad', $pago->contrato) }}" method="POST" class="w-full md:w-auto">
-                                    @csrf
-                                    <button type="submit" class="w-full text-center px-10 py-4 bg-[#003049] text-white font-black rounded-2xl shadow-lg shadow-[#003049]/20 hover:bg-[#002538] hover:-translate-y-1 transition-all active:scale-95">
-                                        Pagar Ahora
-                                    </button>
-                                </form>
-                            </div>
+                            @empty
+                                <div class="bg-white rounded-3xl p-10 text-center shadow-sm border border-slate-100 flex flex-col items-center justify-center">
+                                    <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-5 ring-8 ring-green-50/50">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-[#003049] mb-2">¡Todo al día!</h3>
+                                    <p class="text-slate-500 font-medium">No tienes ningún pago pendiente en este momento.</p>
+                                </div>
+                            @endforelse
                         </div>
-                    @empty
-                        <div class="bg-white rounded-3xl p-8 text-center text-gray-500 border border-gray-100">
-                            ¡Todo al día! No tienes pagos pendientes.
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Historial de Pagos -->
-            <div>
-                <div class="flex items-center justify-between mb-8">
-                    <div class="flex items-center gap-3">
-                        <div class="h-8 w-1 bg-[#669BBC] rounded-full"></div>
-                        <h2 class="text-3xl font-black text-[#003049] tracking-tight">Historial de Transacciones</h2>
                     </div>
-                </div>
 
-                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/40 border border-gray-100 overflow-hidden overflow-x-auto">
-                    <table class="w-full text-left min-w-[700px]">
-                        <thead>
-                            <tr class="bg-[#FDF0D5]/30 border-b border-gray-100">
-                                <th class="px-8 py-5 text-xs font-black text-[#669BBC] uppercase tracking-widest">Concepto</th>
-                                <th class="px-8 py-5 text-xs font-black text-[#669BBC] uppercase tracking-widest">Fecha</th>
-                                <th class="px-8 py-5 text-xs font-black text-[#669BBC] uppercase tracking-widest">Monto</th>
-                                <th class="px-8 py-5 text-xs font-black text-[#669BBC] uppercase tracking-widest text-right">Estado / Recibo</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50">
-                            @php
-                                $todosLosPagos = collect();
-                                foreach($contratos as $c) {
-                                    // 1. Pago Inicial mock (basado en el inicio del contrato)
-                                    $todosLosPagos->push((object)[
-                                        'concepto' => 'Depósito y 1er Mes',
-                                        'subconcepto' => 'Propiedad: ' . ($c->inmueble->titulo ?? 'N/A'),
-                                        'fecha' => \Carbon\Carbon::parse($c->fecha_inicio),
-                                        'monto' => $c->renta_mensual + ($c->deposito ?? 0),
-                                        'estatus' => 'Pagado'
-                                    ]);
-                                    
-                                    // 2. Pagos reales
-                                    if ($c->pagos) {
-                                        foreach($c->pagos as $p) {
-                                            $todosLosPagos->push((object)[
-                                                'concepto' => current(explode(' ', $p->concepto ?? 'Mensualidad')) . ' ' . ($p->mes ?? '') . '/' . ($p->anio ?? ''),
-                                                'subconcepto' => 'Propiedad: ' . ($c->inmueble->titulo ?? 'N/A'),
-                                                'fecha' => \Carbon\Carbon::parse($p->fecha_pago ?? $p->created_at),
-                                                'monto' => $p->total_con_recargo ?? $p->monto,
-                                                'estatus' => $p->estatus
-                                            ]);
+                    <!-- Historial de Pagos -->
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="h-8 w-1.5 bg-[#669BBC] rounded-full"></div>
+                                <h2 class="text-2xl font-black text-[#003049] tracking-tight">Historial de Transacciones</h2>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                            <ul class="divide-y divide-slate-100">
+                                @php
+                                    $todosLosPagos = collect();
+                                    foreach($contratos as $c) {
+                                        // 1. Pago Inicial mock (basado en el inicio del contrato)
+                                        $todosLosPagos->push((object)[
+                                            'id_ref' => 'init_' . $c->id,
+                                            'concepto' => 'Depósito y 1er Mes',
+                                            'subconcepto' => $c->inmueble->titulo ?? 'N/A',
+                                            'fecha' => \Carbon\Carbon::parse($c->fecha_inicio),
+                                            'monto' => $c->renta_mensual + ($c->deposito ?? 0),
+                                            'estatus' => 'Pagado',
+                                            'es_inicial' => true,
+                                            'recibo_url' => null
+                                        ]);
+                                        
+                                        // 2. Pagos reales
+                                        if ($c->pagos) {
+                                            foreach($c->pagos as $p) {
+                                                // Mostrar solo historial (no los pendientes, esos ya están arriba)
+                                                if (strtolower($p->estatus) !== 'pendiente') {
+                                                    $todosLosPagos->push((object)[
+                                                        'id_ref' => 'pago_' . $p->id,
+                                                        'concepto' => current(explode(' ', $p->concepto ?? 'Mensualidad')) . ' ' . str_pad($p->mes ?? '', 2, '0', STR_PAD_LEFT) . '/' . ($p->anio ?? ''),
+                                                        'subconcepto' => $c->inmueble->titulo ?? 'N/A',
+                                                        'fecha' => \Carbon\Carbon::parse($p->fecha_pago ?? $p->created_at),
+                                                        'monto' => $p->total_con_recargo ?? $p->monto,
+                                                        'estatus' => $p->estatus,
+                                                        'es_inicial' => false,
+                                                        'recibo_url' => route('pagos.descargar_recibo', $p->id)
+                                                    ]);
+                                                }
+                                            }
                                         }
                                     }
-                                }
-                                $todosLosPagos = $todosLosPagos->sortByDesc('fecha');
-                            @endphp
+                                    $todosLosPagos = $todosLosPagos->sortByDesc('fecha');
+                                @endphp
 
-                            @forelse($todosLosPagos as $pago)
-                            <tr class="hover:bg-gray-50/50 transition-colors">
-                                <td class="px-8 py-6">
-                                    <div class="flex items-center gap-4">
-                                        <div class="h-10 w-10 rounded-xl bg-[#669BBC]/10 flex items-center justify-center text-lg shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-[#669BBC]">
-                                                <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
+                                @forelse($todosLosPagos as $pago)
+                                    <li class="p-6 sm:px-8 hover:bg-slate-50/70 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div class="flex items-center gap-4">
+                                            <div class="h-12 w-12 rounded-[14px] {{ strtolower($pago->estatus) === 'pagado' ? 'bg-[#669BBC]/10 text-[#669BBC]' : 'bg-slate-100 text-slate-500' }} flex items-center justify-center shrink-0">
+                                                @if(strtolower($pago->estatus) === 'pagado')
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                                @else
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-[#003049] text-base leading-snug">{{ $pago->concepto }}</p>
+                                                <p class="text-sm text-slate-500 flex items-center gap-1.5 mt-0.5">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                                                    <span class="line-clamp-1">{{ $pago->subconcepto }}</span>
+                                                </p>
+                                                <p class="text-[11px] font-bold text-slate-400 mt-1 uppercase tracking-widest sm:hidden">{{ $pago->fecha->format('d M, Y') }}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto mt-2 sm:mt-0">
+                                            <div class="text-left sm:text-right hidden sm:block">
+                                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{{ $pago->fecha->format('d M, Y') }}</p>
+                                                <span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg {{ strtolower($pago->estatus) === 'pagado' ? 'bg-[#669BBC]/10 text-[#003049]' : 'bg-slate-100 text-slate-600' }}">
+                                                    {{ ucfirst($pago->estatus) }}
+                                                </span>
+                                            </div>
+                                            
+                                            <!-- En móvil mostrar monto y estado diferente -->
+                                            <div class="sm:hidden text-left">
+                                                <span class="px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg {{ strtolower($pago->estatus) === 'pagado' ? 'bg-[#669BBC]/10 text-[#003049]' : 'bg-slate-100 text-slate-600' }}">
+                                                    {{ ucfirst($pago->estatus) }}
+                                                </span>
+                                            </div>
+                                            
+                                            <div class="flex flex-col sm:flex-row items-end sm:items-center gap-4 border-l border-slate-100 sm:pl-6 shrink-0">
+                                                <p class="font-black text-xl text-[#003049]">${{ number_format($pago->monto, 2) }}</p>
+                                                @if($pago->recibo_url)
+                                                    <a href="{{ $pago->recibo_url }}" title="Descargar Recibo" class="h-10 w-10 rounded-full bg-slate-50 hover:bg-[#669BBC] text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                    </a>
+                                                @else
+                                                    <div class="h-10 w-10 hidden sm:block"></div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <li class="p-10 text-center">
+                                        <div class="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
-                                        <div>
-                                            <p class="font-bold text-[#003049] whitespace-nowrap">{{ $pago->concepto }}</p>
-                                            <p class="text-xs text-gray-400">{{ $pago->subconcepto }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-6 text-sm font-medium text-gray-600 whitespace-nowrap">{{ $pago->fecha->format('d/m/Y') }}</td>
-                                <td class="px-8 py-6 text-lg font-black text-[#003049] whitespace-nowrap">${{ number_format($pago->monto, 2) }}</td>
-                                <td class="px-8 py-6 text-right">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <span class="px-3 py-1 {{ strtolower($pago->estatus) === 'pagado' ? 'bg-[#669BBC]/20 text-[#003049]' : 'bg-yellow-100 text-yellow-700' }} text-[10px] font-black uppercase tracking-widest rounded-full">{{ ucfirst($pago->estatus) }}</span>
-                                        <button class="p-2 hover:bg-[#669BBC]/10 rounded-lg text-[#669BBC] transition-colors" title="Ver Recibo">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="4" class="px-8 py-6 text-center text-sm font-medium text-gray-500">No hay transacciones todavía.</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                        <p class="text-slate-500 font-medium">Aún no hay transacciones en tu historial.</p>
+                                    </li>
+                                @endforelse
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-        </div>
         @endif
     </div>
 @endsection

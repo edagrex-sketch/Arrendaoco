@@ -45,9 +45,29 @@
                             Publicar Inmueble
                         </a>
                         <a href="{{ route('inmuebles.index') }}"
-                            class="block w-full bg-[#669BBC] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#003049] transition-colors shadow-md">
+                            class="block w-full bg-[#669BBC] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#003049] transition-colors shadow-md mb-2">
                             Mis Propiedades
                         </a>
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            @if(!$usuario->stripe_onboarding_completed)
+                                <a href="{{ route('stripe.connect.onboard') }}"
+                                    class="block w-full bg-[#FDF0D5] border-2 border-[#003049] text-[#003049] font-black py-2.5 px-4 rounded-lg hover:bg-[#003049] hover:text-white transition-colors shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 inline-block -mt-1 mr-1">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+                                    </svg>
+                                    Configurar Cuenta a Recibir Dinero
+                                </a>
+                                <p class="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-wider">Añade tu cuenta banacaria para recibir tus pagos automáticamente.</p>
+                            @else
+                                <div class="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center justify-center gap-2 text-green-700 font-bold text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Cuenta Bancaria Configurada
+                                </div>
+                            @endif
+                        </div>
                     @endif
                 </div>
             </div>

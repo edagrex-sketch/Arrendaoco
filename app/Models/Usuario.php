@@ -23,6 +23,8 @@ class Usuario extends Authenticatable
         'foto_perfil',
         'google_id',
         'facebook_id',
+        'stripe_account_id',
+        'stripe_onboarding_completed',
     ];
     protected $hidden = [
         'password',

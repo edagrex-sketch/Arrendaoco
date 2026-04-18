@@ -157,6 +157,16 @@
                                             </svg>
                                             Mis Propiedades
                                         </a>
+
+                                        @if(!Auth::user()->stripe_onboarding_completed)
+                                            <a href="{{ route('stripe.connect.onboard') }}"
+                                                class="flex items-center gap-3 px-5 py-3 text-[15px] text-[#003049] hover:bg-[#FDF0D5] transition-colors bg-[#FDF0D5]/50 border-y border-[#003049]/10 font-bold">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-[#003049] flex-shrink-0">
+                                                    <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.836 3.836 0 00-1.72.756c-.712.566-1.112 1.35-1.112 2.178 0 .829.4 1.612 1.113 2.178.502.4 1.102.647 1.719.756v2.978a2.536 2.536 0 01-.921-.421l-.879-.66a.75.75 0 00-.9 1.2l.879.66c.533.4 1.169.645 1.821.75V18a.75.75 0 001.5 0v-.81a4.124 4.124 0 001.821-.749c.745-.559 1.179-1.344 1.179-2.191 0-.847-.434-1.632-1.179-2.191a4.122 4.122 0 00-1.821-.75V8.354c.29.082.559.213.786.393l.415.33a.75.75 0 00.933-1.175l-.415-.33a3.836 3.836 0 00-1.719-.755V6z" clip-rule="evenodd" />
+                                                </svg>
+                                                Configurar Cobros
+                                            </a>
+                                        @endif
                                     @endif
 
                                     <a href="{{ route('perfil.index') }}"
@@ -253,6 +263,12 @@
                             class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
                             Mis Propiedades
                         </a>
+                        @if(!Auth::user()->stripe_onboarding_completed)
+                            <a href="{{ route('stripe.connect.onboard') }}"
+                                class="block px-4 py-3 text-[14px] font-bold text-[#FDF0D5] bg-[#003049] hover:bg-[#002538] rounded-2xl transition-all border border-[#FDF0D5]/20 shadow-lg text-center mt-2 mx-4">
+                                Configurar Cobros (Stripe)
+                            </a>
+                        @endif
                     @endif
                     <a href="{{ route('nosotros') }}"
                         class="block px-4 py-4 text-base font-bold text-white hover:bg-white/5 rounded-2xl transition-all">
