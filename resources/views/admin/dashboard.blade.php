@@ -296,3 +296,54 @@
     </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof window.Echo !== 'undefined') {
+            window.Echo.channel('admin-updates')
+                .listen('.nuevo-inmueble', (e) => {
+                    console.log('Nuevo inmueble:', e);
+                    // Mostrar notificación
+                    if (window.Swal) {
+                        Swal.fire({
+                            title: '¡Nueva Propiedad!',
+                            text: `Se ha publicado un nuevo inmueble: ${e.inmueble.titulo}`,
+                            icon: 'success',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        alert('¡Nueva Propiedad publicada! ' + e.inmueble.titulo);
+                        window.location.reload();
+                    }
+                })
+                .listen('.nuevo-usuario', (e) => {
+                    console.log('Nuevo usuario:', e);
+                    if (window.Swal) {
+                        Swal.fire({
+                            title: '¡Nuevo Registro!',
+                            text: `Un nuevo usuario se ha registrado: ${e.usuario.nombre}`,
+                            icon: 'info',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        alert('¡Nuevo Usuario registrado! ' + e.usuario.nombre);
+                        window.location.reload();
+                    }
+                });
+        }
+    });
+</script>
+@endpush
