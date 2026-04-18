@@ -52,7 +52,7 @@ class PerfilController extends Controller
             $usuario->asignarRol('propietario');
         }
 
-        // Logic to redirect to create property would go here, for now redirect to profile with message
-        return redirect()->route('perfil.index')->with('success', '¡Ahora eres Propietario! Puedes publicar inmuebles.');
+        // Redireccionar directamente al formulario de creación para una mejor experiencia de usuario
+        return redirect()->route('inmuebles.create')->with('success', '¡Felicidades! Ahora eres Propietario. Ya puedes publicar tu primer inmueble.');
     }
 }
