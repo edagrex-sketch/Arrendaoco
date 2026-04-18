@@ -131,7 +131,7 @@
                 <button id="btn-aprobar" @click="modalAprobarAbierto = true"
                     class="w-full bg-[#003049] text-white font-bold py-4 px-6 rounded-xl shadow-xl shadow-[#003049]/20 hover:bg-[#002236] hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2 text-lg">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    Aprobar Renta
+                    Aprobar y Descargar Contrato
                 </button>
                 <button id="btn-rechazar" onclick="accionContrato('rechazar')"
                     class="w-full bg-white border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-400 font-bold py-3 px-6 rounded-xl transition-all flex justify-center items-center gap-2">
@@ -223,7 +223,7 @@
             <div class="px-6 pb-6 flex flex-col sm:flex-row gap-3">
                 <button onclick="document.getElementById('form-aprobar').submit();" class="flex-1 bg-[#003049] text-white font-bold py-3 px-4 rounded-xl hover:bg-[#002236] transition-colors flex justify-center items-center gap-2 text-sm z-10 relative">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    Aprobar Renta
+                    Aprobar y Descargar Contrato
                 </button>
                 <button @click="modalAprobarAbierto = false" class="flex-1 bg-white border border-slate-300 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-50 transition-colors text-sm z-10 relative">
                     Cancelar

@@ -192,8 +192,43 @@ class ContratoFisicoController extends Controller
             return $nuevoContrato;
         });
 
-        return redirect()->route('inmuebles.mis_rentas')
-            ->with('success', '¡Solicitud enviada exitosamente! Se ha notificado al propietario de tu interés. Podrás descargar el contrato PDF en cuanto sea aprobado.');
+        // Si ya tiene session de stripe... no generar de nuevo (en este caso lo pasamos si ya se registró el PI, pero como es en el success que lo registramos, aquí sólo mandamos a pagar) 
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+        try {
+            $paymentIntentData = [
+                'capture_method' => 'manual',
+            ];
+            
+            if ($inmueble->propietario && $inmueble->propietario->stripe_account_id && $inmueble->propietario->stripe_onboarding_completed) {
+                // Transferir fondos automáticamente a la cuenta del propietario una vez que se capturen
+                $paymentIntentData['transfer_data'] = [
+                    'destination' => $inmueble->propietario->stripe_account_id
+                ];
+            }
+
+            $session = \Stripe\Checkout\Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'mxn',
+                        'product_data' => [
+                            'name' => 'Validación de Fondos y Reserva de Renta',
+                            'description' => 'Propiedad: ' . ($inmueble->titulo ?? 'N/A'),
+                        ],
+                        'unit_amount' => (int) ($inmueble->renta_mensual * 100),
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'payment_intent_data' => $paymentIntentData,
+                'success_url' => route('contratos.stripe.reserva.success', ['contrato' => $contrato->id]) . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('inmuebles.show', $inmueble->id),
+            ]);
+
+            return redirect()->away($session->url);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al procesar el pago con Stripe: ' . $e->getMessage());
+        }
     }
 
     /*

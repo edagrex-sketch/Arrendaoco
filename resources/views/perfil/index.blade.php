@@ -45,9 +45,11 @@
                             Publicar Inmueble
                         </a>
                         <a href="{{ route('inmuebles.index') }}"
-                            class="block w-full bg-[#669BBC] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#003049] transition-colors shadow-md">
+                            class="block w-full bg-[#669BBC] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#003049] transition-colors shadow-md mb-2">
                             Mis Propiedades
                         </a>
+                        
+
                     @endif
                 </div>
             </div>

@@ -9,6 +9,19 @@
             <p class="text-muted-foreground mt-2 text-lg">Modifica los detalles de tu publicación.</p>
         </div>
 
+        {{-- Aviso de campos protegidos --}}
+        <div class="mb-8 flex items-start gap-4 bg-[#003049]/5 border border-[#003049]/20 rounded-2xl px-6 py-4">
+            <div class="mt-0.5 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#003049]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-[#003049] mb-0.5">Campos protegidos</p>
+                <p class="text-sm text-slate-600 leading-relaxed">Algunos datos estructurales del inmueble (tipo, dirección, superficie y habitaciones) <strong>no se pueden modificar</strong> ya que forman parte del perfil legal de la propiedad y pueden estar vinculados a contratos. Si necesitas corregirlos, contacta al soporte.</p>
+            </div>
+        </div>
+
         <form action="{{ route('inmuebles.update', ['inmueble' => $inmueble] + (request()->has('return_to_contrato') ? ['return_to_contrato' => request('return_to_contrato')] : [])) }}" method="POST" enctype="multipart/form-data"
             class="space-y-8">
             @csrf
@@ -24,17 +37,20 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {{-- Tipo --}}
+                    {{-- Tipo (PROTEGIDO) --}}
                     <div>
-                        <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Tipo de
-                            Inmueble</label>
-                        <select name="tipo" id="tipo-select" onchange="updateMinVal()"
-                            class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
-                            <option value="Casa" {{ $inmueble->tipo == 'Casa' ? 'selected' : '' }}>Casa</option>
-                            <option value="Departamento" {{ $inmueble->tipo == 'Departamento' ? 'selected' : '' }}>
-                                Departamento</option>
-                            <option value="Cuarto" {{ $inmueble->tipo == 'Cuarto' ? 'selected' : '' }}>Cuarto</option>
-                        </select>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider">Tipo de Inmueble</label>
+                            <span class="inline-flex items-center gap-1 text-xs font-semibold text-[#003049]/70 bg-[#003049]/8 border border-[#003049]/20 rounded-full px-2.5 py-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                Protegido
+                            </span>
+                        </div>
+                        <div class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-medium cursor-not-allowed select-none flex items-center justify-between">
+                            <span>{{ $inmueble->tipo }}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                        <input type="hidden" name="tipo" id="tipo-select" value="{{ $inmueble->tipo }}">
                     </div>
 
                     {{-- Precio --}}
@@ -58,30 +74,42 @@
                     </div>
                 </div>
 
-                {{-- Dirección y Buscador --}}
+                {{-- Dirección y Buscador (PROTEGIDA) --}}
                 <div>
-                    <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Dirección</label>
-                    <div class="flex gap-2 mb-4">
-                        <input type="text" name="direccion" id="direccion-input" value="{{ $inmueble->direccion }}" required
-                            class="flex-1 px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
-                        <button type="button" onclick="buscarDireccion()"
-                            class="bg-[#003049] text-white px-6 py-3 rounded-xl hover:bg-[#003049]/90 transition-all font-bold flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                <path fill-rule="evenodd"
-                                    d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                                    clip-rule="evenodd" />
-                            </svg> Buscar en mapa
-                        </button>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider">Dirección</label>
+                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-[#003049]/70 bg-[#003049]/8 border border-[#003049]/20 rounded-full px-2.5 py-0.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            Protegido
+                        </span>
                     </div>
+                    <div class="flex gap-2 mb-4">
+                        <div class="flex-1 px-5 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-medium cursor-not-allowed select-none flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            <span>{{ $inmueble->direccion }}</span>
+                        </div>
+                        <div class="bg-slate-200 text-slate-400 px-6 py-3 rounded-xl font-bold flex items-center gap-2 cursor-not-allowed" title="La dirección está protegida">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            Protegida
+                        </div>
+                    </div>
+                    <input type="hidden" name="direccion" id="direccion-input" value="{{ $inmueble->direccion }}">
                 </div>
 
-                {{-- Selector de Mapa --}}
+                {{-- Selector de Mapa (SOLO LECTURA) --}}
                 <div>
-                    <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Ubicación en el
-                        mapa</label>
-                    <p class="text-xs text-muted-foreground mb-3 font-medium">Puedes mover el marcador manualmente si la
-                        búsqueda no fue exacta.</p>
-                    <div id="map-edit" class="w-full h-[350px] rounded-2xl border border-slate-100 shadow-inner z-0"></div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider">Ubicación en el mapa</label>
+                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-[#003049]/70 bg-[#003049]/8 border border-[#003049]/20 rounded-full px-2.5 py-0.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            Protegido
+                        </span>
+                    </div>
+                    <p class="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3 font-medium flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        El mapa es de solo lectura. La ubicación del inmueble no puede modificarse.
+                    </p>
+                    <div id="map-edit" class="w-full h-[300px] rounded-2xl border border-slate-200 shadow-inner z-0 opacity-80 pointer-events-none"></div>
                     <input type="hidden" name="latitud" id="lat-input" value="{{ $inmueble->latitud }}">
                     <input type="hidden" name="longitud" id="longitud-input" value="{{ $inmueble->longitud }}">
                 </div>
@@ -174,59 +202,94 @@
                     }
                 </script>
 
+                {{-- Habitaciones y Metros (PROTEGIDOS) --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label
-                            class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Habitaciones</label>
-                        <input type="number" name="habitaciones" value="{{ $inmueble->habitaciones }}" required min="0"
-                            oninput="if(this.value < 0) this.value = '';"
-                            class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider">Habitaciones</label>
+                            <span class="inline-flex items-center gap-1 text-xs font-semibold text-[#003049]/70 bg-[#003049]/8 border border-[#003049]/20 rounded-full px-2.5 py-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                Protegido
+                            </span>
+                        </div>
+                        <div class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-medium cursor-not-allowed select-none flex items-center justify-between">
+                            <span>{{ $inmueble->habitaciones }} habitación{{ $inmueble->habitaciones != 1 ? 'es' : '' }}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                        <input type="hidden" name="habitaciones" value="{{ $inmueble->habitaciones }}">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Metros
-                            (m²)</label>
-                        <input type="number" name="metros" value="{{ $inmueble->metros }}" required min="0"
-                            oninput="if(this.value < 0) this.value = '';"
-                            class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider">Metros (m²)</label>
+                            <span class="inline-flex items-center gap-1 text-xs font-semibold text-[#003049]/70 bg-[#003049]/8 border border-[#003049]/20 rounded-full px-2.5 py-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                Protegido
+                            </span>
+                        </div>
+                        <div class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-medium cursor-not-allowed select-none flex items-center justify-between">
+                            <span>{{ $inmueble->metros }} m²</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                        <input type="hidden" name="metros" value="{{ $inmueble->metros }}">
                     </div>
                 </div>
 
+                {{-- Baños (PROTEGIDO) --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    @php
+                        $banoCombo = $inmueble->banos . ',' . $inmueble->medios_banos;
+                        $banoLabels = [
+                            '0,1' => 'Medio Baño',
+                            '1,0' => '1 Baño Completo',
+                            '1,1' => '1 Baño Completo y Medio Baño',
+                            '2,0' => '2 Baños Completos',
+                            '2,1' => '2 Baños Completos y Medio Baño',
+                            '3,0' => '3 Baños Completos',
+                            '3,1' => '3 Baños Completos y Medio Baño',
+                            '4,0' => '4 Baños o más',
+                        ];
+                        $banoLabel = $banoLabels[$banoCombo] ?? $banoCombo;
+                    @endphp
                     <div>
-                        <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Baños</label>
-                        @php $banoCombo = $inmueble->banos . ',' . $inmueble->medios_banos; @endphp
-                        <select id="banos-casa-input" name="banos_casa" required
-                            class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
-                            <option value="0,1" {{ $banoCombo === '0,1' ? 'selected' : '' }}>Medio Baño</option>
-                            <option value="1,0" {{ $banoCombo === '1,0' ? 'selected' : '' }}>1 Baño Completo</option>
-                            <option value="1,1" {{ $banoCombo === '1,1' ? 'selected' : '' }}>1 Baño Completo y Medio Baño
-                            </option>
-                            <option value="2,0" {{ $banoCombo === '2,0' ? 'selected' : '' }}>2 Baños Completos</option>
-                            <option value="2,1" {{ $banoCombo === '2,1' ? 'selected' : '' }}>2 Baños Completos y Medio Baño
-                            </option>
-                            <option value="3,0" {{ $banoCombo === '3,0' ? 'selected' : '' }}>3 Baños Completos</option>
-                            <option value="3,1" {{ $banoCombo === '3,1' ? 'selected' : '' }}>3 Baños Completos y Medio Baño
-                            </option>
-                            <option value="4,0" {{ $banoCombo === '4,0' ? 'selected' : '' }}>4 Baños o más</option>
-                        </select>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider">Baños</label>
+                            <span class="inline-flex items-center gap-1 text-xs font-semibold text-[#003049]/70 bg-[#003049]/8 border border-[#003049]/20 rounded-full px-2.5 py-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                Protegido
+                            </span>
+                        </div>
+                        <div class="w-full px-5 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-medium cursor-not-allowed select-none flex items-center justify-between">
+                            <span>{{ $banoLabel }}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        </div>
+                        <input type="hidden" id="banos-casa-input" name="banos_casa" value="{{ $banoCombo }}">
                     </div>
                 </div>
 
+                {{-- Cerradura / Baño compartido (PROTEGIDOS para cuartos) --}}
                 <div id="bano-compartido-wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2 mb-6"
                     style="display: {{ $inmueble->tipo === 'Cuarto' ? 'grid' : 'none' }};">
                     <div class="flex items-center sm:-mt-3">
-                        <label class="flex items-center gap-2 text-sm font-medium text-slate-500 cursor-pointer">
+                        <label class="flex items-center gap-2 text-sm font-medium text-slate-400 cursor-not-allowed select-none" title="Campo protegido">
                             <input type="checkbox" name="tiene_cerradura" value="si" {{ $inmueble->tiene_cerradura_propia ? 'checked' : '' }}
-                                class="w-4 h-4 rounded border-slate-300 text-[#003049] focus:ring-[#003049]">
-                            ¿El cuarto tiene cerradura propia?
+                                class="w-4 h-4 rounded border-slate-300 text-[#003049]" disabled>
+                            ¿El cuarto tiene cerradura propia? <span class="text-xs text-[#003049]/50">(protegido)</span>
                         </label>
+                        {{-- Hidden para preservar valor en el POST --}}
+                        @if($inmueble->tiene_cerradura_propia)
+                            <input type="hidden" name="tiene_cerradura" value="si">
+                        @endif
                     </div>
                     <div class="flex items-center sm:-mt-3">
-                        <label class="flex items-center gap-2 text-sm font-medium text-slate-500 cursor-pointer">
+                        <label class="flex items-center gap-2 text-sm font-medium text-slate-400 cursor-not-allowed select-none" title="Campo protegido">
                             <input type="checkbox" name="bano_compartido" value="1" {{ $inmueble->bano_compartido ? 'checked' : '' }}
-                                class="w-4 h-4 rounded border-slate-300 text-[#003049] focus:ring-[#003049]">
-                            ¿El baño es compartido?
+                                class="w-4 h-4 rounded border-slate-300 text-[#003049]" disabled>
+                            ¿El baño es compartido? <span class="text-xs text-[#003049]/50">(protegido)</span>
                         </label>
+                        {{-- Hidden para preservar valor en el POST --}}
+                        @if($inmueble->bano_compartido)
+                            <input type="hidden" name="bano_compartido" value="1">
+                        @endif
                     </div>
                 </div>
 

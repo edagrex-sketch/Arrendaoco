@@ -16,10 +16,10 @@ return new class extends Migration
                 $table->json('tipos_mascotas')->nullable();
             }
             if (!Schema::hasColumn('inmuebles', 'servicios_incluidos')) {
-                $table->json('servicios_incluidos')->nullable();
+                $table->json('servicios_incluidos')->nullable(); // agua, luz, etc.
             }
             if (!Schema::hasColumn('inmuebles', 'pago_servicio')) {
-                $table->json('pago_servicio')->nullable();
+                $table->json('pago_servicio')->nullable(); // quien paga que
             }
             if (!Schema::hasColumn('inmuebles', 'clabe_interbancaria')) {
                 $table->string('clabe_interbancaria', 18)->nullable();
@@ -33,6 +33,8 @@ return new class extends Migration
             if (!Schema::hasColumn('inmuebles', 'ancho')) {
                 $table->double('ancho')->nullable();
             }
+            $table->integer('dias_tolerancia')->default(3)->change(); // ensure matches web
+            $table->integer('dias_preaviso')->default(30)->change(); // ensure matches web
         });
     }
 

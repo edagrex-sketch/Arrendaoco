@@ -252,8 +252,8 @@
                         @if(($inmueble->permite_mascotas && $inmueble->mascotas->isNotEmpty()) || ($inmueble->tipo === 'Cuarto' && $inmueble->zonasComunes->isNotEmpty()))
                         <div class="bg-slate-50 rounded-[1.5rem] p-8 mt-10 border border-slate-100/50 flex flex-col gap-6">
                             @if($inmueble->permite_mascotas && $inmueble->mascotas->isNotEmpty())
-                            <div class="flex items-center gap-6">
-                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0 w-32">Especies OK</span>
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">Se aceptan mascotas como:</span>
                                 <div class="flex flex-wrap gap-2">
                                     @foreach($inmueble->mascotas as $m)
                                         <span class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-[#003049] text-[10px] font-black uppercase tracking-wider">{{ $m->nombre }}</span>
@@ -285,25 +285,65 @@
                         <h4 class="text-xl font-bold text-slate-700 mb-5 block">
                             Servicios del Inmueble
                         </h4>
-                        <ul class="space-y-4 grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
-                            @foreach($inmueble->servicios as $pivot)
-                                @php
-                                    $pago = $pivot->paga;
-                                    $isArrendador = $pago === 'arrendador';
-                                    $texto = $isArrendador ? 'Incluido' : 'Extra';
-                                    $color = $isArrendador ? 'text-[#003049] bg-slate-100 border-slate-200/60' : 'text-slate-500 bg-white border-slate-200';
-                                @endphp
-                                <li class="flex items-center justify-between text-sm font-bold text-slate-600 py-2 border-b border-slate-100 last:border-0 md:last:border-b-0 break-inside-avoid">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 mr-2 shrink-0 {{ $isArrendador ? 'text-slate-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $isArrendador ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12' }}" />
-                                        </svg>
-                                        {{ $pivot->servicio }}
-                                    </div>
-                                    <span class="text-[10px] {{ $color }} border px-2 py-1 rounded shadow-sm font-black uppercase tracking-widest">{{ $texto }}</span>
-                                </li>
-                            @endforeach
-                        </ul>
+                        
+                        @php
+                            $serviciosProp = $inmueble->servicios->where('paga', 'arrendador')->values();
+                            $serviciosInq = $inmueble->servicios->where('paga', '!=', 'arrendador')->values();
+                            $maxCount = max($serviciosProp->count(), $serviciosInq->count());
+                        @endphp
+
+                        <div class="bg-[#FDF0D5]/40 rounded-2xl border border-[#FDF0D5] overflow-hidden shadow-sm">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-[#FDF0D5]">
+                                        <th class="py-3 px-5 border-b border-white/60 w-1/2">
+                                            <div class="flex items-center gap-2">
+                                                <svg class="w-5 h-5 text-[#003049]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span class="text-[11px] font-black text-[#003049] uppercase tracking-widest">Paga Propietario</span>
+                                                <span class="text-[9px] font-bold text-[#003049]/60 px-2 py-0.5 bg-white/50 rounded-md ml-auto">INCLUIDO</span>
+                                            </div>
+                                        </th>
+                                        <th class="py-3 px-5 border-b border-l border-white/60 w-1/2">
+                                            <div class="flex items-center gap-2">
+                                                <svg class="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span class="text-[11px] font-black text-slate-600 uppercase tracking-widest">Paga Inquilino</span>
+                                                <span class="text-[9px] font-bold text-slate-500/80 px-2 py-0.5 bg-white/50 rounded-md ml-auto">EXTRA</span>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for($i = 0; $i < $maxCount; $i++)
+                                        <tr class="hover:bg-white/40 transition-colors">
+                                            <td class="py-3 px-5 text-sm font-bold text-slate-700 border-b border-white/60 last:border-b-0">
+                                                @if(isset($serviciosProp[$i]))
+                                                    <div class="flex items-center gap-2">
+                                                        <svg class="w-4 h-4 text-[#003049]/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        <span>{{ $serviciosProp[$i]->servicio }}</span>
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <td class="py-3 px-5 text-sm font-bold text-slate-600 border-b border-l border-white/60 last:border-b-0">
+                                                @if(isset($serviciosInq[$i]))
+                                                    <div class="flex items-center gap-2">
+                                                        <svg class="w-4 h-4 text-slate-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                        <span>{{ $serviciosInq[$i]->servicio }}</span>
+                                                    </div>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endfor
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     @endif
 

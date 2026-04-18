@@ -260,6 +260,14 @@ function confirmDelete(id) {
         document.getElementById('delete-form-' + id).submit();
     }
 }
+
+@if(session('download_contrato'))
+    window.addEventListener('load', function() {
+        // Asignamos la ruta a location.href; como el servidor responde con un archivo (attachment), 
+        // el navegador iniciará la descarga y no abandonará la página actual.
+        window.location.href = "{{ route('contratos.descargar', session('download_contrato')) }}";
+    });
+@endif
 </script>
 @endpush
 
