@@ -94,12 +94,21 @@ class ResenaController extends Controller
             return back()->with('error', 'Ya has calificado esta propiedad.');
         }
 
-        Resena::create([
+        $resena = Resena::create([
             'usuario_id' => Auth::id(),
             'inmueble_id' => $inmueble->id,
             'puntuacion' => $request->puntuacion,
             'comentario' => $request->comentario,
         ]);
+
+        // Notificar al propietario
+        \App\Services\NotificationService::send(
+            $inmueble->propietario_id,
+            'Nueva reseña recibida',
+            Auth::user()->nombre . " calificó tu propiedad con " . $request->puntuacion . " estrellas.",
+            'sistema',
+            $inmueble->id
+        );
 
         return back()->with('success', 'Tu reseña ha sido enviada con éxito.');
     }

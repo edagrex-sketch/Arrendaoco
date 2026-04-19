@@ -93,6 +93,36 @@
 
                             <!-- Perfil de Usuario con Dropdown -->
                             <div x-data="{ openProfile: false }" class="relative hidden sm:block">
+                                <!-- Centro de Notificaciones -->
+                                <div x-data="{ openNotifications: false }" class="relative mr-4">
+                                    <button @click="openNotifications = !openNotifications; if(openNotifications) fetchNotifications()" 
+                                        class="relative p-2 text-white hover:text-brand-light transition-colors focus:outline-none group">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        </svg>
+                                        <span id="notification-badge" class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-brand-dark hidden">0</span>
+                                    </button>
+
+                                    <div x-show="openNotifications" @click.away="openNotifications = false"
+                                        x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                        x-transition:leave="transition ease-in duration-150"
+                                        class="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden" x-cloak>
+                                        
+                                        <div class="px-5 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+                                            <h3 class="text-xs font-black text-brand-dark uppercase tracking-wider">Notificaciones</h3>
+                                            <button @click="markAllAsRead()" class="text-[10px] font-bold text-blue-600 hover:text-blue-800 uppercase tracking-tighter">Limpiar todas</button>
+                                        </div>
+
+                                        <div id="notifications-container" class="max-h-[400px] overflow-y-auto">
+                                            <div class="py-12 flex flex-col items-center justify-center space-y-3">
+                                                <div class="w-6 h-6 border-2 border-brand-light border-t-transparent rounded-full animate-spin"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <button @click="openProfile = !openProfile" @click.away="openProfile = false"
                                     class="flex items-center gap-2 text-sm font-bold text-white hover:text-brand-light transition-colors focus:outline-none">
                                     @if (Auth::user()->foto_perfil)
@@ -527,6 +557,52 @@
     </script>
     @auth
     <script>
+        // --- FUNCIONES DE NOTIFICACIONES ---
+        function updateNotificationBadge() {
+            fetch('{{ route("notifications.unread_count") }}')
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.getElementById('notification-badge');
+                    if (badge) {
+                        if (data.count > 0) {
+                            badge.innerText = data.count > 9 ? '9+' : data.count;
+                            badge.classList.remove('hidden');
+                        } else {
+                            badge.classList.add('hidden');
+                        }
+                    }
+                });
+        }
+
+        function fetchNotifications() {
+            const container = document.getElementById('notifications-container');
+            if(!container) return;
+            fetch('{{ route("notifications.list") }}')
+                .then(res => res.text())
+                .then(html => { container.innerHTML = html; });
+        }
+
+        function markAsRead(id, url) {
+            fetch(`/notifications/mark-read/${id}`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+            }).then(() => {
+                updateNotificationBadge();
+                if (url && url !== '#') window.location.href = url;
+                else fetchNotifications();
+            });
+        }
+
+        function markAllAsRead() {
+            fetch('{{ route("notifications.mark_all_read") }}', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+            }).then(() => {
+                updateNotificationBadge();
+                fetchNotifications();
+            });
+        }
+
         window.addEventListener('load', () => {
             // 1. EXISTENTE: Firebase Chat Notifications
             if (window.FirebaseChat) {
@@ -587,11 +663,23 @@
                 window.Echo.channel('inmuebles')
                     .listen('InmuebleStatusChanged', (e) => {
                         console.log('🏠 Inmueble cambió de estatus:', e);
-                        // Si estamos en el catálogo, refrescamos para ocultar/mostrar
-                        if (window.location.pathname === '/' || window.location.pathname.includes('inicio')) {
-                            // Para no interrumpir al usuario, solo refrescamos si la info es crítica
-                            // Opcional: mostrar un toast de "El catálogo ha sido actualizado"
-                        }
+                    });
+
+                // ESCUCHAR NOTIFICACIONES
+                window.Echo.private(`user.${myId}`)
+                    .listen('.notification.received', (e) => {
+                        console.log('🔔 Notificación en tiempo real:', e);
+                        updateNotificationBadge();
+                        Swal.fire({
+                            title: e.notification.titulo,
+                            text: e.notification.mensaje,
+                            icon: 'info',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 6000,
+                            timerProgressBar: true
+                        });
                     });
             }
         });

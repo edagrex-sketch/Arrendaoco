@@ -87,6 +87,16 @@ class ChatController extends Controller
  
         // Disparar evento para tiempo real
         broadcast(new MessageSent($mensaje->load('parent')))->toOthers();
+
+        // Notificación persistente en la campana para el receptor
+        $receiverId = ($chat->usuario_1 == Auth::id()) ? $chat->usuario_2 : $chat->usuario_1;
+        \App\Services\NotificationService::send(
+            $receiverId,
+            'Nuevo mensaje de ' . Auth::user()->nombre,
+            \Illuminate\Support\Str::limit($request->contenido, 50),
+            'mensaje',
+            $chat->id
+        );
  
         return response()->json([
             'success' => true,

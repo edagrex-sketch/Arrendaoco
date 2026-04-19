@@ -69,6 +69,14 @@ Route::post('/registro', function (\Illuminate\Http\Request $request) {
     // Disparar evento para tiempo real en el panel de administrador
     event(new \App\Events\NuevoUsuarioRegistrado($usuario));
 
+    // Notificar a los administradores (persistente)
+    \App\Services\NotificationService::notifyAdmins(
+        'Nuevo usuario registrado',
+        "Se ha registrado un nuevo usuario: " . $usuario->nombre,
+        'sistema',
+        $usuario->id
+    );
+
     // Asignar rol de inquilino por defecto
     $usuario->asignarRol('inquilino');
     // Iniciar sesión y redirigir
@@ -152,7 +160,18 @@ Route::post('/login', function (Request $request) {
         ->onlyInput('email');
 });
 
+use App\Http\Controllers\NotificacionController;
+
+// ... (existing imports)
+
 // Logout
+Route::prefix('notifications')->name('notifications.')->middleware('auth')->group(function () {
+    Route::get('/list', [NotificacionController::class, 'index'])->name('list');
+    Route::get('/unread-count', [NotificacionController::class, 'unreadCount'])->name('unread_count');
+    Route::post('/mark-read/{notificacion}', [NotificacionController::class, 'markAsRead'])->name('mark_read');
+    Route::post('/mark-all-read', [NotificacionController::class, 'markAllAsRead'])->name('mark_all_read');
+});
+
 Route::match(['get', 'post'], '/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
@@ -269,6 +288,15 @@ Route::middleware('auth')->group(function () {
             // 1. Aprobar la renta: pasa a estado donde el inquilino puede descargar
             $contrato->estatus = 'pdf_descargado';
             $contrato->save();
+
+            // Notificación al inquilino
+            \App\Services\NotificationService::send(
+                $contrato->inquilino_id,
+                'Solicitud Aprobada',
+                "Tu solicitud para el inmueble " . $contrato->inmueble->titulo . " ha sido aprobada.",
+                'renta',
+                $contrato->id
+            );
 
             // 2. Notificar al inquilino (opcional)
             try {

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Inmueble;
 use App\Models\Contrato;
+use App\Services\NotificationService;
 use App\Events\NuevoContratoIniciado;
 use App\Events\ContratoStatusChanged;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -162,6 +163,15 @@ class ContratoFisicoController extends Controller
 
             // Disparar evento de tiempo real
             event(new NuevoContratoIniciado($nuevoContrato));
+
+            // Notificación persistente para el propietario
+            NotificationService::send(
+                $inmueble->propietario_id,
+                'Nueva solicitud de renta',
+                "El usuario " . Auth::user()->nombre . " está interesado en tu inmueble: " . $inmueble->titulo,
+                'renta',
+                $nuevoContrato->id
+            );
 
             // ==== Crear chat automático y enviar mensaje tipo solicitud ====
             $authId = Auth::id();
@@ -320,6 +330,15 @@ class ContratoFisicoController extends Controller
             
             // Disparar evento de estatus cambiado para el inquilino
             event(new \App\Events\ContratoStatusChanged($contrato->id, 'activo', $contrato->inquilino_id));
+
+            // Notificación persistente para el inquilino
+            NotificationService::send(
+                $contrato->inquilino_id,
+                '¡Contrato Activo!',
+                "Tu contrato para el inmueble " . $contrato->inmueble->titulo . " ha sido activado. ¡Felicidades!",
+                'renta',
+                $contrato->id
+            );
         });
 
         try {

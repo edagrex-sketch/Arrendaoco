@@ -467,6 +467,14 @@ class InmuebleController extends Controller
 
             event(new \App\Events\NuevoInmueblePublicado($inmueble));
 
+            // Notificar a los administradores (persistente)
+            \App\Services\NotificationService::notifyAdmins(
+                'Nuevo inmueble publicado',
+                "Se ha publicado un nuevo inmueble: " . $inmueble->titulo,
+                'sistema',
+                $inmueble->id
+            );
+
             DB::commit();
             return redirect()->route('inmuebles.index')->with('success', '¡Propiedad publicada correctamente!');
         } catch (\Exception $e) {
