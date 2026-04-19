@@ -62,6 +62,20 @@ class InmuebleResource extends JsonResource
             'promedio_calificacion' => $this->resenas->avg('puntuacion') ?? 0,
             'total_resenas' => $this->resenas->count(),
             'created_at' => $this->created_at->toDateTimeString(),
+            
+            // Campos de Paridad Web
+            'tiene_estacionamiento' => (bool)($this->tiene_estacionamiento ?? false),
+            'permite_mascotas' => (bool)($this->permite_mascotas ?? false),
+            'tipos_mascotas' => $this->tipos_mascotas ?? [],
+            'estado_mobiliario' => $this->estado_mobiliario ?? 'No especificado',
+            'servicios_incluidos' => $this->servicios_incluidos ?? [],
+            'pago_servicio' => $this->pago_servicio ?? [],
+            'momento_pago' => $this->momento_pago ?? 'Primeros 5 días',
+            'dias_tolerancia' => $this->dias_tolerancia ?? 0,
+            'dias_preaviso' => $this->dias_preaviso ?? 30,
+            'duracion_contrato_meses' => $this->duracion_contrato_meses ?? 12,
+            'incluir_clausulas' => (bool)($this->incluir_clausulas ?? false),
+            'clausulas_extra' => $this->clausulas_extra ?? '',
         ];
     }
 }
