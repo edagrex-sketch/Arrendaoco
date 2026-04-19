@@ -220,8 +220,8 @@ class ContratoController extends Controller
                 ]],
                 'mode' => 'payment',
                 'payment_intent_data' => $paymentIntentData,
-                'success_url' => route('contratos.stripe.reserva.success', ['contrato' => $contrato->id]) . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => route('welcome'), // Fallback URL
+                'success_url' => url('/api/contratos/' . $contrato->id . '/success?session_id={CHECKOUT_SESSION_ID}'),
+                'cancel_url' => url('/api/contratos/' . $contrato->id . '/cancel'),
             ]);
 
             return response()->json([
