@@ -779,7 +779,7 @@
 
                 handleFileSelect(event) {
                     const newFiles = Array.from(event.target.files);
-                    const limiteBytes = 2 * 1024 * 1024;
+                    const limiteBytes = 10 * 1024 * 1024;
                     const archivosValidos = [];
 
                     newFiles.forEach(file => {
