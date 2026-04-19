@@ -171,10 +171,12 @@ class UsuarioController extends Controller
     {
         $usuario = Usuario::with('roles')->findOrFail($id);
 
-        // Verificar si tiene inmuebles o rentas
-        $tieneInmuebles = $usuario->inmuebles()->count() > 0;
-        $esInquilino = $usuario->contratosComoInquilino()->whereIn('estatus', ['activo', 'vigente'])->count() > 0;
-        $puedeDesactivar = !($tieneInmuebles || $esInquilino);
+        // Verificar si tiene inmuebles con historial o si es inquilino con historial
+        $tieneInmueblesRenta = $usuario->inmuebles()->whereHas('contratos', function ($q) {
+            $q->whereNotIn('estatus', ['rechazado']);
+        })->exists();
+        $esInquilino = $usuario->contratosComoInquilino()->whereNotIn('estatus', ['rechazado'])->exists();
+        $puedeDesactivar = !($tieneInmueblesRenta || $esInquilino);
 
         $roles = Role::all();
         return view('admin.usuarios.edit', compact('usuario', 'roles', 'puedeDesactivar'));
@@ -184,12 +186,14 @@ class UsuarioController extends Controller
     {
         $usuario = Usuario::with('roles')->findOrFail($id);
 
-        // Verificar si tiene inmuebles o rentas
-        $tieneInmuebles = $usuario->inmuebles()->count() > 0;
-        $esInquilino = $usuario->contratosComoInquilino()->whereIn('estatus', ['activo', 'vigente'])->count() > 0;
+        // Verificar si tiene inmuebles o rentas con historial
+        $tieneInmueblesRenta = $usuario->inmuebles()->whereHas('contratos', function ($q) {
+            $q->whereNotIn('estatus', ['rechazado']);
+        })->exists();
+        $esInquilino = $usuario->contratosComoInquilino()->whereNotIn('estatus', ['rechazado'])->exists();
 
-        if (($tieneInmuebles || $esInquilino) && $request->estatus === 'inactivo' && $usuario->estatus === 'activo') {
-            return redirect()->back()->with('error', 'No se puede desactivar el usuario "' . $usuario->nombre . '" porque tiene propiedades publicadas o contratos vigentes.');
+        if (($tieneInmueblesRenta || $esInquilino) && $request->estatus === 'inactivo' && $usuario->estatus === 'activo') {
+            return redirect()->back()->with('error', 'No se puede desactivar el usuario "' . $usuario->nombre . '" porque tiene un registro histórico de rentas vinculadas a su cuenta.');
         }
 
         // Reglas base (nombre y email ya no se editan)
@@ -290,13 +294,15 @@ class UsuarioController extends Controller
 
         $nuevoEstatus = $usuario->estatus === 'activo' ? 'inactivo' : 'activo';
 
-        // 2. Verificar si tiene inmuebles o rentas al intentar desactivar
+        // 2. Verificar si tiene inmuebles o rentas registradas al intentar desactivar
         if ($nuevoEstatus === 'inactivo') {
-            $tieneInmuebles = $usuario->inmuebles()->count() > 0;
-            $esInquilino = $usuario->contratosComoInquilino()->whereIn('estatus', ['activo', 'vigente'])->count() > 0;
+            $tieneInmueblesRenta = $usuario->inmuebles()->whereHas('contratos', function ($q) {
+                $q->whereNotIn('estatus', ['rechazado']);
+            })->exists();
+            $esInquilino = $usuario->contratosComoInquilino()->whereNotIn('estatus', ['rechazado'])->exists();
 
-            if ($tieneInmuebles || $esInquilino) {
-                return redirect()->back()->with('error', 'No se puede desactivar el usuario "' . $usuario->nombre . '" porque tiene propiedades publicadas o contratos vigentes.');
+            if ($tieneInmueblesRenta || $esInquilino) {
+                return redirect()->back()->with('error', 'No se puede desactivar el usuario "' . $usuario->nombre . '" porque tiene un registro histórico de rentas vinculadas a su cuenta.');
             }
         }
 
