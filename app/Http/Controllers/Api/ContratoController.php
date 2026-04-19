@@ -164,6 +164,9 @@ class ContratoController extends Controller
 
             // BLOQUEO INMEDIATO: El inmueble deja de estar disponible en el catálogo
             $inmueble->update(['estatus' => 'esperando_aprobacion']);
+            
+            // TRANSMISIÓN EN VIVO: Avisar a todos que el inmueble ya no está disponible
+            event(new \App\Events\InmuebleStatusChanged($inmueble->id, 'esperando_aprobacion'));
 
             // ==== Crear chat automático y enviar mensaje tipo solicitud ====
             $authId = $usuario->id;
@@ -450,7 +453,13 @@ class ContratoController extends Controller
 
         if (in_array($nuevoEstado, ['finalizado', 'rechazado'])) {
             $contrato->inmueble->update(['estatus' => 'disponible']);
+            // Avisar a todos que vuelve a estar disponible
+            event(new \App\Events\InmuebleStatusChanged($contrato->inmueble_id, 'disponible'));
         }
+
+        // NOTIFICAR A AMBAS PARTES: El contrato ha cambiado de estatus
+        event(new \App\Events\ContratoStatusChanged($contrato->id, $nuevoEstado, $contrato->inquilino_id));
+        event(new \App\Events\ContratoStatusChanged($contrato->id, $nuevoEstado, $contrato->propietario_id));
 
         return response()->json(['success' => true, 'data' => $contrato]);
     }
@@ -484,6 +493,9 @@ class ContratoController extends Controller
 
             // Bloquear inmueble temporalmente
             $contrato->inmueble->update(['estatus' => 'esperando_aprobacion']);
+
+            // NOTIFICAR AL DUEÑO: Una nueva solicitud ha llegado
+            event(new \App\Events\ContratoStatusChanged($contrato->id, 'pendiente_aprobacion', $contrato->propietario_id));
 
             return view('stripe.success', [
                 'mensaje' => 'Tu solicitud de renta ha sido enviada con éxito.',
