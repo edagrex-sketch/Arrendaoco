@@ -68,7 +68,7 @@
                         <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Depósito
                             ($) <span class="text-xs font-normal text-muted-foreground">(Opcional)</span></label>
                         <input type="number" name="deposito" id="deposito-input" value="{{ $inmueble->deposito }}"
-                            min="{{ $inmueble->tipo === 'Cuarto' ? 300 : 500 }}"
+                            min="0"
                             oninput="if(this.value < 0) this.value = '';"
                             class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                     </div>
@@ -564,7 +564,7 @@
             const tipo = document.getElementById('tipo-select').value;
             const minVal = tipo === 'Cuarto' ? 300 : 500;
             document.getElementById('precio-input').min = minVal;
-            document.getElementById('deposito-input').min = minVal;
+            // deposito is always optional, min stays at 0
             
             const banoCompartidoWrapper = document.getElementById('bano-compartido-wrapper');
             const zonasComunesWrapper = document.getElementById('zonas-comunes-wrapper');
