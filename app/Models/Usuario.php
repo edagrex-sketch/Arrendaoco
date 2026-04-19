@@ -25,6 +25,7 @@ class Usuario extends Authenticatable
         'facebook_id',
         'stripe_account_id',
         'stripe_onboarding_completed',
+        'fcm_token',
     ];
     protected $hidden = [
         'password',

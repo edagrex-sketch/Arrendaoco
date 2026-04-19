@@ -102,11 +102,16 @@ class ChatController extends Controller
         $mensajeCompleto = $mensaje->load(['sender', 'parent']);
         broadcast(new MessageSent($mensajeCompleto))->toOthers();
 
-        // TODO: Enviar Notificación Push si el receptor tiene fcm_token
+        // Notificación Push y Persistente
         $otro = $chat->getOtroUsuario(Auth::id());
-        if ($otro && $otro->fcm_token) {
-            // Aquí iría la llamada a un servicio de Firebase
-            // Lo dejaremos preparado en el código
+        if ($otro) {
+            \App\Services\NotificationService::send(
+                $otro->id,
+                'Nuevo mensaje de ' . Auth::user()->nombre,
+                \Illuminate\Support\Str::limit($request->contenido, 50),
+                'mensaje',
+                $chat->id
+            );
         }
  
         return response()->json([
