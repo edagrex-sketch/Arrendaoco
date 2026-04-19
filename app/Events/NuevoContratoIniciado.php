@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Contrato;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -10,37 +11,35 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ContratoStatusChanged implements ShouldBroadcast
+class NuevoContratoIniciado implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $contratoId;
-    public $nuevoEstatus;
-    public $usuarioId;
+    public $contrato;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($contratoId, $nuevoEstatus, $usuarioId)
+    public function __construct(Contrato $contrato)
     {
-        $this->contratoId = $contratoId;
-        $this->nuevoEstatus = $nuevoEstatus;
-        $this->usuarioId = $usuarioId;
+        $this->contrato = $contrato;
     }
 
     /**
      * Get the channels the event should broadcast on.
+     *
+     * @return array<int, \Illuminate\Broadcasting\Channel>
      */
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('user.' . $this->usuarioId),
             new Channel('admin-updates'),
+            new PrivateChannel('user.' . $this->contrato->propietario_id),
         ];
     }
 
     public function broadcastAs()
     {
-        return 'rental.updated';
+        return 'nuevo-contrato';
     }
 }

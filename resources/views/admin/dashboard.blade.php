@@ -19,7 +19,7 @@
                 </div>
                 <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Usuarios</span>
             </div>
-            <p class="text-3xl font-black text-[#003049]">{{ $totalUsuarios }}</p>
+            <p id="stat-total-usuarios" class="text-3xl font-black text-[#003049]">{{ $totalUsuarios }}</p>
             <div class="flex items-center gap-3 mt-3 text-xs text-slate-400">
                 <span class="flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full bg-green-400"></span>
@@ -42,7 +42,7 @@
                 </div>
                 <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Propiedades</span>
             </div>
-            <p class="text-3xl font-black text-[#003049]">{{ $totalInmuebles }}</p>
+            <p id="stat-total-inmuebles" class="text-3xl font-black text-[#003049]">{{ $totalInmuebles }}</p>
             <div class="flex items-center gap-3 mt-3 text-xs text-slate-400">
                 <span class="flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full bg-[#669BBC]"></span>
@@ -65,7 +65,7 @@
                 </div>
                 <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Contratos</span>
             </div>
-            <p class="text-3xl font-black text-[#003049]">{{ $contratosActivos }}</p>
+            <p id="stat-contratos-activos" class="text-3xl font-black text-[#003049]">{{ $contratosActivos }}</p>
             <div class="flex items-center gap-3 mt-3 text-xs text-slate-400">
                 <span class="flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full bg-orange-400"></span>
@@ -190,7 +190,7 @@
                                 <th class="px-6 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Registro</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-50">
+                        <tbody id="lista-ultimos-usuarios" class="divide-y divide-slate-50">
                             @foreach($ultimosUsuarios as $usuario)
                                 <tr class="hover:bg-slate-50/50 transition-colors">
                                     <td class="px-6 py-4">
@@ -298,50 +298,108 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         if (typeof window.Echo !== 'undefined') {
+            
+            function updateCounter(id) {
+                const el = document.getElementById(id);
+                if (el) {
+                    let val = parseInt(el.innerText);
+                    el.innerText = val + 1;
+                    el.classList.add('animate-bounce');
+                    setTimeout(() => el.classList.remove('animate-bounce'), 1000);
+                }
+            }
+
             window.Echo.channel('admin-updates')
                 .listen('.nuevo-inmueble', (e) => {
                     console.log('Nuevo inmueble:', e);
-                    // Mostrar notificación
-                    if (window.Swal) {
-                        Swal.fire({
-                            title: '¡Nueva Propiedad!',
-                            text: `Se ha publicado un nuevo inmueble: ${e.inmueble.titulo}`,
-                            icon: 'success',
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 5000,
-                            timerProgressBar: true
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        alert('¡Nueva Propiedad publicada! ' + e.inmueble.titulo);
-                        window.location.reload();
-                    }
+                    updateCounter('stat-total-inmuebles');
+                    
+                    Swal.fire({
+                        title: '¡Nueva Propiedad!',
+                        text: `Se ha publicado un nuevo inmueble: ${e.inmueble.titulo}`,
+                        icon: 'success',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true
+                    });
                 })
                 .listen('.nuevo-usuario', (e) => {
                     console.log('Nuevo usuario:', e);
-                    if (window.Swal) {
-                        Swal.fire({
-                            title: '¡Nuevo Registro!',
-                            text: `Un nuevo usuario se ha registrado: ${e.usuario.nombre}`,
-                            icon: 'info',
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 5000,
-                            timerProgressBar: true
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        alert('¡Nuevo Usuario registrado! ' + e.usuario.nombre);
-                        window.location.reload();
+                    updateCounter('stat-total-usuarios');
+
+                    // Añadir a la tabla dinámicamente
+                    const tabla = document.getElementById('lista-ultimos-usuarios');
+                    if (tabla) {
+                        const row = document.createElement('tr');
+                        row.className = 'bg-green-50/50 hover:bg-slate-50/50 transition-colors animate-pulse';
+                        
+                        const foto = e.usuario.foto_perfil 
+                            ? (e.usuario.foto_perfil.startsWith('http') ? e.usuario.foto_perfil : `/storage/${e.usuario.foto_perfil}`)
+                            : null;
+                            
+                        const avatarHtml = foto 
+                            ? `<img src="${foto}" class="h-8 w-8 rounded-full object-cover">`
+                            : `<div class="h-8 w-8 rounded-full bg-[#003049]/5 flex items-center justify-center text-xs font-bold text-[#003049]">${e.usuario.nombre.substring(0,1).toUpperCase()}</div>`;
+
+                        row.innerHTML = `
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    ${avatarHtml}
+                                    <div>
+                                        <p class="text-sm font-bold text-[#003049]">${e.usuario.nombre}</p>
+                                        <p class="text-xs text-slate-400">${e.usuario.email}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mr-1 bg-blue-100 text-blue-700">Inquilino</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-green-600">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                                    Activo
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-xs text-slate-400 font-medium">Hace un momento</td>
+                        `;
+                        tabla.insertBefore(row, tabla.firstChild);
+                        
+                        // Quitar el pulse después de 5 segundos
+                        setTimeout(() => row.classList.remove('animate-pulse', 'bg-green-50/50'), 5000);
                     }
+
+                    Swal.fire({
+                        title: '¡Nuevo Registro!',
+                        text: `Un nuevo usuario se ha registrado: ${e.usuario.nombre}`,
+                        icon: 'info',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true
+                    });
+                })
+                .listen('.nuevo-contrato', (e) => {
+                    console.log('Nuevo contrato:', e);
+                    // Actualizamos el contador de contratos (aunque el evento puede ser pendiente, sumamos al total visible)
+                    updateCounter('stat-contratos-activos');
+
+                    Swal.fire({
+                        title: '¡Nueva Solicitud!',
+                        text: `Se ha iniciado un nuevo contrato para el inmueble #${e.contrato.inmueble_id}`,
+                        icon: 'warning',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
                 });
         }
     });

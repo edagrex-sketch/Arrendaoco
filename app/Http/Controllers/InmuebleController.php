@@ -336,6 +336,16 @@ class InmuebleController extends Controller
         return view('inmuebles.edit', compact('inmueble', 'imagenes'));
     }
 
+    public function cardRender(Inmueble $inmueble)
+    {
+        $favoritosIds = [];
+        if (auth()->check()) {
+            $favoritosIds = auth()->user()->favoritos()->pluck('inmueble_id')->toArray();
+        }
+
+        return view('inmuebles.partials.card', compact('inmueble', 'favoritosIds'))->render();
+    }
+
     public function store(Request $request)
     {
         $rules = [

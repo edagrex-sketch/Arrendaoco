@@ -33,6 +33,7 @@ class NuevoInmueblePublicado implements ShouldBroadcast
     {
         return [
             new Channel('admin-updates'),
+            new Channel('public-updates'),
         ];
     }
 

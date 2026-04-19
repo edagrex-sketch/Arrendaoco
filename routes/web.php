@@ -164,6 +164,7 @@ Route::match(['get', 'post'], '/logout', function (Request $request) {
 
 // Rutas públicas de Inmuebles
 Route::get('/buscar', [App\Http\Controllers\InmuebleController::class, 'publicSearch'])->name('inmuebles.public_search');
+Route::get('/inmuebles/card-render/{inmueble}', [App\Http\Controllers\InmuebleController::class, 'cardRender'])->name('inmuebles.card_render');
 Route::get('/inmuebles/{inmueble}', [App\Http\Controllers\InmuebleController::class, 'show'])->name('inmuebles.show');
 
 Route::middleware('auth')->group(function () {

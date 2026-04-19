@@ -175,140 +175,14 @@
             <span class="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full">
                 {{ $inmuebles->total() }} resultados
             </span>
+             <div id="grid-inmuebles" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+            @forelse ($inmuebles as $inmueble)
+                @include('inmuebles.partials.card', ['inmueble' => $inmueble])
+            @empty
+                <div id="no-inmuebles" class="col-span-full py-16 text-center text-slate-400 font-medium uppercase tracking-widest opacity-50">No hay propiedades disponibles.</div>
+            @endforelse
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-            @forelse ($inmuebles as $inmueble)
-                <div class="group bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                    {{-- Imagen --}}
-                    <div class="relative h-56 overflow-hidden">
-                        @if ($inmueble->imagen)
-                            <img src="{{ str_starts_with($inmueble->imagen, 'http') ? $inmueble->imagen : (str_contains($inmueble->imagen, 'storage/') ? asset($inmueble->imagen) : asset('storage/' . $inmueble->imagen)) }}" alt="{{ $inmueble->titulo }}"
-                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                        @else
-                            <div class="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300">
-                                <span class="text-xs font-bold uppercase tracking-widest">Sin imagen</span>
-                            </div>
-                        @endif
-
-                        {{-- Badge de Precio --}}
-                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-slate-100">
-                            <span class="font-bold text-[#003049]">${{ number_format($inmueble->renta_mensual ?? 0) }}</span>
-                            <span class="text-[10px] text-slate-500">/ mes</span>
-                        </div>
-
-                        {{-- Botón Favorito --}}
-                        @auth
-                            @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
-                            <div class="absolute top-4 left-4 z-10" x-data="{ 
-                                isFavorited: {{ in_array($inmueble->id, $favoritosIds ?? []) ? 'true' : 'false' }},
-                                loading: false,
-                                toggle() {
-                                    if (this.loading) return;
-                                    this.loading = true;
-                                    fetch('{{ route('favoritos.toggle', $inmueble) }}', {
-                                        method: 'POST',
-                                        headers: {
-                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                            'Accept': 'application/json',
-                                            'X-Requested-With': 'XMLHttpRequest'
-                                        }
-                                    })
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        if(data.success) {
-                                            this.isFavorited = data.agregado;
-                                            
-                                            // Toast de confirmación premium
-                                             const Toast = Swal.mixin({
-                                                 toast: true,
-                                                 position: 'top-end',
-                                                 showConfirmButton: false,
-                                                 timer: 1500
-                                             });
-
-                                             Toast.fire({
-                                                 icon: 'success',
-                                                 title: data.agregado ? 'Agregado' : 'Eliminado'
-                                             });
-                                        }
-                                    })
-                                    .finally(() => this.loading = false);
-                                }
-                            }">
-                                <button @click.prevent="toggle()" 
-                                    class="h-10 w-10 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-lg transition-all hover:scale-110 active:scale-95 group/fav"
-                                    :class="isFavorited ? 'text-red-500' : 'text-slate-400'">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-all duration-300" 
-                                         :class="isFavorited ? 'fill-current' : 'fill-none'" 
-                                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                    </svg>
-                                </button>
-                            </div>
-                            @endunless
-                        @endauth
-                    </div>
-
-                    {{-- Contenido --}}
-                    <div class="p-6">
-                        <h3 class="font-bold text-lg text-[#003049] line-clamp-1 mb-1">
-                            {{ $inmueble->titulo }}</h3>
-                        <p class="text-sm text-slate-400 flex items-center gap-1.5 mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            {{ $inmueble->direccion }}
-                        </p>
-
-                        <div class="flex items-center justify-between py-4 border-t border-slate-100 mb-6">
-                            <div class="flex items-center gap-4">
-                                <div class="flex items-center gap-1.5 text-slate-500" title="Habitaciones">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M3 11v3a2 2 0 002 2h14a2 2 0 002-2v-3"></path><path d="M5 16v2"></path><path d="M19 16v2"></path><path d="M5 11V7a2 2 0 012-2h10a2 2 0 012 2v4"></path><path d="M5 11h14"></path>
-                                    </svg>
-                                    <span class="text-base font-bold text-slate-700">{{ $inmueble->habitaciones }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Hab</span></span>
-                                </div>
-                                <div class="flex items-center gap-1.5 text-slate-500" title="Baños">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><line x1="10" x2="8" y1="5" y2="7"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="7" x2="7" y1="19" y2="21"/><line x1="17" x2="17" y1="19" y2="21"/>
-                                    </svg>
-                                    <span class="text-base font-bold text-slate-700">{{ $inmueble->banos }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">Baño</span></span>
-                                </div>
-                                <div class="flex items-center gap-1.5 text-slate-500" title="Superficie">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="w-5 h-5 opacity-70" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/>
-                                    </svg>
-                                    <span class="text-base font-bold text-slate-700">{{ number_format($inmueble->metros ?? 0, 0) }} <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider ml-0.5">M²</span></span>
-                                </div>
-                            </div>
-                            @auth
-                                @if(Auth::id() === $inmueble->propietario_id)
-                                    <div class="flex-shrink-0 ml-2" title="Tu propiedad">
-                                        <div class="h-10 w-10 flex items-center justify-center rounded-full border-[3px] border-[#E63946] bg-white shadow-sm overflow-hidden group/owner group-hover:scale-105 transition-transform p-1">
-                                            @if(Auth::user()->foto_perfil)
-                                                <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}" class="w-full h-full object-cover rounded-full">
-                                            @else
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-full w-full text-orange-500" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
-                                                </svg>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endif
-                            @endauth
-                        </div>
-
-                            <a href="{{ route('inmuebles.show', $inmueble) }}"
-                                class="flex w-full py-4 items-center justify-center rounded-2xl bg-slate-100 text-sm font-black text-[#003049] transition-all hover:bg-slate-200 uppercase tracking-widest">
-                                Ver Detalles
-                            </a>
-                    </div>
-                </div>
-            @empty
-                <div class="col-span-full py-16 text-center text-slate-400 font-medium uppercase tracking-widest opacity-50">No hay propiedades disponibles.</div>
-            @endforelse
         </div>
         
         <div class="mt-12">{{ $inmuebles->links() }}</div>
@@ -332,22 +206,53 @@
         </div>
     </section>
 
-    {{-- Script de Alertas y Animación --}}
+    {{-- Script de Alertas y Tiempo Real --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Alertas originales de Laravel
-            @if (session('success'))
-                Swal.fire({
-                    title: '¡Excelente!',
-                    text: "{{ session('success') }}",
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                    confirmButtonColor: '#5D4037'
-                });
-            @endif
+            // TIEMPO REAL: NUEVOS INMUEBLES
+            if (typeof window.Echo !== 'undefined') {
+                window.Echo.channel('public-updates')
+                    .listen('.nuevo-inmueble', (e) => {
+                        console.log('🆕 Nueva propiedad detectada:', e);
+                        
+                        const noInmuebles = document.getElementById('no-inmuebles');
+                        if (noInmuebles) noInmuebles.remove();
 
-            // Buscador en tiempo real
+                        fetch(`/inmuebles/card-render/${e.inmueble.id}`, {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                        .then(res => res.text())
+                        .then(html => {
+                            const grid = document.getElementById('grid-inmuebles');
+                            if (grid) {
+                                const tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = html.trim();
+                                const newCard = tempDiv.firstChild;
+                                
+                                newCard.classList.add('animate-pulse', 'border-[#003049]', 'border-2');
+                                grid.insertBefore(newCard, grid.firstChild);
+
+                                Swal.fire({
+                                    title: '¡Nueva Casa!',
+                                    text: `Se acaba de publicar: ${e.inmueble.titulo}`,
+                                    icon: 'info',
+                                    toast: true,
+                                    position: 'bottom-start',
+                                    showConfirmButton: false,
+                                    timer: 6000,
+                                    timerProgressBar: true
+                                });
+
+                                setTimeout(() => {
+                                    newCard.classList.remove('animate-pulse', 'border-[#003049]', 'border-2');
+                                }, 10000);
+                            }
+                        });
+                    });
+            }
+
+            // Alertas originales de Laravel
             const form = document.getElementById('form-busqueda');
             const resultados = document.getElementById('resultados-busqueda');
             let timeout = null;

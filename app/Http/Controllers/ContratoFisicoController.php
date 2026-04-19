@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Inmueble;
 use App\Models\Contrato;
+use App\Events\NuevoContratoIniciado;
+use App\Events\ContratoStatusChanged;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
@@ -157,6 +159,9 @@ class ContratoFisicoController extends Controller
                 'deposito'          => $inmueble->deposito ?? $inmueble->renta_mensual,
                 'estatus'           => 'pendiente_aprobacion',
             ]);
+
+            // Disparar evento de tiempo real
+            event(new NuevoContratoIniciado($nuevoContrato));
 
             // ==== Crear chat automático y enviar mensaje tipo solicitud ====
             $authId = Auth::id();
@@ -312,6 +317,9 @@ class ContratoFisicoController extends Controller
             ]);
 
             $contrato->inmueble->update(['estatus' => 'rentado']);
+            
+            // Disparar evento de estatus cambiado para el inquilino
+            event(new \App\Events\ContratoStatusChanged($contrato->id, 'activo', $contrato->inquilino_id));
         });
 
         try {
