@@ -92,9 +92,9 @@
                             @endif
 
                             <!-- Perfil de Usuario con Dropdown -->
-                            <div x-data="{ openProfile: false }" class="relative hidden sm:block">
+                            <div x-data="{ openProfile: false }" class="relative hidden sm:flex items-center">
                                 <!-- Centro de Notificaciones -->
-                                <div x-data="{ openNotifications: false }" class="relative mr-4">
+                                <div x-data="{ openNotifications: false }" class="relative mr-4 flex-shrink-0">
                                     <button @click="openNotifications = !openNotifications; if(openNotifications) fetchNotifications()" 
                                         class="relative p-2 text-white hover:text-brand-light transition-colors focus:outline-none group">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -135,7 +135,7 @@
                                             </svg>
                                         </div>
                                     @endif
-                                    {{ Auth::user()->nombre }}
+                                    <span class="truncate max-w-[120px] lg:max-w-[180px]">{{ Auth::user()->nombre }}</span>
                                     <svg :class="{'rotate-180': openProfile}" class="h-4 w-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                     </svg>
