@@ -199,18 +199,22 @@ Route::middleware('auth')->group(function () {
     )->name('contratos.confirmar');
     Route::get('/contratos/{contrato}/stripe-reserva-success', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
         if ($request->has('session_id')) {
-            \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-            $session = \Stripe\Checkout\Session::retrieve($request->session_id);
-            if ($session->payment_status !== 'paid' && $session->payment_status !== 'unpaid') {
-                return redirect()->route('inmuebles.mis_rentas')->with('error', 'La validación de fondos no fue completada.');
-            }
-            
-            if ($session->payment_intent) {
-                $pi = \Stripe\PaymentIntent::retrieve($session->payment_intent);
-                if ($pi->status === 'requires_capture') {
-                    $contrato->stripe_payment_intent_id = $pi->id;
-                    $contrato->save();
+            try {
+                $stripeSecret = env('STRIPE_SECRET') ?: config('services.stripe.secret');
+                \Stripe\Stripe::setApiKey($stripeSecret);
+                $session = \Stripe\Checkout\Session::retrieve($request->session_id);
+
+                if (in_array($session->payment_status, ['paid', 'unpaid'])) {
+                    if ($session->payment_intent) {
+                        $pi = \Stripe\PaymentIntent::retrieve($session->payment_intent);
+                        if (in_array($pi->status, ['requires_capture', 'succeeded'])) {
+                            $contrato->stripe_payment_intent_id = $pi->id;
+                            $contrato->save();
+                        }
+                    }
                 }
+            } catch (\Exception $e) {
+                \Log::error("❌ Error verificando pago en Stripe: " . $e->getMessage());
             }
         }
 
