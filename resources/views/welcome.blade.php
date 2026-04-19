@@ -170,19 +170,19 @@
 
     {{-- 3. SECCIÓN DE PROPIEDADES --}}
     <section class="container mx-auto px-4 mb-16 -mt-8" id="resultados-busqueda">
-        <div class="flex items-center justify-between mb-8">
-            <h2 class="text-2xl font-bold text-foreground">Propiedades Disponibles</h2>
-            <span class="text-sm font-medium text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full">
+        <div class="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
+            <h2 class="text-2xl font-black text-brand-dark">Propiedades Disponibles</h2>
+            <span class="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
                 {{ $inmuebles->total() }} resultados
             </span>
-             <div id="grid-inmuebles" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+        </div>
+
+        <div id="grid-inmuebles" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @forelse ($inmuebles as $inmueble)
                 @include('inmuebles.partials.card', ['inmueble' => $inmueble])
             @empty
                 <div id="no-inmuebles" class="col-span-full py-16 text-center text-slate-400 font-medium uppercase tracking-widest opacity-50">No hay propiedades disponibles.</div>
             @endforelse
-        </div>
-
         </div>
         
         <div class="mt-12">{{ $inmuebles->links() }}</div>
