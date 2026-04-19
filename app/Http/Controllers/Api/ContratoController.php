@@ -51,12 +51,14 @@ class ContratoController extends Controller
             'arrendador_foto' => \App\Support\MediaUrl::fromStoragePath($c->propietario->foto_perfil),
             'arrendador_telefono' => $c->propietario->telefono ?? 'Sin teléfono',
             'arrendador_email' => $c->propietario->email,
+            'inquilino_id' => $c->inquilino_id,
+            'inquilino_nombre' => $c->inquilino->nombre,
             'fecha_inicio' => $c->fecha_inicio,
             'fecha_fin' => $c->fecha_fin,
             'plazo' => $c->plazo,
             'monto_mensual' => $c->renta_mensual,
             'deposito' => $c->deposito,
-            'dia_pago' => 19, // Ajustado a la captura (19 en la web)
+            'dia_pago' => 19,
             'estado' => ($c->estatus === 'activo' || $c->estatus === 'activa') ? 'activa' : $c->estatus,
             'pdf_url' => url("/api/contratos/{$c->id}/pdf"),
             'created_at' => $c->created_at->format('Y-m-d'),
@@ -136,6 +138,17 @@ class ContratoController extends Controller
     public function rentar(Request $request, Inmueble $inmueble)
     {
         $usuario = $request->user();
+
+        // VALIDACIÓN CRÍTICA: Solo una renta activa o pendiente a la vez
+        $poseeRenta = Contrato::where('inquilino_id', $usuario->id)
+            ->whereIn('estatus', ['activo', 'activa', 'pendiente_aprobacion', 'esperando_pago'])
+            ->exists();
+
+        if ($poseeRenta) {
+            return response()->json([
+                'message' => 'Ya posees una renta activa o una solicitud en proceso. Finaliza tu renta actual antes de solicitar una nueva.'
+            ], 422);
+        }
 
         if ($inmueble->propietario_id === $usuario->id) {
             return response()->json(['message' => 'No puedes arrendar tu propia propiedad.'], 403);
