@@ -24,7 +24,25 @@ use App\Http\Controllers\Auth\SocialAuthController;
 Route::get('/auth/{provider}', [SocialAuthController::class, 'redirectToProvider'])->name('social.login');
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])->name('social.callback');
 
-// Ruta /test-gemini ELIMINADA por seguridad (exponía API Key públicamente)
+// RUTA TEMPORAL PARA CREAR LA LLAVE FCM (BORRAR DESPUÉS)
+Route::get('/crear-llave-secreta-fcm', function() {
+    $json = '{
+  "type": "service_account",
+  "project_id": "arrendaoco-fad79",
+  "private_key_id": "ce116ed2757cc1df78274994549a995c28c2c9b3",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDAh5YvbsY3EFTa\nW67f17PCnSQdb7lWErrOsgu2lApmevvTd6kM2DvrgT4bPJoNxNNYtfscSBliLfpc\nShFKs2IX1DmUuUxJqiAHa+dGMUDX4GkU9RTxRW/8Jh1srnfbgXTjxAzyC4kPYIaL\nnweSeDlI/OV8GwhiXnLQsEfMm70ICqvElrO/BNH56+8lkgTC1Kpcka7Q41LbpChG\nfsP0WkzysbyLt7SL3VBy4RZKlPgiuA/vvWsDiKUWvxx7+f8YPci9ARPd6s2pLGhK\nJ+P6hT7cdhG2KdACiE2QJGu2rOk0lBhuU6Rcp3QcUE2+3PqCyJsIL6Veb3i18zo5\n1azrH9ldAgMBAAECggEAJhwQleYC9U5VxX1FcciELB8n0W3WjVuav6RNnj/SiTOJ\n2nOCsmiw/65vCTwnMFeIEDTBdnktERqRxqfgoV09qwLWvQIqwCAdQ+rPdjz0nWat\n1jinAxUgFBTFWUh1sC0BYr5hY5317OXJ7CQ3/v2uNSzeDgFZ2QLiDj3+kFk5gzgl\nk/ITr1RvCv14qs22bNjZ0UwsyBnoA2CHK5vDwVYvQoF0LjqxSQ96K8Xawiz0h+dD\nbMMog75MpDWoUYuBEmcaxeZd42DsCQwSsWQAvTcxcuBvkcfkb3zvefegTUQa5x+u\n2M9HaxkpYa91lLJ8ck6iOrt9dtCd+FTMiT4ebaJFPwKBgQDlstIShWIRNSfqA3SD\n121qSz8uBEKmkn3+Flopi3x3zY1CINCecYcL8/8wZgbtawNRw/0+cmu9nGQJ1SEI\nnFL296yq76jaRxg8iMVAKobjuO+nqkvVJZM7UZFcGJCf3Zt6R16IthbpUr92ChMJ\nCsATQ+bk0XaMhrS5AesWDN/bBwKBgQDWkzrz3QL6j7DQ0p52C37MsxAOl8k231WT\nLi5EAw9LSgLoKjeKslBImGrzTS46nWygzl4UnJUCB6pYD/HYXKKjfo+HBTE81/9b\nS6Nif5Gbt5J7kOAY2fNORv+2Ha7gp+smXdroE/+L7NLlp7QvAPTa0fSfO8tzIIRq\nTm4LWnE7ewKBgHL2kh/E9HVKVoTQX+OQ0eluadu9NCKslTSzuUKr1osbrQSY6fEz\nPvUjlOiDWBpCAjJNVpWHrRcEjClDq7nki72h7qDLPIarKJ07kwXvgv281O3k1PmE\nSfFZfNhMTy5EOwnzaIQiJst2p+8LUcWnxMSfqpOBpsTkstUZ+bBalzvHAoGAcjvL\npMxCq7YXwfR/HAUeqkeiAsLYAnh/jG2Hf/nJCKIMTiE7lIE9sIhEV+b894Obszhq\nabq6sWv3Sg6jCDa49yWHr7AZ+HRdo/Lutp+Hm0jtmQ8V3uUZXND7ja7bzQpYbAKH\nagpLf+jCljTj/ioaMOyZuLQSqeXj2NyMRUsPAUUCgYEAqzb6tMdixp8NPDT6x0L9\n5AFqV7rqv41orBg54XS6uyYN9qB3dygLm27eDuL9gbPfDsFmcbxARNw1m0lq3lyK\nPTsd/ki1TfJaBwZI+4Jm+gKcpANVeVSwkX73b5OwY6JL03/Kxsx9mFtsouwVyVli\nizvW3kMtUUMdMUTY6WheIvU=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@arrendaoco-fad79.iam.gserviceaccount.com",
+  "client_id": "106859607222156673622",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40arrendaoco-fad79.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}';
+    $path = storage_path('app/firebase-auth.json');
+    file_put_contents($path, $json);
+    return "✅ Archivo creado exitosamente en: " . $path;
+});
 
 
 // 1. Mostrar formulario
