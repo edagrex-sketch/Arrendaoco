@@ -528,24 +528,13 @@
     @auth
     <script>
         window.addEventListener('load', () => {
+            // 1. EXISTENTE: Firebase Chat Notifications
             if (window.FirebaseChat) {
                 const myId = "{{ Auth::id() }}";
                 console.log('🔔 Escuchando notificaciones globales en Firebase para:', myId);
                 
                 window.FirebaseChat.listenToAllChats(myId, (chatData, chatId) => {
-                    // Solo notificar si el último mensaje NO lo enviamos nosotros
                     if (chatData.last_sender_id != myId && chatData.last_message) {
-                        
-                        // 1. Actualizar burbujas en el layout
-                        const dotDesktop = document.getElementById('unread-count');
-                        const dotMobile = document.getElementById('unread-count-mobile');
-                        const dotChatSidebar = document.getElementById(`badge-chat-${chatId}`);
-                        
-                        if (dotDesktop) dotDesktop.classList.remove('hidden');
-                        if (dotMobile) dotMobile.classList.remove('hidden');
-                        if (dotChatSidebar) dotChatSidebar.classList.remove('hidden');
-
-                        // 2. Alerta visual (Toast) si no estamos viendo ese chat
                         const urlParams = window.location.pathname;
                         if (!urlParams.includes(`/chats/${chatId}`)) {
                              Swal.fire({
@@ -566,6 +555,44 @@
                         }
                     }
                 });
+            }
+
+            // 2. NUEVO: Laravel Echo (Reverb) para Rentas y Disponibilidad
+            if (window.Echo) {
+                const myId = "{{ Auth::id() }}";
+                console.log('⚡ Conectado a Laravel Echo (Reverb) - Usuario:', myId);
+
+                // Escuchar cambios personales (Rentas, Aprobaciones, etc)
+                window.Echo.private(`user.${myId}`)
+                    .listen('ContratoStatusChanged', (e) => {
+                        console.log('📩 Actualización de Renta Recibida:', e);
+                        
+                        Swal.fire({
+                            title: 'Actualización de Renta',
+                            text: `Tu contrato #${e.contratoId} ha cambiado a: ${e.nuevoEstado}`,
+                            icon: 'success',
+                            toast: true,
+                            position: 'top-end',
+                            timer: 5000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            // Si estamos en la página de rentas, refrescamos automáticamente
+                            if (window.location.pathname.includes('mis-rentas') || window.location.pathname.includes('inmuebles')) {
+                                window.location.reload();
+                            }
+                        });
+                    });
+
+                // Escuchar cambios globales de Inmuebles
+                window.Echo.channel('inmuebles')
+                    .listen('InmuebleStatusChanged', (e) => {
+                        console.log('🏠 Inmueble cambió de estatus:', e);
+                        // Si estamos en el catálogo, refrescamos para ocultar/mostrar
+                        if (window.location.pathname === '/' || window.location.pathname.includes('inicio')) {
+                            // Para no interrumpir al usuario, solo refrescamos si la info es crítica
+                            // Opcional: mostrar un toast de "El catálogo ha sido actualizado"
+                        }
+                    });
             }
         });
     </script>
