@@ -132,7 +132,7 @@ class ContratoFisicoController extends Controller
         $contrato = DB::transaction(function () use ($inmueble) {
             $existing = Contrato::where('inmueble_id', $inmueble->id)
                 ->where('inquilino_id', Auth::id())
-                ->whereIn('estatus', ['pendiente_aprobacion', 'pdf_descargado'])
+                ->whereIn('estatus', ['pendiente_aprobacion', 'pdf_descargado', 'pendiente', 'disponible'])
                 ->lockForUpdate()
                 ->latest()
                 ->first();

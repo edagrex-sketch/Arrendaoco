@@ -96,18 +96,18 @@
                     @forelse ($contratos as $contrato)
                         <tr class="hover:bg-slate-50/80 transition-colors group">
                             <td class="px-6 py-5">
-                                <p class="font-bold text-[#003049] leading-tight">{{ $contrato->inmueble->titulo }}</p>
-                                <p class="text-xs text-muted-foreground">{{ $contrato->inmueble->direccion }}</p>
+                                <p class="font-bold text-[#003049] leading-tight">{{ $contrato->inmueble->titulo ?? 'Sin Título' }}</p>
+                                <p class="text-xs text-muted-foreground">{{ $contrato->inmueble->direccion ?? 'Sin Dirección' }}</p>
                             </td>
                             <td class="px-6 py-5">
                                 <div class="space-y-1">
-                                    <p class="text-xs"><span class="font-bold text-[#669BBC]">Prop:</span> {{ $contrato->propietario->nombre }}</p>
-                                    <p class="text-xs"><span class="font-bold text-[#C1121F]">Inq:</span> {{ $contrato->inquilino->nombre }}</p>
+                                    <p class="text-xs"><span class="font-bold text-[#669BBC]">Prop:</span> {{ $contrato->propietario->nombre ?? 'N/D' }}</p>
+                                    <p class="text-xs"><span class="font-bold text-[#C1121F]">Inq:</span> {{ $contrato->inquilino->nombre ?? 'N/D' }}</p>
                                 </div>
                             </td>
                             <td class="px-6 py-5">
-                                <p class="text-xs font-bold text-[#003049]">{{ $contrato->fecha_inicio->format('d/m/Y') }}</p>
-                                <p class="text-[10px] text-muted-foreground uppercase tracking-widest">al {{ $contrato->fecha_fin->format('d/m/Y') }}</p>
+                                <p class="text-xs font-bold text-[#003049]">{{ optional($contrato->fecha_inicio)->format('d/m/Y') ?? 'N/A' }}</p>
+                                <p class="text-[10px] text-muted-foreground uppercase tracking-widest">al {{ optional($contrato->fecha_fin)->format('d/m/Y') ?? 'N/A' }}</p>
                             </td>
                             <td class="px-6 py-5">
                                 <p class="font-black text-[#003049]">${{ number_format($contrato->renta_mensual, 2) }}</p>
@@ -136,7 +136,7 @@
                             </td>
                             <td class="px-6 py-5 text-right">
                                 <div class="flex justify-end gap-2">
-                                    <a href="{{ route('inmuebles.descargarContratoPdf', $contrato) }}" 
+                                    <a href="{{ route('contratos.descargar', $contrato) }}" 
                                         class="p-2 bg-slate-100 text-[#003049] rounded-xl hover:bg-[#003049] hover:text-white transition-all shadow-sm"
                                         title="Descargar PDF Original">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

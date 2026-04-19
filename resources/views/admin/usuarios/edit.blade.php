@@ -90,89 +90,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {{-- Campo: Contraseña --}}
-                        <div class="space-y-2">
-                            <label for="password"
-                                class="text-sm font-black text-[#003049] uppercase tracking-widest ml-1">Nueva
-                                Contraseña</label>
-                            <div class="relative">
-                                <input type="password" name="password" id="password"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 pr-12 text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-blue-100 focus:border-[#669BBC] focus:bg-white transition-all outline-none"
-                                    placeholder="Dejar en blanco para mantener"
-                                    minlength="8" maxlength="64">
-                                <button type="button" onclick="togglePassword('password', this)" 
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
-                                    <svg class="w-5 h-5 eye-open" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                    <svg class="w-5 h-5 eye-closed hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            {{-- Barra de fortaleza (solo visible si se escribe) --}}
-                            <div id="password-strength-container" class="mt-2 hidden">
-                                <div class="flex gap-1 mb-1">
-                                    <div id="str-1" class="h-1.5 flex-1 rounded-full bg-slate-200 transition-all duration-300"></div>
-                                    <div id="str-2" class="h-1.5 flex-1 rounded-full bg-slate-200 transition-all duration-300"></div>
-                                    <div id="str-3" class="h-1.5 flex-1 rounded-full bg-slate-200 transition-all duration-300"></div>
-                                    <div id="str-4" class="h-1.5 flex-1 rounded-full bg-slate-200 transition-all duration-300"></div>
-                                    <div id="str-5" class="h-1.5 flex-1 rounded-full bg-slate-200 transition-all duration-300"></div>
-                                </div>
-                                <p id="password-strength-text" class="text-[10px] text-slate-400 ml-1"></p>
-                                {{-- Checklist de requisitos --}}
-                                <div class="bg-slate-50 rounded-xl p-3 mt-2 space-y-1">
-                                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Requisitos:</p>
-                                    <div class="grid grid-cols-2 gap-1">
-                                        <p id="req-length" class="text-[10px] text-slate-400 flex items-center gap-1">
-                                            <span class="req-icon">○</span> Mínimo 8 caracteres
-                                        </p>
-                                        <p id="req-upper" class="text-[10px] text-slate-400 flex items-center gap-1">
-                                            <span class="req-icon">○</span> Una mayúscula
-                                        </p>
-                                        <p id="req-lower" class="text-[10px] text-slate-400 flex items-center gap-1">
-                                            <span class="req-icon">○</span> Una minúscula
-                                        </p>
-                                        <p id="req-number" class="text-[10px] text-slate-400 flex items-center gap-1">
-                                            <span class="req-icon">○</span> Un número
-                                        </p>
-                                        <p id="req-special" class="text-[10px] text-slate-400 flex items-center gap-1">
-                                            <span class="req-icon">○</span> Un carácter especial
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="text-[10px] text-muted-foreground ml-1 italic">* Dejar vacío si no deseas cambiar la contraseña.</p>
-                            <p id="password-error" class="text-red-500 text-xs mt-1 ml-1 hidden"></p>
-                            @error('password')
-                                <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Campo: Confirmar Contraseña (solo visible si se escribe password) --}}
-                        <div class="space-y-2" id="confirm-container" style="display: none;">
-                            <label for="password_confirmation"
-                                class="text-sm font-black text-[#003049] uppercase tracking-widest ml-1">Confirmar
-                                Nueva Contraseña <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <input type="password" name="password_confirmation" id="password_confirmation"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 pr-12 text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-blue-100 focus:border-[#669BBC] focus:bg-white transition-all outline-none"
-                                    placeholder="Repite la nueva contraseña">
-                                <button type="button" onclick="togglePassword('password_confirmation', this)" 
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
-                                    <svg class="w-5 h-5 eye-open" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                    <svg class="w-5 h-5 eye-closed hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <p id="confirm-error" class="text-red-500 text-xs mt-1 ml-1 hidden"></p>
-                            <p id="confirm-match" class="text-green-600 text-xs mt-1 ml-1 hidden">✓ Las contraseñas coinciden</p>
-                        </div>
+                    {{-- Sección de Contraseña Eliminada por Privacidad --}}
 
                         {{-- Campo: Estatus --}}
                         <div class="space-y-2" id="estatus-container">
@@ -282,27 +200,7 @@
             roles: @json($usuario->roles->pluck('id')->toArray())
         };
 
-        // Contraseña: mostrar/ocultar campo de confirmación y fortaleza
-        passwordInput.addEventListener('input', function() {
-            const confirmContainer = document.getElementById('confirm-container');
-            const strengthContainer = document.getElementById('password-strength-container');
-            
-            if (this.value.length > 0) {
-                confirmContainer.style.display = 'block';
-                strengthContainer.classList.remove('hidden');
-                checkPasswordStrength(this.value);
-            } else {
-                confirmContainer.style.display = 'none';
-                strengthContainer.classList.add('hidden');
-                confirmInput.value = '';
-            }
-            checkPasswordMatch();
-            detectChanges();
-        });
-
-        confirmInput.addEventListener('input', function() {
-            checkPasswordMatch();
-        });
+            // Validación eliminada
 
         // Detectar cambios en estatus
         document.getElementById('estatus').addEventListener('change', function() {
@@ -400,9 +298,6 @@
             
             if (document.getElementById('estatus').value !== originals.estatus) {
                 changes.push(`<strong>Estatus:</strong> "${originals.estatus}" → "${document.getElementById('estatus').value}"`);
-            }
-            if (passwordInput.value.length > 0) {
-                changes.push(`<strong>Contraseña:</strong> Se actualizará`);
             }
             
             const currentRoles = Array.from(document.querySelectorAll('input[name="roles[]"]:checked')).map(cb => parseInt(cb.value)).sort();
