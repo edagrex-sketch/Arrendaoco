@@ -44,9 +44,11 @@ class ContratoController extends Controller
             'id' => $c->id,
             'inmueble_id' => $c->inmueble_id,
             'inmueble_titulo' => $c->inmueble->titulo,
+            'inmueble_direccion' => $c->inmueble->direccion,
             'rutas_imagen' => \App\Support\MediaUrl::fromStoragePath($c->inmueble->imagen),
             'arrendador_id' => $c->propietario_id,
             'arrendador_nombre' => $c->propietario->nombre,
+            'arrendador_foto' => \App\Support\MediaUrl::fromStoragePath($c->propietario->foto_perfil),
             'arrendador_telefono' => $c->propietario->telefono ?? 'Sin teléfono',
             'arrendador_email' => $c->propietario->email,
             'fecha_inicio' => $c->fecha_inicio,
@@ -54,9 +56,9 @@ class ContratoController extends Controller
             'plazo' => $c->plazo,
             'monto_mensual' => $c->renta_mensual,
             'deposito' => $c->deposito,
-            'dia_pago' => 5, // Default day
+            'dia_pago' => 19, // Ajustado a la captura (19 en la web)
             'estado' => ($c->estatus === 'activo' || $c->estatus === 'activa') ? 'activa' : $c->estatus,
-            'pdf_url' => url("/api/contratos/{$c->id}/pdf"), // Enlace para descargar el contrato
+            'pdf_url' => url("/api/contratos/{$c->id}/pdf"),
             'created_at' => $c->created_at->format('Y-m-d'),
         ];
     }
