@@ -141,6 +141,7 @@ class ContratoController extends Controller
 
         // VALIDACIÓN CRÍTICA: Solo una renta activa o pendiente a la vez
         $poseeRenta = Contrato::where('inquilino_id', $usuario->id)
+            ->where('inmueble_id', '!=', $inmueble->id)
             ->whereIn('estatus', ['activo', 'activa', 'pendiente_aprobacion', 'esperando_pago'])
             ->exists();
 
@@ -158,8 +159,20 @@ class ContratoController extends Controller
             return response()->json(['message' => 'Esta propiedad ya no está disponible.'], 422);
         }
 
-        // Crear el contrato en estatus pendiente de aprobación
+        // Crear o recuperar el contrato en estatus pendiente
         $contrato = DB::transaction(function () use ($inmueble, $usuario) {
+            // Verificar si ya existe un contrato para este inmueble e inquilino que no esté finalizado/rechazado
+            $existing = Contrato::where('inmueble_id', $inmueble->id)
+                ->where('inquilino_id', $usuario->id)
+                ->whereIn('estatus', ['pendiente_aprobacion', 'pdf_descargado', 'pendiente', 'disponible', 'esperando_pago'])
+                ->lockForUpdate()
+                ->latest()
+                ->first();
+
+            if ($existing) {
+                return $existing;
+            }
+
             $duracionMeses = $inmueble->duracion_contrato_meses ?? 12;
             $plazo = $duracionMeses >= 12
                 ? floor($duracionMeses / 12) . ' año' . (floor($duracionMeses / 12) > 1 ? 's' : '')
