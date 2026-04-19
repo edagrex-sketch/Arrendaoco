@@ -683,8 +683,29 @@
                 (position) => {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
-                    actualizarPin(lat, lng, 18);
-                    obtenerDireccionDesdeMapa(lat, lng);
+
+                    // Validación: Si la ubicación está muy lejos de México (como Ohio)
+                    // México está aprox entre Lat 14-33 y Lng -118 a -86
+                    if (lat > 33 || lat < 14 || lng > -86 || lng < -118) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Ubicación detectada lejos',
+                            text: 'Tu navegador dice que estás en otro país (posiblemente por una VPN o tu proveedor de internet). ¿Quieres centrar el mapa en Ocosingo para marcarlo manualmente?',
+                            showCancelButton: true,
+                            confirmButtonText: 'Sí, ir a Ocosingo',
+                            cancelButtonText: 'No, dejar así',
+                            confirmButtonColor: '#003049'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                actualizarPin(16.9068, -92.0941, 15);
+                                obtenerDireccionDesdeMapa(16.9068, -92.0941);
+                            }
+                        });
+                    } else {
+                        actualizarPin(lat, lng, 18);
+                        obtenerDireccionDesdeMapa(lat, lng);
+                    }
+                    
                     btn.innerHTML = originalContent;
                     btn.disabled = false;
                 },
@@ -696,7 +717,11 @@
                     btn.innerHTML = originalContent;
                     btn.disabled = false;
                 },
-                { enableHighAccuracy: true }
+                { 
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
             );
         }
 
