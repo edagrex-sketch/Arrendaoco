@@ -326,7 +326,7 @@ Route::middleware('auth')->group(function () {
         }
     })->name('contratos.rechazar');
     
-    // Cancelar renta: desvincula el inmueble y marca el contrato como cancelado
+    // Cancelar renta: marca el contrato como cancelado recortando fecha_fin
     Route::delete('/mis-rentas/cancelar/{contrato}', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
         // Solo el inquilino o admin puede cancelar
         if ($contrato->inquilino_id !== \Illuminate\Support\Facades\Auth::id()
@@ -355,9 +355,9 @@ Route::middleware('auth')->group(function () {
             }
 
             $mensajeExito = 'Suscripción de renta cancelada.';
+            $fechaCorte = now();
             
             if ($contrato->estatus === 'activo') {
-                // Lógica de Cancelación Tipo Suscripción
                 $proximoPago = \App\Models\Pago::where('contrato_id', $contrato->id)
                     ->where('estatus', 'pendiente')
                     ->orderBy('anio')->orderBy('mes')->first();
@@ -367,51 +367,46 @@ Route::middleware('auth')->group(function () {
                     $fechaCorte = \Carbon\Carbon::create($proximoPago->anio, $proximoPago->mes, $diaPago);
                     
                     if ($fechaCorte->isPast()) {
-                        $fechaCorte = now(); // Si ya pasó, se corta hoy
+                        $fechaCorte = now();
                     }
                 } else {
                     $fechaCorte = $contrato->fecha_fin ?: now();
                 }
 
-                // Acortar el contrato a la fecha del corte y cancelar
                 $contrato->update([
                     'estatus' => 'cancelado',
                     'fecha_fin' => $fechaCorte
                 ]);
 
-                // Notificar al dueño
                 if ($contrato->inmueble && $contrato->inmueble->propietario) {
-                    // Tratar de mandar correo
                     try {
                         \Illuminate\Support\Facades\Mail::raw(
-                            "Hola, tu inquilino ha cancelado la renta del inmueble '{$contrato->inmueble->titulo}'. La suscripción dejará de generar cobros futuros y el inmueble vuelve a estar disponible para rentar de inmediato. Sin embargo, el inquilino tiene derecho sobre la propiedad hasta el {$fechaCorte->format('d/m/Y')}.",
+                            "Hola, tu inquilino ha cancelado la renta del inmueble '{$contrato->inmueble->titulo}'. La suscripción dejará de generar cobros futuros. El inquilino mantendrá el acceso hasta el {$fechaCorte->format('d/m/Y')}. A partir de esa fecha, podrás marcar tu inmueble como Disponible nuevamente.",
                             function ($msg) use ($contrato) {
                                 $msg->to($contrato->inmueble->propietario->email)
                                     ->subject('Aviso de Cancelación de Renta');
                             }
                         );
-                    } catch (\Exception $e) {
-                        // Ignorar si falla el envio para no trabar la app
-                    }
+                    } catch (\Exception $e) {}
                 }
                 
                 $mensajeExito = "Renta cancelada exitosamente. No se te harán más cobros y tendrás acceso al inmueble hasta tu fecha de corte ({$fechaCorte->format('d/m/Y')}).";
             } else {
-                // Cancelaciones normales (no estaba activa aún)
                 $contrato->update(['estatus' => 'cancelado']);
             }
 
-            // 2. Desvincular el inmueble → disponible nuevamente de inmediato
-            if ($contrato->inmueble) {
+            // 2. Liberar inmueble SOLO si la fecha de corte es hoy o en el pasado
+            if ($contrato->inmueble && now()->startOfDay()->gte($fechaCorte->startOfDay())) {
                 $contrato->inmueble->update(['estatus' => 'disponible']);
+                $mensajeExito .= " El inmueble ha quedado disponible nuevamente.";
             }
 
-            // 3. Eliminar pagos pendientes asociados para que no se cobre a futuro
+            // 3. Eliminar pagos pendientes
             \App\Models\Pago::where('contrato_id', $contrato->id)
                 ->where('estatus', 'pendiente')
                 ->delete();
 
-            // 4. Eliminar eventos del calendario de esta renta
+            // 4. Eliminar eventos
             \App\Models\Evento::where('renta_id', $contrato->id)->delete();
 
             \Illuminate\Support\Facades\DB::commit();
@@ -421,8 +416,7 @@ Route::middleware('auth')->group(function () {
                 ->with('error', 'Error al cancelar la renta: ' . $e->getMessage());
         }
 
-        return redirect()->route('inmuebles.mis_rentas')
-            ->with('success', $mensajeExito ?? 'Renta cancelada. El inmueble está disponible nuevamente.');
+        return redirect()->route('inmuebles.mis_rentas')->with('success', $mensajeExito);
     })->name('rentas.cancelar');
 
     Route::get('/publicar', [InmuebleController::class, 'create'])->name('inmuebles.create');

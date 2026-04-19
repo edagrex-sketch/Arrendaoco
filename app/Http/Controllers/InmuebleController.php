@@ -597,8 +597,14 @@ class InmuebleController extends Controller
             abort(403);
         }
 
-        if ($inmueble->estatus === 'rentado' || \App\Models\Contrato::where('inmueble_id', $inmueble->id)->where('estatus', 'activo')->exists()) {
-            return redirect()->route('inmuebles.index')->with('error', 'No puedes eliminar un inmueble que ya está rentado.');
+        // Un inmueble no puede ser eliminado si tiene contratos asociados (activos, cancelados, finalizados, etc.)
+        // Solo puede ser eliminado si NUNCA ha tenido un contrato o si todos sus contratos fueron rechazados.
+        $tieneHistorialRentas = \App\Models\Contrato::where('inmueble_id', $inmueble->id)
+            ->whereNotIn('estatus', ['rechazado'])
+            ->exists();
+            
+        if ($tieneHistorialRentas) {
+            return redirect()->route('inmuebles.index')->with('error', 'No puedes eliminar un inmueble que tiene historial de rentas (incluso canceladas o finalizadas).');
         }
 
         $inmueble->delete();
