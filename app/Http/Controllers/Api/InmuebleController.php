@@ -152,6 +152,25 @@ class InmuebleController extends Controller
     {
         $this->authorize('update', $inmueble);
 
+        // Seguridad: No editar si está rentado o tiene procesos técnicos activos
+        if ($inmueble->estatus === 'rentado') {
+            return response()->json([
+                'success' => false,
+                'message' => 'No puedes editar un inmueble que ya está RENTADO.'
+            ], 422);
+        }
+
+        $tieneContratos = \App\Models\Contrato::where('inmueble_id', $inmueble->id)
+            ->whereIn('estatus', ['activo', 'pendiente', 'disponible', 'esperando_pago'])
+            ->exists();
+
+        if ($tieneContratos) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No puedes editar este inmueble porque tiene un proceso de renta activo o pendiente.'
+            ], 422);
+        }
+
         $data = $request->validate([
             'titulo'          => 'sometimes|string|max:255',
             'descripcion'     => 'sometimes|string',
@@ -206,8 +225,28 @@ class InmuebleController extends Controller
     public function destroy(Inmueble $inmueble)
     {
         $this->authorize('delete', $inmueble);
+
+        // Seguridad: No borrar si está rentado o tiene contratos activos/pendientes
+        if ($inmueble->estatus === 'rentado') {
+            return response()->json([
+                'success' => false,
+                'message' => 'No puedes eliminar un inmueble que está marcado como RENTADO.'
+            ], 422);
+        }
+
+        $tieneContratos = \App\Models\Contrato::where('inmueble_id', $inmueble->id)
+            ->whereIn('estatus', ['activo', 'pendiente', 'disponible', 'esperando_pago'])
+            ->exists();
+
+        if ($tieneContratos) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No puedes eliminar este inmueble porque tiene contratos activos, pendientes o en proceso de renta.'
+            ], 422);
+        }
+
         $inmueble->delete();
-        return response()->json(['message' => 'Inmueble eliminado']);
+        return response()->json(['success' => true, 'message' => 'Inmueble eliminado']);
     }
 }
 
