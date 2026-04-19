@@ -13,7 +13,7 @@ class StripeConnectController extends Controller
     {
         $user = auth()->user();
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('services.stripe.secret'));
 
         // 1. Create a custom or express account if the user doesn't have one
         if (!$user->stripe_account_id) {
@@ -48,7 +48,7 @@ class StripeConnectController extends Controller
     public function handleReturn()
     {
         $user = auth()->user();
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('services.stripe.secret'));
 
         $account = Account::retrieve($user->stripe_account_id);
 

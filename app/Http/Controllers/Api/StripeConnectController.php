@@ -14,7 +14,7 @@ class StripeConnectController extends Controller
     {
         $user = $request->user();
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('services.stripe.secret'));
 
         // 1. Create or Retrieve the Stripe account
         if (!$user->stripe_account_id) {
@@ -56,7 +56,7 @@ class StripeConnectController extends Controller
             return response()->json(['completed' => false]);
         }
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('services.stripe.secret'));
         $account = Account::retrieve($user->stripe_account_id);
 
         if ($account->details_submitted && !$user->stripe_onboarding_completed) {
