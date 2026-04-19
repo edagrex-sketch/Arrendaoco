@@ -367,6 +367,5 @@
                 {{ $inmuebles->withQueryString()->links() }}
             </div>
         @endif
-        </div>
-        </div>
-    @endsection
+    </section>
+@endsection
