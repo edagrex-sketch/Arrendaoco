@@ -47,14 +47,17 @@ class ContratoController extends Controller
             'rutas_imagen' => \App\Support\MediaUrl::fromStoragePath($c->inmueble->imagen),
             'arrendador_id' => $c->propietario_id,
             'arrendador_nombre' => $c->propietario->nombre,
-            'inquilino_id' => $c->inquilino_id,
-            'inquilino_nombre' => $c->inquilino->nombre,
+            'arrendador_telefono' => $c->propietario->telefono ?? 'Sin teléfono',
+            'arrendador_email' => $c->propietario->email,
             'fecha_inicio' => $c->fecha_inicio,
             'fecha_fin' => $c->fecha_fin,
+            'plazo' => $c->plazo,
             'monto_mensual' => $c->renta_mensual,
             'deposito' => $c->deposito,
             'dia_pago' => 5, // Default day
             'estado' => ($c->estatus === 'activo' || $c->estatus === 'activa') ? 'activa' : $c->estatus,
+            'pdf_url' => url("/api/contratos/{$c->id}/pdf"), // Enlace para descargar el contrato
+            'created_at' => $c->created_at->format('Y-m-d'),
         ];
     }
 
@@ -158,6 +161,9 @@ class ContratoController extends Controller
                 'deposito'          => $inmueble->deposito ?? $inmueble->renta_mensual,
                 'estatus'           => 'pendiente_aprobacion',
             ]);
+
+            // BLOQUEO INMEDIATO: El inmueble deja de estar disponible en el catálogo
+            $inmueble->update(['estatus' => 'esperando_aprobacion']);
 
             // ==== Crear chat automático y enviar mensaje tipo solicitud ====
             $authId = $usuario->id;
