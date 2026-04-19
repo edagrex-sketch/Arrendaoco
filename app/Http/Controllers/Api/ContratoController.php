@@ -458,4 +458,34 @@ class ContratoController extends Controller
     {
         return $this->update($request->merge(['estado' => 'activo']), $contrato);
     }
+
+    /**
+     * Retorno de éxito de Stripe para Reserva de Inmueble
+     */
+    public function successReserva(Request $request, Contrato $contrato)
+    {
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+        $sessionId = $request->get('session_id');
+
+        try {
+            $session = \Stripe\Checkout\Session::retrieve($sessionId);
+            
+            // Actualizar contrato con el ID de pago de Stripe
+            $contrato->update([
+                'stripe_payment_intent_id' => $session->payment_intent,
+                'estatus' => 'pendiente_aprobacion' // Reforzar estatus
+            ]);
+
+            // Bloquear inmueble temporalmente
+            $contrato->inmueble->update(['estatus' => 'esperando_aprobacion']);
+
+            return view('stripe.success', [
+                'mensaje' => 'Tu solicitud de renta ha sido enviada con éxito.',
+                'subtitulo' => 'El propietario revisará tu solicitud y te notificaremos pronto.'
+            ]);
+
+        } catch (\Exception $e) {
+            return "Error procesando el éxito del pago: " . $e->getMessage();
+        }
+    }
 }
