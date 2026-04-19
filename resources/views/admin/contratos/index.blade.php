@@ -136,7 +136,7 @@
                             </td>
                             <td class="px-6 py-5 text-right">
                                 <div class="flex justify-end gap-2">
-                                    <a href="{{ route('inmuebles.descargarContratoPdf', $contrato) }}" 
+                                    <a href="{{ route('contratos.descargar', $contrato) }}" 
                                         class="p-2 bg-slate-100 text-[#003049] rounded-xl hover:bg-[#003049] hover:text-white transition-all shadow-sm"
                                         title="Descargar PDF Original">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
