@@ -136,7 +136,7 @@ class InmuebleController extends Controller
     public function show(Inmueble $inmueble)
     {
         // No autorizamos para que sea publico el detalle en la app si se desea
-        return new InmuebleResource($inmueble->load(['propietario', 'imagenes', 'resenas.usuario']));
+        return new InmuebleResource($inmueble->load(['propietario', 'imagenes', 'resenas.usuario', 'servicios']));
     }
 
     /**

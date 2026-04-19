@@ -122,4 +122,23 @@ class Inmueble extends Model
     {
         return $this->hasMany(InmuebleServicio::class, 'inmueble_id');
     }
+
+    /**
+     * Une los servicios de la tabla relacional (web) con la columna JSON (móvil)
+     */
+    public function mergeServiciosParaApp()
+    {
+        $mapa = is_array($this->pago_servicio) ? $this->pago_servicio : [];
+
+        // Si hay servicios en la tabla relacional, los agregamos si no están ya
+        if ($this->servicios) {
+            foreach ($this->servicios as $s) {
+                if (!isset($mapa[$s->servicio])) {
+                    $mapa[$s->servicio] = ($s->paga === 'arrendador') ? 'Arrendador' : 'Inquilino';
+                }
+            }
+        }
+
+        return (object)$mapa;
+    }
 }
