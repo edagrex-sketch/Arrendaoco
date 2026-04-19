@@ -101,13 +101,25 @@ class ContratoController extends Controller
                 'renta_mensual' => $inmueble->renta_mensual,
                 'deposito' => $inmueble->deposito ?? $inmueble->renta_mensual,
                 'duracion' => $plazo,
+                'direccion' => $inmueble->direccion,
+                'area' => $inmueble->area ?? '0.00',
+                'habitaciones' => $inmueble->habitaciones ?? 1,
+                'banos' => $inmueble->banos ?? 1,
+                'compartida' => $inmueble->compartida ? 'El inmueble comparte acceso principal.' : 'El inmueble cuenta con acceso independiente.',
+                'estacionamiento' => ($inmueble->estacionamiento > 0) ? "El alquiler incluye {$inmueble->estacionamiento} cajón(es) de estacionamiento." : "El alquiler NO incluye un cajón de estacionamiento asignado.",
+                'mobiliario' => $inmueble->amueblado ? 'Amueblada' : 'Sin amueblar',
+                'servicios_inquilino' => $inmueble->servicios_incluidos ?? 'No especificado',
+                'mascotas_permitidas' => $inmueble->acepta_mascotas ? 'EL Arrendador autoriza explícitamente la tenencia de mascotas.' : 'No se permite la tenencia de mascotas.',
+                'mascotas_detalles' => $inmueble->detalles_mascotas ?? 'Perros/Gatos',
+                'clausulas_adicionales' => $inmueble->clausulas_adicionales ?? 'No se estipularon cláusulas especiales adicionales por parte del Arrendador para este contrato.',
             ],
             'inquilino' => [
                 'id' => $usuario->id,
                 'nombre' => $usuario->nombre,
             ],
-            'fecha_inicio' => now()->toDateString(),
-            'fecha_fin' => now()->addMonths($duracionMeses)->toDateString(),
+            'fecha_actual' => now()->format('d \d\e F \d\e\l Y'),
+            'fecha_inicio' => now()->format('d \d\e F \d\e\l Y'),
+            'fecha_fin' => now()->addMonths($duracionMeses)->format('d \d\e F \d\e\l Y'),
         ]);
     }
 
