@@ -37,7 +37,7 @@ class InmuebleController extends Controller
             $query->where('ciudad', 'like', '%' . $request->ciudad . '%');
         }
 
-        return InmuebleResource::collection($query->latest()->paginate(15));
+        return InmuebleResource::collection($query->latest()->paginate(10));
     }
 
     /**
