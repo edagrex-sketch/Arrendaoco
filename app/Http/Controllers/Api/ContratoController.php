@@ -69,59 +69,188 @@ class ContratoController extends Controller
         ]);
     }
 
-    /* ======================================================
-     *  CREAR CONTRATO (RENTAR INMUEBLE)
-     * ====================================================== */
+    /*
+    |--------------------------------------------------------------------------
+    | VER PRECONTRATO (Previsualización)
+    |--------------------------------------------------------------------------
+    */
+    public function verContrato(Inmueble $inmueble, Request $request)
+    {
+        $usuario = $request->user();
+
+        if ($inmueble->propietario_id === $usuario->id) {
+            return response()->json(['message' => 'No puedes arrendar tu propia propiedad.'], 403);
+        }
+
+        if ($inmueble->estatus !== 'disponible') {
+            return response()->json(['message' => 'Esta propiedad ya no está disponible.'], 422);
+        }
+
+        $inmueble->load('propietario');
+        
+        $duracionMeses = $inmueble->duracion_contrato_meses ?? 12;
+        $plazo = $duracionMeses >= 12
+            ? floor($duracionMeses / 12) . ' año' . (floor($duracionMeses / 12) > 1 ? 's' : '')
+            : $duracionMeses . ' meses';
+
+        return response()->json([
+            'inmueble' => [
+                'id' => $inmueble->id,
+                'titulo' => $inmueble->titulo,
+                'propietario_nombre' => $inmueble->propietario->nombre,
+                'renta_mensual' => $inmueble->renta_mensual,
+                'deposito' => $inmueble->deposito ?? $inmueble->renta_mensual,
+                'duracion' => $plazo,
+            ],
+            'inquilino' => [
+                'id' => $usuario->id,
+                'nombre' => $usuario->nombre,
+            ],
+            'fecha_inicio' => now()->toDateString(),
+            'fecha_fin' => now()->addMonths($duracionMeses)->toDateString(),
+        ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONFIRMAR RENTA (CREAR CONTRATO + STRIPE HOLD)
+    |--------------------------------------------------------------------------
+    */
     public function rentar(Request $request, Inmueble $inmueble)
     {
         $usuario = $request->user();
 
-        $data = $request->validate([
-            'inquilino_id'  => 'nullable|exists:usuarios,id',
-            'fecha_inicio'  => 'required|date',
-            'fecha_fin'     => 'nullable|date|after:fecha_inicio',
-            'renta_mensual' => 'required|numeric|min:0',
-            'deposito'      => 'nullable|numeric|min:0',
-        ]);
-
-        // Si el que llama NO es el propietario, asumimos que es el inquilino que quiere rentar
-        if ($inmueble->propietario_id !== $usuario->id) {
-            // El inquilino_id será el usuario autenticado
-            $data['inquilino_id'] = $usuario->id;
-        } else {
-            // Si el que llama es el propietario, DEBE especificar un inquilino_id (a quién le renta)
-            if (!isset($data['inquilino_id'])) {
-                return response()->json(['message' => 'Debes especificar el inquilino_id para formalizar la renta'], 422);
-            }
+        if ($inmueble->propietario_id === $usuario->id) {
+            return response()->json(['message' => 'No puedes arrendar tu propia propiedad.'], 403);
         }
 
         if ($inmueble->estatus !== 'disponible') {
-            return response()->json(['message' => 'El inmueble no está disponible en este momento'], 422);
+            return response()->json(['message' => 'Esta propiedad ya no está disponible.'], 422);
         }
 
-        if ($data['inquilino_id'] == $inmueble->propietario_id) {
-            return response()->json(['message' => 'No puedes rentar tu propio inmueble'], 422);
-        }
+        // Crear el contrato en estatus pendiente de aprobación
+        $contrato = DB::transaction(function () use ($inmueble, $usuario) {
+            $duracionMeses = $inmueble->duracion_contrato_meses ?? 12;
+            $plazo = $duracionMeses >= 12
+                ? floor($duracionMeses / 12) . ' año' . (floor($duracionMeses / 12) > 1 ? 's' : '')
+                : $duracionMeses . ' meses';
 
-        $contrato = DB::transaction(function () use ($data, $inmueble, $usuario) {
-
-            $contrato = Contrato::create([
-                'inmueble_id'    => $inmueble->id,
-                'propietario_id' => $inmueble->propietario_id, // Siempre el dueño del inmueble
-                'inquilino_id'   => $data['inquilino_id'],
-                'fecha_inicio'   => $data['fecha_inicio'],
-                'fecha_fin'      => $data['fecha_fin'],
-                'renta_mensual'  => $data['renta_mensual'],
-                'deposito'       => $data['deposito'],
-                'estatus'        => 'activo',
+            $nuevoContrato = Contrato::create([
+                'inmueble_id'       => $inmueble->id,
+                'propietario_id'    => $inmueble->propietario_id,
+                'inquilino_id'      => $usuario->id,
+                'fecha_inicio'      => now()->toDateString(),
+                'fecha_fin'         => now()->addMonths($duracionMeses)->toDateString(),
+                'plazo'             => $plazo,
+                'renta_mensual'     => $inmueble->renta_mensual,
+                'deposito'          => $inmueble->deposito ?? $inmueble->renta_mensual,
+                'estatus'           => 'pendiente_aprobacion',
             ]);
 
-            $inmueble->update(['estatus' => 'rentado']);
+            // ==== Crear chat automático y enviar mensaje tipo solicitud ====
+            $authId = $usuario->id;
+            $id1 = min($authId, $inmueble->propietario_id);
+            $id2 = max($authId, $inmueble->propietario_id);
 
-            return $contrato;
+            $chat = \App\Models\Chat::firstOrCreate(
+                [
+                    'usuario_1'   => $id1,
+                    'usuario_2'   => $id2,
+                    'inmueble_id' => $inmueble->id
+                ],
+                [
+                    'activo'          => true,
+                    'last_message_at' => now()
+                ]
+            );
+
+            $mensajeTexto = "Hola, soy {$usuario->nombre} y me interesa tu inmueble, acabo de solicitar la renta y estoy en espera de tu aprobación.";
+            
+            $chat->mensajes()->create([
+                'sender_id' => $authId,
+                'contenido' => $mensajeTexto,
+                'tipo'      => 'solicitud_renta'
+            ]);
+
+            $chat->update([
+                'last_message'    => $mensajeTexto,
+                'last_message_at' => now()
+            ]);
+
+            return $nuevoContrato;
         });
 
-        return response()->json($contrato, 201);
+        // Generar sesión de Stripe para el móvil (Checkout URL)
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+        try {
+            $paymentIntentData = [
+                'capture_method' => 'manual', // HOLD DE FONDOS
+            ];
+            
+            if ($inmueble->propietario && $inmueble->propietario->stripe_account_id && $inmueble->propietario->stripe_onboarding_completed) {
+                $paymentIntentData['transfer_data'] = [
+                    'destination' => $inmueble->propietario->stripe_account_id
+                ];
+            }
+
+            $session = \Stripe\Checkout\Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'mxn',
+                        'product_data' => [
+                            'name' => 'Validación de Fondos y Reserva de Renta',
+                            'description' => 'Propiedad: ' . $inmueble->titulo,
+                        ],
+                        'unit_amount' => (int) ($inmueble->renta_mensual * 100),
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'payment_intent_data' => $paymentIntentData,
+                'success_url' => route('contratos.stripe.reserva.success', ['contrato' => $contrato->id]) . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('welcome'), // Fallback URL
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'contrato_id' => $contrato->id,
+                'stripe_url' => $session->url // El móvil abrirá esto para el pago
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error con Stripe: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SUBIR CONTRATO FIRMADO (PROPIETARIO)
+    |--------------------------------------------------------------------------
+    */
+    public function subirFirmado(Request $request, Contrato $contrato)
+    {
+        $usuario = $request->user();
+        if ($contrato->propietario_id !== $usuario->id) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $request->validate([
+            'archivo' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+        ]);
+
+        DB::transaction(function () use ($request, $contrato) {
+            $path = $request->file('archivo')->store('contratos_firmados', 'public');
+
+            $contrato->update([
+                'archivo_firmado'   => $path,
+                'archivo_subido_at' => now(),
+                'estatus'           => 'activo',
+            ]);
+
+            $contrato->inmueble->update(['estatus' => 'rentado']);
+        });
+
+        return response()->json(['success' => true, 'message' => 'Contrato activado exitosamente.']);
     }
 
     /* ======================================================
@@ -262,6 +391,24 @@ class ContratoController extends Controller
             $estadoCuenta->ruta_pdf,
             basename($estadoCuenta->ruta_pdf)
         );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DESCARGAR CONTRATO PDF (INQUILINO/ARRENDADOR)
+    |--------------------------------------------------------------------------
+    */
+    public function descargarContratoPdf(Contrato $contrato)
+    {
+        abort_unless(
+            in_array(auth()->id(), [$contrato->inquilino_id, $contrato->propietario_id]),
+            403
+        );
+
+        $contrato->load('inmueble.propietario', 'inquilino');
+        $pdf = Pdf::loadView('pdf.contrato', compact('contrato'));
+
+        return $pdf->download('Contrato_ArrendaOco_' . $contrato->id . '.pdf');
     }
 
     public function update(Request $request, Contrato $contrato)

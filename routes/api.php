@@ -71,17 +71,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/notificaciones/{notificacion}', [NotificacionController::class, 'destroy']);
 
     // Inmuebles (Gestión Propietario/Admin)
+    Route::get('/inmuebles/{inmueble}/ver-contrato', [ContratoController::class, 'verContrato']);
+    Route::post('/inmuebles/{inmueble}/rentar', [ContratoController::class, 'rentar']);
     Route::apiResource('inmuebles', InmuebleController::class)->names('api.inmuebles');
 
     // Contratos
     Route::get('/contratos', [ContratoController::class, 'index']);
     Route::get('/contratos/{contrato}', [ContratoController::class, 'show']);
     Route::put('/contratos/{contrato}', [ContratoController::class, 'update']);
-    Route::post('/inmuebles/{inmueble}/rentar', [ContratoController::class, 'rentar']);
+    Route::post('/contratos/{contrato}/subir-firmado', [ContratoController::class, 'subirFirmado']);
     Route::post('/contratos/{contrato}/renovar', [ContratoController::class, 'renovar']);
     Route::post('/contratos/{contrato}/cancelar', [ContratoController::class, 'cancelar']);
 
     // Estado de cuenta
+    Route::get('/contratos/{contrato}/descargar-pdf', [ContratoController::class, 'descargarContratoPdf']);
     Route::get('/contratos/{contrato}/estado-cuenta', [ContratoController::class, 'estadoCuenta']);
 
     // Pagos
