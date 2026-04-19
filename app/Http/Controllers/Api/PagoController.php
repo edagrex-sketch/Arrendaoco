@@ -70,16 +70,49 @@ class PagoController extends Controller
             abort(403, 'No autorizado para pagar este recibo');
         }
 
-        if ($pago->estatus === 'pagado') {
-            abort(422, 'Este pago ya fue liquidado');
-        }
+        // Generar sesión de Stripe
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
 
+        try {
+            $session = \Stripe\Checkout\Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'mxn',
+                        'product_data' => [
+                            'name' => 'Pago de Renta - Mes ' . $pago->mes . ' (' . $pago->anio . ')',
+                            'description' => 'Inmueble: ' . $pago->contrato->inmueble->titulo,
+                        ],
+                        'unit_amount' => (int) ($pago->monto * 100),
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                // Usamos una ruta de éxito que marque el pago
+                'success_url' => url('/api/pagos/' . $pago->id . '/success?session_id={CHECKOUT_SESSION_ID}'),
+                'cancel_url' => url('/api/pagos/' . $pago->id . '/cancel'),
+            ]);
+
+            return response()->json([
+                'url' => $session->url,
+                'pago_id' => $pago->id
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error con Stripe: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Endpoint de éxito para marcar el pago
+     */
+    public function success(Pago $pago)
+    {
         $pago->update([
             'estatus' => 'pagado',
             'fecha_pago' => now(),
         ]);
 
-        return response()->json($pago);
+        return view('pago_success'); // Una vista simple que diga "Pago Exitoso"
     }
     public function estadoCuenta(Contrato $contrato, Request $request)
     {

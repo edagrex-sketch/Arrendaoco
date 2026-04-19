@@ -91,6 +91,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pagos/pendientes', [PagoController::class, 'pendientes']);
     Route::post('/contratos/{contrato}/pagos/generar', [PagoController::class, 'generar']);
     Route::post('/pagos/{pago}/pagar', [PagoController::class, 'pagar']);
+    Route::get('/pagos/{pago}/success', [PagoController::class, 'success'])->name('pagos.success');
+    Route::get('/pagos/{pago}/cancel', function() { return "Pago cancelado"; })->name('pagos.cancel');
 
     // Reportes
     Route::get('/reportes/ingresos', [ReporteController::class, 'ingresos']);
