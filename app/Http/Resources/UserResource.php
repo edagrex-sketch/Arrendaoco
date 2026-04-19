@@ -22,6 +22,7 @@ class UserResource extends JsonResource
             'roles' => $this->roles->pluck('nombre'),
             'es_admin' => $this->es_admin,
             'estatus' => $this->estatus,
+            'stripe_onboarding_completed' => (bool)($this->stripe_onboarding_completed ?? false),
             'created_at' => $this->created_at->toDateTimeString(),
         ];
     }

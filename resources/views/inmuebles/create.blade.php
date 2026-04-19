@@ -11,11 +11,11 @@
              class="fixed inset-0 z-[100] flex items-center justify-center bg-[#003049]/80 backdrop-blur-sm px-4"
              style="display: none;" x-cloak>
             
+            <!-- El modal ahora es obligatorio form-bloqueante al no tener función de cierre -->
             <div x-show="showBankingModal"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 scale-90 translate-y-8"
                  x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                 <!-- El modal ahora es obligatorio form-bloqueante al no tener función de cierre -->
                  class="bg-white rounded-[2rem] shadow-2xl max-w-2xl w-full relative overflow-hidden mt-10">
                  
                  <div class="flex flex-col md:flex-row items-stretch">

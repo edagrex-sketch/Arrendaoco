@@ -67,7 +67,7 @@ class InmuebleController extends Controller
             'renta_mensual'   => 'required|numeric|min:0',
             'deposito'        => 'nullable|numeric|min:0',
             'habitaciones'    => 'required|integer|min:0',
-            'banos'           => 'required|integer|min:0',
+            'banos'           => 'required|numeric|min:0',
             'medios_banos'    => 'nullable|integer|min:0',
             'bano_compartido' => 'nullable|boolean',
             'metros'          => 'required|numeric|min:0',
@@ -96,14 +96,20 @@ class InmuebleController extends Controller
         ]);
 
 
+        // Limpiar datos numéricos/booleanos que podrían venir como strings vacíos desde el móvil
+        $cleanData = collect($data)->map(function ($value, $key) {
+            if ($value === '' || $value === 'null') return null;
+            return $value;
+        })->toArray();
+
         $inmueble = Inmueble::create([
-            ...collect($data)->except(['imagenes', 'estatus', 'tipos_mascotas', 'servicios_incluidos', 'pago_servicio'])->toArray(),
+            ...collect($cleanData)->except(['imagenes', 'estatus', 'tipos_mascotas', 'servicios_incluidos', 'pago_servicio'])->toArray(),
             'propietario_id' => $request->user()->id,
             'ciudad'         => 'Ocosingo',
             'estado'         => 'Chiapas',
             'codigo_postal'  => '29950',
             'estatus'        => $data['estatus'] ?? 'disponible',
-            'tipos_mascotas' => $request->input('tipos_mascotas'), // Guardar exactamente lo que llegue
+            'tipos_mascotas' => $request->input('tipos_mascotas'),
             'servicios_incluidos' => $request->input('servicios_incluidos'),
             'pago_servicio' => $request->input('pago_servicio'),
             'registrado_desde' => $data['registrado_desde'] ?? ($request->header('User-Agent') ? 'mobile' : 'web'),

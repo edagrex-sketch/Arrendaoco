@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ResenaController;
 use App\Http\Controllers\Api\PerfilController;
 use App\Http\Controllers\Api\EventoController;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\StripeConnectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -117,4 +118,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/chats/{chat}/enviar', [ChatController::class, 'sendMessage']);
     Route::post('/chats/iniciar/{otroUsuarioId}/{inmuebleId?}', [ChatController::class, 'startChat']);
     Route::post('/fcm-token', [ChatController::class, 'updateFcmToken']);
+
+    // Stripe Connect (Propietarios)
+    Route::get('/stripe/onboarding-link', [StripeConnectController::class, 'getOnboardingLink']);
+    Route::get('/stripe/check-status', [StripeConnectController::class, 'checkStatus']);
 });
