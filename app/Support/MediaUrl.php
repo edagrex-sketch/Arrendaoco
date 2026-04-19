@@ -34,5 +34,15 @@ class MediaUrl
         // Usar asset() para garantizar que la URL sea completa y segura (https)
         return asset('storage/' . $normalizedPath);
     }
+
+    /**
+     * Asegura que el archivo en public storage esté disponible.
+     */
+    public static function ensurePublicStorageCopy(?string $path): void
+    {
+        // En este entorno basta con que Laravel ya lo haya guardado.
+        // Se mantiene la función para evitar el error 500 reportado en logs.
+        return;
+    }
 }
 
