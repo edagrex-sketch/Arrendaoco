@@ -97,12 +97,15 @@ class InmuebleController extends Controller
 
 
         $inmueble = Inmueble::create([
-            ...collect($data)->except(['imagenes', 'estatus'])->toArray(),
+            ...collect($data)->except(['imagenes', 'estatus', 'tipos_mascotas', 'servicios_incluidos', 'pago_servicio'])->toArray(),
             'propietario_id' => $request->user()->id,
             'ciudad'         => 'Ocosingo',
             'estado'         => 'Chiapas',
             'codigo_postal'  => '29950',
             'estatus'        => $data['estatus'] ?? 'disponible',
+            'tipos_mascotas' => $request->input('tipos_mascotas'), // Guardar exactamente lo que llegue
+            'servicios_incluidos' => $request->input('servicios_incluidos'),
+            'pago_servicio' => $request->input('pago_servicio'),
             'registrado_desde' => $data['registrado_desde'] ?? ($request->header('User-Agent') ? 'mobile' : 'web'),
         ]);
 

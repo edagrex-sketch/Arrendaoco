@@ -63,13 +63,14 @@ class InmuebleResource extends JsonResource
             'total_resenas' => $this->resenas->count(),
             'created_at' => $this->created_at->toDateTimeString(),
             
-            // Campos de Paridad Web
+            // Campos de Paridad Web (Asegurando que no vengan vacíos)
             'tiene_estacionamiento' => (bool)($this->tiene_estacionamiento ?? false),
+            'estacionamiento' => $this->estacionamiento ?? 0,
             'permite_mascotas' => (bool)($this->permite_mascotas ?? false),
-            'tipos_mascotas' => $this->tipos_mascotas ?? [],
+            'tipos_mascotas' => !empty($this->tipos_mascotas) ? $this->tipos_mascotas : ($this->mascotas->pluck('nombre')->toArray() ?? []),
             'estado_mobiliario' => $this->estado_mobiliario ?? 'No especificado',
-            'servicios_incluidos' => $this->servicios_incluidos ?? [],
-            'pago_servicio' => $this->pago_servicio ?? [],
+            'servicios_incluidos' => !empty($this->servicios_incluidos) ? $this->servicios_incluidos : [],
+            'pago_servicio' => !empty($this->pago_servicio) ? $this->pago_servicio : [],
             'momento_pago' => $this->momento_pago ?? 'Primeros 5 días',
             'dias_tolerancia' => $this->dias_tolerancia ?? 0,
             'dias_preaviso' => $this->dias_preaviso ?? 30,
