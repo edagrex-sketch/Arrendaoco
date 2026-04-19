@@ -97,6 +97,13 @@ class ChatController extends Controller
             'mensaje',
             $chat->id
         );
+
+        // Sincronización Real-Time con Firebase Firestore (Móvil)
+        \App\Services\FirestoreService::syncMessage(
+            $chat->getFirebaseId(),
+            Auth::id(),
+            $request->contenido
+        );
  
         return response()->json([
             'success' => true,

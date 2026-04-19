@@ -48,7 +48,11 @@ class NotificationService
             $accessToken = self::getAccessToken();
             if (!$accessToken) return;
 
-            $projectId = 'arrendaoco-fad79';
+            $configJson = env('FCM_SERVICE_ACCOUNT_JSON');
+            if (!$configJson) return;
+            $config = json_decode($configJson, true);
+            $projectId = $config['project_id'] ?? 'arrendaoco-fad79';
+
             $url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
 
             $client = new Client();
@@ -76,14 +80,6 @@ class NotificationService
                                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
                             ],
                         ],
-                        'apns' => [
-                            'payload' => [
-                                'aps' => [
-                                    'sound' => 'default',
-                                    'badge' => 1,
-                                ],
-                            ],
-                        ],
                     ],
                 ],
             ]);
@@ -96,23 +92,24 @@ class NotificationService
     }
 
     /**
-     * Genera un Access Token para Google API usando el Service Account JSON.
+     * Genera un Access Token para Google API usando el Service Account JSON del .env.
      */
     private static function getAccessToken()
     {
-        $filePath = storage_path('app/firebase-auth.json');
-        if (!file_exists($filePath)) {
-            Log::error("⚠️ Archivo firebase-auth.json no encontrado.");
+        $configJson = env('FCM_SERVICE_ACCOUNT_JSON');
+        if (!$configJson) {
+            Log::error("⚠️ FCM_SERVICE_ACCOUNT_JSON no configurado en .env.");
             return null;
         }
 
-        $config = json_decode(file_get_contents($filePath), true);
+        $config = json_decode($configJson, true);
+        if (!$config) {
+            Log::error("❌ Formato de FCM_SERVICE_ACCOUNT_JSON inválido en .env.");
+            return null;
+        }
+
         $now = time();
-        
-        // Header del JWT
         $header = json_encode(['alg' => 'RS256', 'typ' => 'JWT']);
-        
-        // Payload del JWT
         $payload = json_encode([
             'iss'   => $config['client_email'],
             'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
@@ -124,14 +121,12 @@ class NotificationService
         $base64UrlHeader = self::base64UrlEncode($header);
         $base64UrlPayload = self::base64UrlEncode($payload);
 
-        // Crear Firma
         $signature = '';
         openssl_sign($base64UrlHeader . "." . $base64UrlPayload, $signature, $config['private_key'], 'SHA256');
         $base64UrlSignature = self::base64UrlEncode($signature);
 
         $jwt = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
 
-        // Solicitar el Access Token a Google
         try {
             $client = new Client();
             $response = $client->post('https://oauth2.googleapis.com/token', [
@@ -144,7 +139,7 @@ class NotificationService
             $data = json_decode($response->getBody()->getContents(), true);
             return $data['access_token'];
         } catch (\Exception $e) {
-            Log::error("❌ Error obteniendo Google Access Token: " . $e->getMessage());
+            Log::error("❌ Error obteniendo Access Token: " . $e->getMessage());
             return null;
         }
     }

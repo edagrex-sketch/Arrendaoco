@@ -112,12 +112,36 @@ class ChatController extends Controller
                 'mensaje',
                 $chat->id
             );
+
+            // Sincronización Real-Time con Firebase Firestore (Móvil)
+            \App\Services\FirestoreService::syncMessage(
+                $chat->getFirebaseId(),
+                Auth::id(),
+                $request->contenido
+            );
         }
  
         return response()->json([
             'success' => true,
             'data' => $mensajeCompleto
         ]);
+    }
+
+    public function sendToUser(Request $request, $otroUsuarioId)
+    {
+        $authId = Auth::id();
+        $id1 = min($authId, $otroUsuarioId);
+        $id2 = max($authId, $otroUsuarioId);
+
+        $chat = Chat::firstOrCreate([
+            'usuario_1' => $id1,
+            'usuario_2' => $id2,
+        ], [
+            'activo' => true,
+            'last_message_at' => now()
+        ]);
+
+        return $this->sendMessage($request, $chat);
     }
 
     public function startChat($otroUsuarioId, $inmuebleId = null)

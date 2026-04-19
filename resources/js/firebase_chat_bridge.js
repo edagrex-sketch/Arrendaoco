@@ -74,30 +74,34 @@ export function listenToAllChats(userId, callback) {
 }
 
 /**
- * Envía un mensaje a Firebase Firestore
+ * Envía un mensaje a Laravel (quien se encargará de MySQL y Firebase)
  */
 export async function sendFirebaseMessage(senderId, receiverId, text, extraData = {}) {
-    const chatId = getChatId(senderId, receiverId);
-    const now = new Date();
+    // Nota: El chatId de Laravel es numérico, pero en la vista show.blade.php
+    // ya tenemos acceso a la ruta de envío. 
+    // Para ser universales, usaremos fetch a la ruta de Laravel.
+    
+    // El ID del chat de Laravel lo obtenemos de la URL o del contexto
+    const chatPath = window.location.pathname;
+    const chatIdMatch = chatPath.match(/\/chats\/(\d+)/);
+    const laravelChatId = chatIdMatch ? chatIdMatch[1] : null;
 
-    const chatRef = doc(db, "chats", chatId);
-    const messageRef = collection(db, "chats", chatId, "mensajes");
+    if (!laravelChatId) {
+        console.error('No se pudo encontrar el ID del chat de Laravel');
+        return;
+    }
 
-    // 1. Actualizar metadata del chat
-    await setDoc(chatRef, {
-        last_message: text,
-        last_message_at: serverTimestamp(),
-        usuario_1: senderId.toString(),
-        usuario_2: receiverId.toString(),
-        updated_at: serverTimestamp(),
-        ...extraData
-    }, { merge: true });
+    const formData = new FormData();
+    formData.append('contenido', text);
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
 
-    // 2. Agregar el mensaje
-    return await addDoc(messageRef, {
-        sender_id: senderId.toString(),
-        text: text,
-        created_at: serverTimestamp(),
-        leido: false
+    const response = await fetch(`/chats/${laravelChatId}/messages`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
     });
+
+    return await response.json();
 }

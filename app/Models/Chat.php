@@ -50,4 +50,14 @@ class Chat extends Model
     {
         return $this->usuario_1 == $userId ? $this->usuario2 : $this->usuario1;
     }
+
+    /**
+     * Obtener el ID que usa Firebase (ordenado por min_id_max_id)
+     */
+    public function getFirebaseId()
+    {
+        $ids = [(string)$this->usuario_1, (string)$this->usuario_2];
+        sort($ids);
+        return implode('_', $ids);
+    }
 }

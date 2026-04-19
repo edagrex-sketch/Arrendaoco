@@ -116,6 +116,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chats', [ChatController::class, 'index']);
     Route::get('/chats/{chat}/mensajes', [ChatController::class, 'messages']);
     Route::post('/chats/{chat}/enviar', [ChatController::class, 'sendMessage']);
+    Route::post('/chats/enviar-a-usuario/{otroUsuarioId}', [ChatController::class, 'sendToUser']);
     Route::post('/chats/iniciar/{otroUsuarioId}/{inmuebleId?}', [ChatController::class, 'startChat']);
     Route::post('/fcm-token', [ChatController::class, 'updateFcmToken']);
 
