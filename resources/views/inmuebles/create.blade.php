@@ -62,7 +62,7 @@
                             <label class="block text-sm font-bold text-gray-700 mb-2">Renta Mensual <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <span class="absolute left-5 top-4 text-gray-400">$</span>
-                                <input type="number" name="precio" x-model="precio" placeholder="0.00" required class="w-full bg-gray-50 border-none rounded-xl py-4 pl-10 px-5 focus:ring-2 focus:ring-[#003049]/10">
+                                <input type="number" name="precio" x-model="precio" placeholder="0.00" step="any" required class="w-full bg-gray-50 border-none rounded-xl py-4 pl-10 px-5 focus:ring-2 focus:ring-[#003049]/10">
                             </div>
                         </div>
                     </div>
@@ -102,13 +102,21 @@
                 <div class="space-y-6">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Dirección Completa <span class="text-red-500">*</span></label>
-                        <div class="flex gap-2">
-                            <input type="text" name="direccion" id="direccion-input" value="{{ old('direccion') }}" placeholder="Calle, Número, Colonia..." required class="flex-1 bg-gray-50 border-none rounded-xl py-4 px-5">
-                            <button type="button" onclick="buscarDireccion()" class="bg-[#003049] text-white px-6 py-4 rounded-xl font-bold flex items-center gap-2 hover:bg-[#002030] transition-all">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                                Buscar en mapa
-                            </button>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" name="direccion" id="direccion-input" value="{{ old('direccion') }}" placeholder="Calle, Número, Colonia..." required class="w-full sm:flex-1 bg-gray-50 border-none rounded-xl py-4 px-5 focus:ring-2 focus:ring-[#003049]/10">
+                            <div class="flex gap-2">
+                                <button type="button" onclick="buscarDireccion()" class="flex-1 sm:flex-none bg-[#003049] text-white px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#002030] transition-all whitespace-nowrap">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                    <span class="sm:inline">Buscar en mapa</span>
+                                </button>
+                                <button type="button" onclick="obtenerUbicacionActual()" class="bg-blue-600 text-white px-4 py-4 rounded-xl font-bold flex items-center justify-center hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20" title="Usar mi ubicación exacta">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                </button>
+                            </div>
                         </div>
+                        <p class="mt-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                            Marca el punto en el mapa (Seleccionado automáticamente al buscar dirección)
+                        </p>
                     </div>
 
                     <div class="rounded-2xl border-2 border-gray-100 overflow-hidden relative shadow-inner">
@@ -335,6 +343,66 @@ document.addEventListener('alpine:init', () => {
             document.getElementById('lat-input').value = e.target.getLatLng().lat;
             document.getElementById('lng-input').value = e.target.getLatLng().lng;
         });
+    }
+    // Buscar dirección usando Nominatim (OpenStreetMap)
+    function buscarDireccion() {
+        const query = document.getElementById('direccion-input').value;
+        if (!query) return;
+
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const lat = data[0].lat;
+                    const lon = data[0].lon;
+                    map.setView([lat, lon], 16);
+                    marker.setLatLng([lat, lon]);
+                    document.getElementById('lat-input').value = lat;
+                    document.getElementById('lng-input').value = lon;
+                } else {
+                    alert("No se encontró la dirección. Intenta ser más específico.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Obtener ubicación actual del usuario
+    function obtenerUbicacionActual() {
+        if (!navigator.geolocation) {
+            alert("Tu navegador no soporta geolocalización.");
+            return;
+        }
+
+        const btn = event.currentTarget;
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        btn.disabled = true;
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                map.setView([lat, lng], 17);
+                marker.setLatLng([lat, lng]);
+                document.getElementById('lat-input').value = lat;
+                document.getElementById('lng-input').value = lng;
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+                
+                // Opcional: Reversar geocodificación para el input
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if(data.display_name) document.getElementById('direccion-input').value = data.display_name;
+                    });
+            },
+            (error) => {
+                alert("Error al obtener ubicación: " + error.message);
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            },
+            { enableHighAccuracy: true }
+        );
     }
     window.onload = initMap;
 </script>
