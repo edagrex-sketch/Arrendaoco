@@ -35,7 +35,12 @@ class Notificacion extends Model
                 case 'mensaje':
                     return route('chats.show', $this->referencia_id);
                 case 'renta':
-                    return '#'; // Expandible a rutas de contratos
+                    // La referencia_id es el ID del contrato. Obtenemos el inmueble_id desde el contrato.
+                    $contrato = Contrato::find($this->referencia_id);
+                    if ($contrato) {
+                        return route('inmuebles.index', ['highlight' => $contrato->inmueble_id]);
+                    }
+                    return route('inmuebles.index');
                 case 'sistema':
                     // Si la referencia es un inmueble
                     return route('inmuebles.show', $this->referencia_id);

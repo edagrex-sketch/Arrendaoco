@@ -58,7 +58,8 @@
                     $contratoEnCurso       = $contratoPdfDesc ?? $contratoPendiente;
                 @endphp
 
-                <div class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border {{ $enProceso ? 'border-[#669BBC]/40 ring-2 ring-[#669BBC]/20' : 'border-slate-100' }} flex flex-col h-full relative">
+                <div id="inmueble-{{ $inmueble->id }}" 
+                     class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border {{ $enProceso ? 'border-[#669BBC]/40 ring-2 ring-[#669BBC]/20' : 'border-slate-100' }} flex flex-col h-full relative {{ request('highlight') == $inmueble->id ? 'highlight-pulse' : '' }}">
 
 
                     {{-- Imagen --}}
@@ -254,7 +255,31 @@
 </div>
 
 @push('scripts')
+<style>
+    @keyframes highlightPulse {
+        0% { box-shadow: 0 0 0 0 rgba(102, 155, 188, 0.7); border-color: rgba(102, 155, 188, 1); transform: scale(1); }
+        50% { box-shadow: 0 0 30px 10px rgba(102, 155, 188, 0); border-color: rgba(102, 155, 188, 0.5); transform: scale(1.02); }
+        100% { box-shadow: 0 0 0 0 rgba(102, 155, 188, 0); border-color: rgba(226, 232, 240, 1); transform: scale(1); }
+    }
+    .highlight-pulse {
+        animation: highlightPulse 1s ease-in-out 3;
+        z-index: 10;
+        position: relative;
+    }
+</style>
 <script>
+window.addEventListener('load', function() {
+    const highlightId = "{{ request('highlight') }}";
+    if (highlightId) {
+        const element = document.getElementById('inmueble-' + highlightId);
+        if (element) {
+            setTimeout(() => {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 500);
+        }
+    }
+});
+
 function confirmDelete(id) {
     if (confirm('¿Estás seguro de que deseas eliminar esta propiedad? Esta acción no se puede deshacer.')) {
         document.getElementById('delete-form-' + id).submit();
