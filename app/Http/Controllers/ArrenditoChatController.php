@@ -10,9 +10,9 @@ use App\Models\Inmueble;
 class ArrenditoChatController extends Controller
 {
     /**
-     * Modelo de Gemini a utilizar.
+     * Modelo de Gemini a utilizar (Fallback si no está en config).
      */
-    private const GEMINI_MODEL = 'gemini-2.0-flash';
+    private const DEFAULT_GEMINI_MODEL = 'gemini-1.5-flash';
 
     /**
      * Endpoint base de la API de Gemini.
@@ -55,9 +55,10 @@ class ArrenditoChatController extends Controller
 
         $systemInstruction = $this->getSystemInstruction();
         $userContent = "{$contexto}Usuario dice: {$userMessage}";
+        $model = config('services.gemini.model', self::DEFAULT_GEMINI_MODEL);
 
         try {
-            $url = self::GEMINI_BASE_URL . self::GEMINI_MODEL . ":generateContent?key={$apiKey}";
+            $url = self::GEMINI_BASE_URL . $model . ":generateContent?key={$apiKey}";
 
             $response = Http::withoutVerifying()
                 ->timeout(30)
@@ -81,14 +82,31 @@ class ArrenditoChatController extends Controller
             if ($response->successful()) {
                 $data = $response->json();
                 $resText = $data['candidates'][0]['content']['parts'][0]['text'] ?? '¡Guau! 🐾 No pude procesar eso, intenta de nuevo.';
-                return response()->json(['success' => true, 'response' => $resText]);
+                
+                // Retornar ambos para compatibilidad con Web (response) y Móvil (reply)
+                return response()->json([
+                    'success' => true, 
+                    'response' => $resText,
+                    'reply' => $resText
+                ]);
             }
 
-            return response()->json(['success' => false, 'response' => '¡Guau! 🐾 Tuve un problemita al procesar tu mensaje.']);
+            $status = $response->status();
+            $body = $response->body();
+            Log::error("ROCO Chat - Error API Gemini [$status]: $body");
+
+            return response()->json([
+                'success' => false, 
+                'response' => '¡Guau! 🐾 Mi cerebro perruno se distrajo con una mariposa. Intenta de nuevo en un momento.',
+                'error_detail' => "API Error $status"
+            ]);
 
         } catch (\Exception $e) {
             Log::error("ROCO Chat - Excepción: " . $e->getMessage());
-            return response()->json(['success' => false, 'response' => '¡Guau! 🐾 Error inesperado del sistema.']);
+            return response()->json([
+                'success' => false, 
+                'response' => '¡Guau! 🐾 Error inesperado en mi caseta digital.'
+            ]);
         }
     }
 
