@@ -307,15 +307,7 @@
 
                         <!-- Fichas de Datos que faltaban -->
                         <div class="space-y-4">
-                            <div class="flex items-center gap-3">
-                                <div class="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-brand-dark shadow-sm">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0v1m-4 0a2 2 0 014 0v1" /></svg>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] uppercase font-bold text-gray-400">ID de Cliente</p>
-                                    <p class="text-xs font-black text-brand-dark">#{{ str_pad(Auth::id(), 5, '0', STR_PAD_LEFT) }}</p>
-                                </div>
-                            </div>
+
                             <div class="flex items-center gap-3">
                                 <div class="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-brand-dark shadow-sm">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
