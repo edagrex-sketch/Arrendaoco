@@ -34,7 +34,15 @@
     <!-- Info del Inmueble (Compacta) -->
     @if($chat->inmueble)
     <div class="hidden sm:flex items-center gap-3 p-2 pr-4 bg-gray-50 rounded-2xl border border-gray-100 group cursor-pointer hover:border-[#669BBC]/30 transition-all">
-        <img src="{{ asset('storage/'.($chat->inmueble->imagenes[0] ?? 'default.jpg')) }}" class="w-10 h-10 rounded-xl object-cover">
+        @php
+            $imagenPath = 'default.jpg';
+            if ($chat->inmueble->imagenes && count($chat->inmueble->imagenes) > 0) {
+                $imagenPath = $chat->inmueble->imagenes[0];
+            }
+        @endphp
+        <img src="{{ str_starts_with($imagenPath, 'http') ? $imagenPath : asset('storage/'.$imagenPath) }}" 
+             class="w-10 h-10 rounded-xl object-cover"
+             onerror="this.src='{{ asset('img/placeholder-house.jpg') }}'">
         <div class="max-w-[150px]">
             <p class="text-[10px] font-black text-[#003049] truncate">{{ $chat->inmueble->titulo }}</p>
             <p class="text-[9px] font-bold text-[#669BBC]">${{ number_format($chat->inmueble->precio, 0) }}/mes</p>
@@ -99,7 +107,7 @@
         <div class="flex-1 bg-gray-50 rounded-[28px] flex items-end p-2 border border-gray-100 focus-within:bg-white focus-within:border-[#003049]/20 transition-all shadow-sm">
             <textarea id="chat-textarea" 
                     placeholder="Escribe un mensaje elegante..." 
-                    class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 px-4 resize-none max-h-32 min-h-[48px] placeholder:text-gray-400 font-medium"
+                    class="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none outline-none text-sm py-3 px-4 resize-none max-h-32 min-h-[48px] placeholder:text-gray-400 font-medium"
                     rows="1"></textarea>
             
             <button type="submit" class="p-3 bg-[#003049] text-white rounded-2xl shadow-xl shadow-[#003049]/20 hover:scale-105 active:scale-95 transition-all">
@@ -122,6 +130,14 @@
     input.addEventListener('input', function() {
         this.style.height = 'auto';
         this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    // Enviar con Enter
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            form.dispatchEvent(new Event('submit'));
+        }
     });
 
     window.addEventListener('load', () => {
