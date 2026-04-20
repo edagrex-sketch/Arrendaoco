@@ -388,8 +388,12 @@
 
         function updateNotificationBadge() {
             const badge = document.getElementById('notification-badge');
+            // Corregido: unread-count con guion medio para coincidir con la ruta de Laravel
             fetch('/notificaciones/unread-count')
-            .then(res => res.json())
+            .then(res => {
+                if(!res.ok) throw new Error('Not found');
+                return res.json();
+            })
             .then(count => {
                 if(count > 0) {
                     badge.innerText = count;
@@ -397,7 +401,8 @@
                 } else {
                     badge.classList.add('hidden');
                 }
-            });
+            })
+            .catch(err => console.log('Badge sync wait...')); // Silenciar 404 temporales si el usuario no tiene sesion
         }
 
         function markAllAsRead() {
