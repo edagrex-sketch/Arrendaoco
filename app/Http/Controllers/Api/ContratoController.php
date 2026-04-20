@@ -194,10 +194,10 @@ class ContratoController extends Controller
             ]);
 
             // BLOQUEO INMEDIATO: El inmueble deja de estar disponible en el catálogo
-            $inmueble->update(['estatus' => 'esperando_aprobacion']);
+            $inmueble->update(['estatus' => 'rentado']);
             
             // TRANSMISIÓN EN VIVO: Avisar a todos que el inmueble ya no está disponible
-            event(new \App\Events\InmuebleStatusChanged($inmueble->id, 'esperando_aprobacion'));
+            event(new \App\Events\InmuebleStatusChanged($inmueble->id, 'rentado'));
 
             // ==== Crear chat automático y enviar mensaje tipo solicitud ====
             $authId = $usuario->id;
