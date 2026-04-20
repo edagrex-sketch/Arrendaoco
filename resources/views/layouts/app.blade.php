@@ -72,8 +72,8 @@
                 </div>
                 <!-- 3. Botones (Auth) -->
                 <div class="flex items-center gap-4">
-                    {{-- Desktop Auth Menu --}}
-                    <div class="hidden md:flex items-center gap-4">
+                    {{-- Desktop Auth Menu (Visible only on LG+) --}}
+                    <div class="hidden lg:flex items-center gap-4">
                         @auth
                             @if (Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
                                 <a href="{{ route('admin.dashboard') }}"
@@ -238,12 +238,12 @@
                                 Registrarse
                             </a>
                         @endauth
-                    </div>
+                    </div> {{-- Fin de Desktop Auth Menu --}}
 
-                    {{-- Hamburger Button (Premium Animation) --}}
-                    <div class="flex lg:hidden">
+                    {{-- Botón de Hamburguesa (Siempre al final de la derecha en móvil) --}}
+                    <div class="flex lg:hidden ml-auto">
                         <button @click="mobileMenuOpen = !mobileMenuOpen"
-                            class="relative text-white hover:text-brand-light transition-colors p-2 rounded-xl focus:outline-none z-[70]">
+                            class="relative text-white hover:text-brand-light transition-all p-2 rounded-xl focus:outline-none z-[80] bg-white/5 border border-white/10 shadow-lg">
                             <span class="sr-only">Menú</span>
                             <div class="w-8 h-8 flex flex-col justify-center items-center gap-1.5 overflow-hidden">
                                 <span :class="mobileMenuOpen ? 'rotate-45 translate-y-2.5' : ''" class="w-full h-1 bg-white rounded-full transition-all duration-300 origin-center"></span>
@@ -252,8 +252,8 @@
                             </div>
                         </button>
                     </div>
-                </div>
-            </div>
+                </div> {{-- Fin de Botones (Auth) --}}
+            </div> {{-- Fin de h-16 --}}
 
             <!-- Menú Móvil Lateral (Premium Overlay) -->
             <div x-show="mobileMenuOpen" 
