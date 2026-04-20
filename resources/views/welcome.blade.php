@@ -19,81 +19,118 @@
 
 
     {{-- 1. HERO SECTION --}}
-    <section class="mb-12 py-4">
+    <section class="mb-12 py-4" x-data="{ 
+        filtersExpanded: false, 
+        isDesktop: window.innerWidth >= 768 
+    }" @resize.window="isDesktop = window.innerWidth >= 768; if(isDesktop) filtersExpanded = false">
         <div class="w-full max-w-5xl mx-auto rounded-3xl bg-white p-5 sm:p-10 shadow-[0_20px_50px_rgba(0,48,73,0.05)] border border-gray-100">
             <h2 class="mb-8 text-center text-2xl sm:text-4xl font-black text-[#003049] tracking-tight">
                 Encuentra tu próximo hogar en Ocosingo
             </h2>
+
+            {{-- Botón de Búsqueda (Trigger para Móvil) --}}
+            <button @click="filtersExpanded = !filtersExpanded" 
+                class="flex md:hidden w-full items-center justify-between bg-brand-dark text-white px-6 py-4 rounded-2xl font-bold shadow-lg shadow-brand-dark/20 transition-all active:scale-[0.98] mb-4"
+                x-show="!filtersExpanded && !isDesktop" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95">
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span>Buscar propiedades...</span>
+                </div>
+                <svg :class="{'rotate-180': filtersExpanded}" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
             <form id="form-busqueda" action="{{ route('inmuebles.public_search') }}" method="GET"
-                    class="flex flex-col gap-4 md:flex-row items-end">
-                    <div class="relative flex-1 w-full">
-                        <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Ubicación</label>
-                        <div class="relative">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <input type="text" name="ubicacion" value="{{ request('ubicacion') }}"
-                                placeholder="Ej: Centro, Las Margaritas..."
-                                class="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                        </div>
-                    </div>
+                    class="flex flex-col gap-4 md:flex-row items-end"
+                    x-show="filtersExpanded || isDesktop"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 -translate-y-4"
+                    x-transition:enter-end="opacity-100 translate-y-0">
 
-                    <div class="relative w-full md:w-48">
-                        <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Precio</label>
-                        <div class="relative">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                class="absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <select name="rango_precio"
-                                class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                                <option value="">Cualquiera</option>
-                                <option value="0-2000" {{ request('rango_precio') == '0-2000' ? 'selected' : '' }}>$0 - $2,000
-                                </option>
-                                <option value="2000-4000" {{ request('rango_precio') == '2000-4000' ? 'selected' : '' }}>$2,000
-                                    - $4,000</option>
-                                <option value="4000-6000" {{ request('rango_precio') == '4000-6000' ? 'selected' : '' }}>$4,000
-                                    - $6,000</option>
-                                <option value="6000+" {{ request('rango_precio') == '6000+' ? 'selected' : '' }}>$6,000+</option>
-                            </select>
+                    {{-- Contenedor de Campos --}}
+                    <div class="grid grid-cols-1 md:flex md:flex-row gap-4 w-full items-end">
+                        <div class="relative flex-1 w-full">
+                            <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Ubicación</label>
+                            <div class="relative">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <input type="text" name="ubicacion" value="{{ request('ubicacion') }}"
+                                    placeholder="Ej: Centro, Las Margaritas..."
+                                    class="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-sm">
+                            </div>
                         </div>
-                    </div>
-                    <div class="relative w-full md:w-48">
-                        <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Categoría</label>
-                        <div class="relative">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                class="absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            <select name="categoria"
-                                class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                                <option value="">Todas</option>
-                                <option value="casa" {{ request('categoria') == 'casa' ? 'selected' : '' }}>Casa</option>
-                                <option value="departamento" {{ request('categoria') == 'departamento' ? 'selected' : '' }}>
-                                    Departamento</option>
-                                <option value="cuarto" {{ request('categoria') == 'cuarto' ? 'selected' : '' }}>Cuarto</option>
-                            </select>
-                        </div>
-                    </div>
 
-                    <button type="submit"
-                        class="inline-flex h-12 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-2 w-full md:w-auto">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        Buscar
-                    </button>
+                        <div class="relative w-full md:w-48">
+                            <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Precio</label>
+                            <div class="relative">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <select name="rango_precio"
+                                    class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-sm">
+                                    <option value="">Cualquiera</option>
+                                    <option value="0-2000" {{ request('rango_precio') == '0-2000' ? 'selected' : '' }}>$0 - $2,000
+                                    </option>
+                                    <option value="2000-4000" {{ request('rango_precio') == '2000-4000' ? 'selected' : '' }}>$2,000
+                                        - $4,000</option>
+                                    <option value="4000-6000" {{ request('rango_precio') == '4000-6000' ? 'selected' : '' }}>$4,000
+                                        - $6,000</option>
+                                    <option value="6000+" {{ request('rango_precio') == '6000+' ? 'selected' : '' }}>$6,000+</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="relative w-full md:w-48">
+                            <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Categoría</label>
+                            <div class="relative">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <select name="categoria"
+                                    class="flex h-12 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-sm">
+                                    <option value="">Todas</option>
+                                    <option value="casa" {{ request('categoria') == 'casa' ? 'selected' : '' }}>Casa</option>
+                                    <option value="departamento" {{ request('categoria') == 'departamento' ? 'selected' : '' }}>
+                                        Departamento</option>
+                                    <option value="cuarto" {{ request('categoria') == 'cuarto' ? 'selected' : '' }}>Cuarto</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 w-full md:w-auto">
+                            {{-- Botón: Ocultar (Solo Móvil) --}}
+                            <button type="button" @click="filtersExpanded = false"
+                                class="flex md:hidden items-center justify-center w-12 h-12 rounded-xl bg-slate-100 text-brand-dark hover:bg-slate-200 transition-all border border-slate-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
+                                </svg>
+                            </button>
+
+                            <button type="submit"
+                                class="btn-primary flex-1 md:flex-none md:w-auto px-8 h-12 flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                Buscar
+                            </button>
+                        </div>
+                    </div>
                 </form>
         </div>
     </section>
