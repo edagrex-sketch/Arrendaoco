@@ -75,7 +75,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-4">
             {{-- Left Box: Image Gallery --}}
             <div class="lg:col-span-5 bg-white rounded-3xl p-4 shadow-sm border border-slate-200 flex flex-col">
-                <div class="relative group w-full flex-1 min-h-[450px] lg:min-h-[600px] rounded-2xl grid gap-2 overflow-hidden"
+                <div class="relative group w-full flex-1 min-h-[300px] sm:min-h-[450px] lg:min-h-[600px] rounded-2xl grid gap-2 overflow-hidden"
                     :class="images.length >= 4 ? 'grid-cols-2 grid-rows-4' : (images.length >= 2 ? 'grid-cols-2 grid-rows-3' : 'grid-cols-2 grid-rows-2')">
 
                     {{-- Grid 5 posiciones --}}
@@ -134,7 +134,7 @@
                     {{-- Nuevo Diseño: Gallery Dashboard --}}
                     <div class="mt-8 mb-12">
                         {{-- BLOQUE 1: Estadísticas de Impacto (Upper Header) --}}
-                        <div class="grid grid-cols-3 gap-0 mb-12 rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-0 mb-12 rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm">
                             <div class="p-8 bg-white flex flex-col items-center justify-center text-center border-r border-slate-100 hover:bg-slate-50/50 transition-colors">
                                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Habitaciones</span>
                                 <div class="flex items-center gap-3">
@@ -292,8 +292,8 @@
                             $maxCount = max($serviciosProp->count(), $serviciosInq->count());
                         @endphp
 
-                        <div class="bg-[#FDF0D5]/40 rounded-2xl border border-[#FDF0D5] overflow-hidden shadow-sm">
-                            <table class="w-full text-left border-collapse">
+                        <div class="bg-[#FDF0D5]/40 rounded-2xl border border-[#FDF0D5] overflow-hidden shadow-sm overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[400px]">
                                 <thead>
                                     <tr class="bg-[#FDF0D5]">
                                         <th class="py-3 px-5 border-b border-white/60 w-1/2">

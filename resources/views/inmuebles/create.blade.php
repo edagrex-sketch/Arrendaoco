@@ -56,29 +56,28 @@
             <div class="flex items-center justify-center gap-4 relative">
                 <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 rounded-full"></div>
                 
-                {{-- Paso 1: Básico --}}
-                <div class="flex flex-col items-center cursor-pointer" @click="if(step > 1) step = 1">
+                {{-- Paso 1: B                <div class="flex flex-col items-center cursor-pointer" @click="if(step > 1) step = 1">
                     <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold border-4 transition-colors bg-white z-10" :class="step >= 1 ? 'border-primary text-primary' : 'border-gray-300 text-gray-400'">1</div>
-                    <span class="text-xs font-medium mt-1 bg-background px-1" :class="step >= 1 ? 'text-primary' : 'text-gray-400'">Básico</span>
+                    <span class="text-[10px] sm:text-xs font-medium mt-1 bg-background px-1 hidden sm:block" :class="step >= 1 ? 'text-primary' : 'text-gray-400'">Básico</span>
                 </div>
                 
                 {{-- Paso 2: Detalles --}}
                 <div class="flex flex-col items-center">
                     <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold border-4 transition-colors bg-white z-10" :class="step >= 2 ? 'border-primary text-primary' : 'border-gray-300 text-gray-400'">2</div>
-                    <span class="text-xs font-medium mt-1 bg-background px-1" :class="step >= 2 ? 'text-primary' : 'text-gray-400'">Detalles</span>
+                    <span class="text-[10px] sm:text-xs font-medium mt-1 bg-background px-1 hidden sm:block" :class="step >= 2 ? 'text-primary' : 'text-gray-400'">Detalles</span>
                 </div>
-
+ 
                 {{-- Paso 3: Reglas y Pagos (NUEVO) --}}
                 <div class="flex flex-col items-center">
                     <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold border-4 transition-colors bg-white z-10" :class="step >= 3 ? 'border-primary text-primary' : 'border-gray-300 text-gray-400'">3</div>
-                    <span class="text-xs font-medium mt-1 bg-background px-1" :class="step >= 3 ? 'text-primary' : 'text-gray-400'">Reglas</span>
+                    <span class="text-[10px] sm:text-xs font-medium mt-1 bg-background px-1 hidden sm:block" :class="step >= 3 ? 'text-primary' : 'text-gray-400'">Reglas</span>
                 </div>
                 
                 {{-- Paso 4: Archivos --}}
                 <div class="flex flex-col items-center">
                     <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold border-4 transition-colors bg-white z-10" :class="step >= 4 ? 'border-primary text-primary' : 'border-gray-300 text-gray-400'">4</div>
-                    <span class="text-xs font-medium mt-1 bg-background px-1" :class="step >= 4 ? 'text-primary' : 'text-gray-400'">Archivos</span>
-                </div>
+                    <span class="text-[10px] sm:text-xs font-medium mt-1 bg-background px-1 hidden sm:block" :class="step >= 4 ? 'text-primary' : 'text-gray-400'">Archivos</span>
+                </div>       </div>
             </div>
         </div>
 
@@ -172,20 +171,22 @@
                         </svg> Características y Ubicación
                     </h2>
 
-                    <div class="mb-4">
+                    <div class="mb-4 text-left">
                         <label class="block text-sm font-medium mb-1">Dirección Completa <span class="text-red-500">*</span></label>
-                        <div class="flex gap-2">
-                            <input type="text" name="direccion" id="direccion-input" value="{{ old('direccion') }}" placeholder="Calle, Número, Colonia..." required class="flex-1 rounded-lg border-input bg-white border py-3 px-4">
-                            <button type="button" onclick="buscarDireccion()" class="bg-[#003049] hover:bg-[#003049]/90 text-white px-4 py-2 rounded-lg transition-all text-sm font-bold flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                                Buscar en mapa
-                            </button>
-                            <button type="button" onclick="geolocalizar()" title="Usar mi ubicación actual" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg transition-all shadow-md group">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </button>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" name="direccion" id="direccion-input" value="{{ old('direccion') }}" placeholder="Calle, Número, Colonia..." required class="flex-1 rounded-lg border-input bg-white border py-3 px-4 shadow-sm">
+                            <div class="flex gap-2">
+                                <button type="button" onclick="buscarDireccion()" class="flex-1 sm:flex-none bg-[#003049] hover:bg-[#003049]/90 text-white px-4 py-2 rounded-lg transition-all text-sm font-bold flex items-center justify-center gap-2 min-w-[44px]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                    <span class="sm:inline">Buscar</span>
+                                </button>
+                                <button type="button" onclick="geolocalizar()" title="Usar mi ubicación actual" class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition-all shadow-md group border-none cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -382,29 +383,31 @@
 
                     {{-- Servicios (Matriz dinámica) --}}
                     <div class="mb-6 border rounded-xl overflow-hidden" x-show="serviciosSeleccionados.length > 0" x-transition style="display: none;">
-                        <div class="bg-slate-100 p-3 border-b font-medium text-sm text-center">¿Quién será responsable de pagar los servicios?</div>
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="bg-white">
-                                    <th class="p-2 text-left font-normal text-slate-500">Servicio</th>
-                                    <th class="p-2 text-center font-normal text-slate-500">Inquilino paga</th>
-                                    <th class="p-2 text-center font-normal text-slate-500">Arrendador paga</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($listaServicios as $index => $servicio)
-                                <tr class="border-t {{ $index % 2 == 0 ? 'bg-slate-50' : 'bg-white' }}" x-show="serviciosSeleccionados.includes('{{ $servicio }}')">
-                                    <td class="p-3">{{ $servicio }}</td>
-                                    <td class="p-3 text-center">
-                                        <input type="radio" name="pago_servicio[{{ \Str::slug($servicio, '_') }}]" value="inquilino" class="w-4 h-4 text-primary" x-bind:required="serviciosSeleccionados.includes('{{ $servicio }}')" x-bind:disabled="!serviciosSeleccionados.includes('{{ $servicio }}')">
-                                    </td>
-                                    <td class="p-3 text-center">
-                                        <input type="radio" name="pago_servicio[{{ \Str::slug($servicio, '_') }}]" value="arrendador" class="w-4 h-4 text-primary" x-bind:disabled="!serviciosSeleccionados.includes('{{ $servicio }}')">
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                        <div class="bg-slate-100 p-3 border-b font-medium text-sm text-center font-bold text-[#003049]">¿Quién será responsable de pagar los servicios?</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm min-w-[350px]">
+                                <thead>
+                                    <tr class="bg-white">
+                                        <th class="p-2 text-left font-normal text-slate-500">Servicio</th>
+                                        <th class="p-2 text-center font-normal text-slate-500">Inquilino paga</th>
+                                        <th class="p-2 text-center font-normal text-slate-500">Arrendador paga</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($listaServicios as $index => $servicio)
+                                    <tr class="border-t {{ $index % 2 == 0 ? 'bg-slate-50' : 'bg-white' }}" x-show="serviciosSeleccionados.includes('{{ $servicio }}')">
+                                        <td class="p-3 font-bold">{{ $servicio }}</td>
+                                        <td class="p-3 text-center">
+                                            <input type="radio" name="pago_servicio[{{ \Str::slug($servicio, '_') }}]" value="inquilino" class="w-5 h-5 text-primary" x-bind:required="serviciosSeleccionados.includes('{{ $servicio }}')" x-bind:disabled="!serviciosSeleccionados.includes('{{ $servicio }}')">
+                                        </td>
+                                        <td class="p-3 text-center">
+                                            <input type="radio" name="pago_servicio[{{ \Str::slug($servicio, '_') }}]" value="arrendador" class="w-5 h-5 text-primary" x-bind:disabled="!serviciosSeleccionados.includes('{{ $servicio }}')">
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

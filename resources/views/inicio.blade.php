@@ -7,13 +7,13 @@
     {{-- 
        1. HERO SECTION & BUSCADOR 
     --}}
-    <section class="mb-12 px-4 py-8">
-        <div class="w-full max-w-5xl mx-auto rounded-3xl bg-card p-8 shadow-2xl shadow-slate-200/50 border border-border">
-            <h2 class="mb-8 text-center text-3xl font-black text-foreground tracking-tight">
+    <section class="mb-12 py-4">
+        <div class="w-full max-w-5xl mx-auto rounded-3xl bg-white p-5 sm:p-10 shadow-[0_20px_50px_rgba(0,48,73,0.05)] border border-gray-100">
+            <h2 class="mb-8 text-center text-2xl sm:text-4xl font-black text-[#003049] tracking-tight">
                 Encuentra tu próximo hogar en Ocosingo
             </h2>
             <form id="form-busqueda" action="{{ route('inmuebles.public_search') }}" method="GET"
-                class="flex flex-col gap-4 lg:flex-row items-end">
+                class="flex flex-col gap-4 md:flex-row items-end">
                 <div class="relative flex-1 w-full">
                     <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Ubicación</label>
                     <div class="relative">
@@ -32,7 +32,7 @@
                 </div>
 
                 {{-- Select: Categoría --}}
-                <div class="relative w-full lg:w-44">
+                <div class="relative w-full md:w-44">
                     <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Categoría</label>
                     <div class="relative">
                         <svg xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +51,7 @@
                     </div>
                 </div>
 
-                <div class="relative w-full lg:w-44">
+                <div class="relative w-full md:w-44">
                     <label class="text-sm font-medium mb-1.5 block text-muted-foreground ml-1">Precio</label>
                     <div class="relative">
                         <svg xmlns="http://www.w3.org/2000/svg"
@@ -71,7 +71,7 @@
                     </div>
                 </div>
                 <button type="submit"
-                    class="btn-primary w-full lg:w-auto px-8">
+                    class="btn-primary w-full md:w-auto px-8">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

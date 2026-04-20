@@ -26,7 +26,7 @@
 
     @if ($inmuebles->isEmpty())
         {{-- ===== Estado vacío ===== --}}
-        <div class="bg-white rounded-3xl p-20 text-center border-2 border-dashed border-slate-200">
+        <div class="bg-white rounded-3xl p-10 sm:p-20 text-center border-2 border-dashed border-slate-200">
             <div class="bg-[#FDF0D5] w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 text-[#003049]">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"

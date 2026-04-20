@@ -92,8 +92,8 @@
                 </div>
 
                 {{-- Scroll area del contrato --}}
-                <div class="h-[520px] overflow-y-auto p-6 bg-slate-50/50">
-                    <div class="bg-white rounded-2xl border border-slate-100 shadow-inner p-6 text-sm text-slate-700 font-serif leading-relaxed space-y-3">
+                <div class="h-[400px] sm:h-[520px] overflow-y-auto p-4 sm:p-6 bg-slate-50/50">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-inner p-4 sm:p-8 text-sm text-slate-700 font-serif leading-relaxed space-y-3">
                         <x-contrato-legal :inmueble="$inmueble" :contrato="$contrato" />
 
                         {{-- Sección de firmas físicas (preview) --}}
@@ -125,9 +125,9 @@
                     Resumen del Contrato
                 </h3>
                 <ul class="space-y-3 text-sm">
-                    <li class="flex justify-between items-center py-2 border-b border-slate-50">
-                        <span class="text-slate-500 font-medium">Propiedad</span>
-                        <span class="font-bold text-brand-dark text-right max-w-[140px] leading-tight">{{ $inmueble->titulo }}</span>
+                    <li class="flex justify-between items-start py-2 border-b border-slate-50 gap-4">
+                        <span class="text-slate-500 font-medium shrink-0">Propiedad</span>
+                        <span class="font-bold text-brand-dark text-right leading-tight">{{ $inmueble->titulo }}</span>
                     </li>
                     <li class="flex justify-between items-center py-2 border-b border-slate-50">
                         <span class="text-slate-500 font-medium">Renta mensual</span>

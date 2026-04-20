@@ -35,14 +35,22 @@
     @if($chat->inmueble)
     <div class="hidden sm:flex items-center gap-3 p-2 pr-4 bg-gray-50 rounded-2xl border border-gray-100 group cursor-pointer hover:border-[#669BBC]/30 transition-all">
         @php
-            $imagenPath = 'default.jpg';
-            if ($chat->inmueble->imagenes && count($chat->inmueble->imagenes) > 0) {
-                $imagenPath = $chat->inmueble->imagenes[0];
+            $inmueble = $chat->inmueble;
+            $imagenUrl = 'https://placehold.co/150x150/003049/FFFFFF?text=Inmueble';
+            
+            if ($inmueble) {
+                if ($inmueble->imagen) {
+                    $img = $inmueble->imagen;
+                    $imagenUrl = str_starts_with($img, 'http') ? $img : asset('storage/' . $img);
+                } elseif ($inmueble->imagenes && count($inmueble->imagenes) > 0) {
+                    $img = $inmueble->imagenes[0];
+                    $imagenUrl = str_starts_with($img, 'http') ? $img : asset('storage/' . $img);
+                }
             }
         @endphp
-        <img src="{{ str_starts_with($imagenPath, 'http') ? $imagenPath : asset('storage/'.$imagenPath) }}" 
-             class="w-10 h-10 rounded-xl object-cover"
-             onerror="this.src='https://via.placeholder.com/150?text=Casa'">
+        <img src="{{ $imagenUrl }}" 
+             class="w-10 h-10 rounded-xl object-cover border border-gray-100 shadow-sm"
+             onerror="this.onerror=null;this.src='https://placehold.co/150x150/003049/FFFFFF?text=Inmueble'">
         <div class="max-w-[150px]">
             <p class="text-[10px] font-black text-[#003049] truncate">{{ $chat->inmueble->titulo }}</p>
             <p class="text-[9px] font-bold text-[#669BBC]">${{ number_format($chat->inmueble->precio, 0) }}/mes</p>

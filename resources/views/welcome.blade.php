@@ -19,9 +19,9 @@
 
 
     {{-- 1. HERO SECTION --}}
-    <section class="mb-12 px-4 py-8">
-        <div class="w-full max-w-5xl mx-auto rounded-xl bg-card p-6 shadow-lg border border-border">
-            <h2 class="mb-6 text-center text-3xl font-semibold text-card-foreground">
+    <section class="mb-12 py-4">
+        <div class="w-full max-w-5xl mx-auto rounded-3xl bg-white p-5 sm:p-10 shadow-[0_20px_50px_rgba(0,48,73,0.05)] border border-gray-100">
+            <h2 class="mb-8 text-center text-2xl sm:text-4xl font-black text-[#003049] tracking-tight">
                 Encuentra tu próximo hogar en Ocosingo
             </h2>
             <form id="form-busqueda" action="{{ route('inmuebles.public_search') }}" method="GET"
@@ -190,14 +190,14 @@
     </section>
 
     {{-- 3. CTA: Publicar Inmueble --}}
-    <section class="mb-12">
-        <div class="bg-primary px-6 py-16 rounded-3xl text-center relative overflow-hidden">
+    <section class="mb-12 px-2 sm:px-0">
+        <div class="bg-[#003049] px-5 py-12 sm:px-10 sm:py-20 rounded-[40px] text-center relative overflow-hidden shadow-2xl shadow-[#003049]/20">
             <div class="absolute top-0 left-0 w-full h-full bg-white/5 pointer-events-none"></div>
             <div class="relative z-10">
-                <h2 class="mb-4 text-3xl font-bold text-primary-foreground">¿Tienes una propiedad en Ocosingo?</h2>
-                <p class="mb-8 text-lg text-primary-foreground/90 max-w-2xl mx-auto">Únete a ArrendaOco y conecta con inquilinos verificados de la universidad y la ciudad.</p>
+                <h2 class="mb-4 text-2xl sm:text-4xl font-black text-white leading-tight">¿Tienes una propiedad en Ocosingo?</h2>
+                <p class="mb-8 text-sm sm:text-lg text-white/80 max-w-2xl mx-auto font-medium">Únete a ArrendaOco y conecta con inquilinos verificados de la universidad y la ciudad.</p>
                 <a href="{{ route('inmuebles.create') }}" 
-                   class="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-white px-8 text-sm font-black text-[#003049] shadow-xl hover:scale-105 transition-all uppercase tracking-widest">
+                   class="inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-[#669BBC] px-8 text-sm font-black text-white shadow-xl hover:bg-[#669BBC]/90 hover:scale-105 transition-all uppercase tracking-widest">
                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
                        <path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" />
                    </svg>
