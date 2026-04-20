@@ -140,11 +140,16 @@
         this.style.height = (this.scrollHeight) + 'px';
     });
 
-    // Enviar con Enter
+    // Enviar con Enter (Mejorado)
     input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            form.dispatchEvent(new Event('submit'));
+            // Usamos requestSubmit para disparar el evento submit del formulario y sus validaciones
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+            } else {
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
         }
     });
 
@@ -186,19 +191,40 @@
         formData.append('_token', '{{ csrf_token() }}');
 
         try {
-            const socketId = window.Echo ? window.Echo.socketId() : null;
+            console.log('🚀 Enviando mensaje a Laravel...');
+            const socketId = (window.Echo && typeof window.Echo.socketId === 'function') ? window.Echo.socketId() : null;
+            
             const response = await fetch("{{ route('chats.messages.send', $chat->id) }}", {
                 method: 'POST',
                 body: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-Socket-ID': socketId }
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest', 
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    ...(socketId ? { 'X-Socket-ID': socketId } : {})
+                }
             });
+
+            console.log('📡 Respuesta del servidor:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Error del servidor (${response.status}): ${errorText}`);
+            }
+
             const data = await response.json();
+            console.log('✅ Mensaje confirmado por servidor:', data);
             
             const tempMsg = document.querySelector(`[data-id="${tempId}"]`);
             if (tempMsg) tempMsg.closest('.message-wrapper').remove();
             appendMessage(data.mensaje, true);
+
         } catch (error) {
-            console.error('Error:', error);
+            console.error('❌ Error fatal al enviar:', error);
+            alert('Error al enviar mensaje: ' + error.message);
+            // Restaurar el texto si falló
+            input.value = contenido;
+            const tempMsg = document.querySelector(`[data-id="${tempId}"]`);
+            if (tempMsg) tempMsg.closest('.message-wrapper').remove();
         }
     });
 
