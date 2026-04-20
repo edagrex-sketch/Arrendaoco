@@ -510,14 +510,19 @@
         document.addEventListener('DOMContentLoaded', function() {
             const userId = "{{ auth()->id() }}";
             
-            // Configuración de Toast global
+            // Configuración de Toast Circular Premium
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
                 timer: 5000,
                 timerProgressBar: true,
+                background: '#003049',
+                color: '#fff',
                 didOpen: (toast) => {
+                    toast.style.borderRadius = '60px'; // Diseño circular tipo cápsula
+                    toast.style.padding = '10px 25px';
+                    toast.style.boxShadow = '0 15px 35px rgba(0,0,0,0.2)';
                     toast.addEventListener('mouseenter', Swal.stopTimer)
                     toast.addEventListener('mouseleave', Swal.resumeTimer)
                 }
@@ -531,26 +536,20 @@
                         console.log('🔔 Notificación en tiempo real:', notification);
                         
                         // 1. Actualizar campana
-                        if (typeof updateNotificationBadge === 'function') {
-                            updateNotificationBadge();
-                        }
+                        updateNotificationBadge();
 
-                        // 2. Mostrar Toast
+                        // 2. Mostrar Toast Circular
                         Toast.fire({
                             icon: 'info',
-                            title: notification.titulo || 'Nueva Notificación',
-                            text: notification.mensaje || 'Tienes una nueva actualización en tu cuenta.',
-                            background: '#003049',
-                            color: '#fff',
+                            title: `<span style="font-weight: 800; font-size: 14px;">${notification.titulo}</span>`,
+                            html: `<span style="font-size: 13px; opacity: 0.9;">${notification.mensaje}</span>`,
                             iconColor: '#fff',
                         });
                         
                         // 3. Refrescar lista si está abierta
-                        if (typeof fetchNotifications === 'function') {
-                            const container = document.getElementById('notifications-container');
-                            if (container && container.offsetParent !== null) {
-                                fetchNotifications();
-                            }
+                        const container = document.getElementById('notifications-container');
+                        if (container && container.offsetParent !== null) {
+                            fetchNotifications();
                         }
                     });
             }
