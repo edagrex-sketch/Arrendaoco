@@ -8,40 +8,40 @@
         @if(auth()->check() && !auth()->user()->stripe_onboarding_completed)
         <div x-data="{ showBankingModal: true }" 
              x-show="showBankingModal" 
-             class="fixed inset-0 z-[100] flex items-center justify-center bg-[#003049]/80 backdrop-blur-sm px-4"
+             class="fixed inset-0 z-[100] flex items-center justify-center bg-[#003049]/90 backdrop-blur-md px-4 py-6"
              style="display: none;" x-cloak>
             
-            <!-- El modal ahora es obligatorio form-bloqueante al no tener función de cierre -->
+            <!-- Modal responsivo -->
             <div x-show="showBankingModal"
                  x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 scale-90 translate-y-8"
+                 x-transition:enter-start="opacity-0 scale-95 translate-y-4"
                  x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                 class="bg-white rounded-[2rem] shadow-2xl max-w-2xl w-full relative overflow-hidden mt-10">
+                 class="bg-white rounded-[2rem] shadow-2xl max-w-2xl w-full relative overflow-hidden max-h-[90vh] flex flex-col">
                  
-                 <div class="flex flex-col md:flex-row items-stretch">
+                 <div class="flex flex-col md:flex-row items-stretch overflow-y-auto">
                      <!-- Columna Izquierda: Texto -->
-                     <div class="p-8 pb-10 md:w-3/5">
-                         <h2 class="text-2xl font-black text-[#003049] mb-4 leading-tight">¡Estás a un paso de recibir pagos! 💸</h2>
-                         <p class="text-gray-600 mb-6 leading-relaxed text-sm">
+                     <div class="p-6 sm:p-10 md:w-3/5">
+                         <h2 class="text-xl sm:text-2xl font-black text-[#003049] mb-4 leading-tight">
+                            ¡Estás a un paso de recibir pagos! 💸
+                         </h2>
+                         <p class="text-gray-600 mb-6 leading-relaxed text-xs sm:text-sm">
                              Al publicar tu primer inmueble comenzarás tu camino como <strong>propietario</strong>.<br><br>
-                             <strong>Necesitamos que vincules una cuenta bancaria o CLABE</strong> de forma segura con Stripe para que te lleguen tus pagos. Sin una cuenta configurada, tus inquilinos no podrán realizar transferencias automáticas desde la App.
+                             <strong>Necesitamos que vincules una cuenta bancaria o CLABE</strong> de forma segura con Stripe para que te lleguen tus pagos. Sin esto, no podrás recibir transferencias automáticas.
                          </p>
                          
-                         <div class="flex flex-col sm:flex-row gap-3 relative z-20 mt-4">
-                             <a href="{{ route('stripe.connect.onboard') }}" class="w-full bg-[#C1121F] text-white font-bold py-3 px-4 rounded-xl text-center hover:bg-[#780000] shadow-lg shadow-[#C1121F]/30 transition-all text-sm flex items-center justify-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg> 
+                         <div class="mt-auto pt-2">
+                             <a href="{{ route('stripe.connect.onboard') }}" 
+                                class="w-full bg-[#C1121F] text-white font-bold py-4 px-6 rounded-2xl text-center hover:bg-[#780000] shadow-xl shadow-[#C1121F]/30 transition-all text-sm flex items-center justify-center gap-3 active:scale-95">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg> 
                                 Vincular Cuenta Ahora
                              </a>
                          </div>
                      </div>
     
-                     <!-- Columna Derecha: Lottie Animation -->
-                     <div class="md:w-2/5 bg-[#FDF0D5]/40 hidden md:flex items-center justify-center relative overflow-hidden">
-                         <!-- Círculo decorativo -->
+                     <!-- Columna Derecha: Lottie Animation (Oculta en móviles muy pequeños para ahorrar espacio) -->
+                     <div class="md:w-2/5 bg-[#FDF0D5]/40 hidden md:flex items-center justify-center relative overflow-hidden min-h-[200px]">
                          <div class="absolute inset-0 m-auto w-40 h-40 bg-[#FDF0D5] rounded-full blur-2xl"></div>
-                         
-                         <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-                         <div class="w-64 h-64 relative z-10 translate-y-6 -translate-x-2">
+                         <div class="w-64 h-64 relative z-10">
                              <lottie-player src="https://assets4.lottiefiles.com/packages/lf20_syqnfe7c.json" background="transparent" speed="1" style="width: 100%; height: 100%;" loop autoplay></lottie-player>
                          </div>
                      </div>
