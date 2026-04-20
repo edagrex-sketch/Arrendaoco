@@ -504,6 +504,59 @@
         // Cargar conteo inicial
         updateNotificationBadge();
     </script>
+
+    @auth
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userId = "{{ auth()->id() }}";
+            
+            // Configuración de Toast global
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            // Escuchar notificaciones en tiempo real
+            if (window.Echo) {
+                window.Echo.private(`user.${userId}`)
+                    .listen('.notification.received', (data) => {
+                        const notification = data.notification;
+                        console.log('🔔 Notificación en tiempo real:', notification);
+                        
+                        // 1. Actualizar campana
+                        if (typeof updateNotificationBadge === 'function') {
+                            updateNotificationBadge();
+                        }
+
+                        // 2. Mostrar Toast
+                        Toast.fire({
+                            icon: 'info',
+                            title: notification.titulo || 'Nueva Notificación',
+                            text: notification.mensaje || 'Tienes una nueva actualización en tu cuenta.',
+                            background: '#003049',
+                            color: '#fff',
+                            iconColor: '#fff',
+                        });
+                        
+                        // 3. Refrescar lista si está abierta
+                        if (typeof fetchNotifications === 'function') {
+                            const container = document.getElementById('notifications-container');
+                            if (container && container.offsetParent !== null) {
+                                fetchNotifications();
+                            }
+                        }
+                    });
+            }
+        });
+    </script>
+    @endauth
     @auth
     <script>
         // Actualizar cada 30 segundos
