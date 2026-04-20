@@ -24,11 +24,7 @@
 
 <body class="bg-background text-foreground font-sans antialiased">
 
-<<<<<<< SEARCH
     <div class="flex flex-col justify-start items-stretch">
-=======
-    <div class="flex flex-col justify-start items-stretch">
->>>>>>> REPLACE
         <!-- Barra de Navegación -->
         @php
             $novedadRenta = false;
