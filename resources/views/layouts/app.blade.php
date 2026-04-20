@@ -555,6 +555,7 @@
         };
         console.log('🔥 Firebase cargado vía CDN exitosamente');
     </script>
+    @stack('scripts')
 </body>
 
 </html>
