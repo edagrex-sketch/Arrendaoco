@@ -232,54 +232,68 @@ class ContratoController extends Controller
         // Generar sesión de Stripe para el móvil (Checkout URL)
         \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
         try {
-            // Log para depuración en producción
-            \Log::info("🚀 Iniciando Checkout de Stripe para Contrato #{$contrato->id}");
+            \Log::info("🚀 Generando Checkout Stripe - Contrato: {$contrato->id}");
 
-            $paymentIntentData = [
-                'capture_method' => 'manual', // HOLD DE FONDOS
+            // Construir metadatos para rastreo
+            $metadata = [
+                'contrato_id' => $contrato->id,
+                'inmueble_id' => $inmueble->id,
+                'inquilino_id' => $usuario->id,
+                'tipo_pago' => 'reserva_inicial'
             ];
-            
-            if ($inmueble->propietario && $inmueble->propietario->stripe_account_id && $inmueble->propietario->stripe_onboarding_completed) {
-                $paymentIntentData['transfer_data'] = [
-                    'destination' => $inmueble->propietario->stripe_account_id
-                ];
-            }
 
-            // Usamos secure_url para garantizar que Stripe acepte las URLs de retorno
-            $successUrl = secure_url('/api/contratos/' . $contrato->id . '/success') . '?session_id={CHECKOUT_SESSION_ID}';
-            $cancelUrl = secure_url('/api/contratos/' . $contrato->id . '/cancel');
-
-            $session = \Stripe\Checkout\Session::create([
+            $sessionParams = [
                 'payment_method_types' => ['card'],
                 'line_items' => [[
                     'price_data' => [
                         'currency' => 'mxn',
                         'product_data' => [
-                            'name' => 'Validación de Fondos y Reserva de Renta',
-                            'description' => 'Propiedad: ' . $inmueble->titulo,
+                            'name' => 'Reserva: ' . $inmueble->titulo,
+                            'description' => 'Validación de fondos para contrato de arrendamiento.',
                         ],
-                        'unit_amount' => (int) ($inmueble->renta_mensual * 100),
+                        'unit_amount' => (int) round($inmueble->renta_mensual * 100),
                     ],
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'payment_intent_data' => $paymentIntentData,
-                'success_url' => $successUrl,
-                'cancel_url' => $cancelUrl,
-            ]);
+                'payment_intent_data' => [
+                    'capture_method' => 'manual', // Bloqueo de fondos
+                    'metadata' => $metadata
+                ],
+                'success_url' => secure_url('/api/contratos/' . $contrato->id . '/success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => secure_url('/api/contratos/' . $contrato->id . '/cancel'),
+                'metadata' => $metadata,
+            ];
 
-            \Log::info("✅ Checkout creado exitosamente: " . $session->url);
+            // Solo añadir transferencia si el propietario tiene Stripe vinculado
+            if ($inmueble->propietario && $inmueble->propietario->stripe_account_id && $inmueble->propietario->stripe_onboarding_completed) {
+                // Verificamos que no sea el mismo usuario
+                if ($inmueble->propietario_id !== $usuario->id) {
+                    $sessionParams['payment_intent_data']['transfer_data'] = [
+                        'destination' => $inmueble->propietario->stripe_account_id
+                    ];
+                }
+            }
+
+            $session = \Stripe\Checkout\Session::create($sessionParams);
 
             return response()->json([
                 'success' => true,
                 'contrato_id' => $contrato->id,
                 'stripe_url' => $session->url 
             ]);
-        } catch (\Exception $e) {
-            \Log::error('❌ Error CRÍTICO en Stripe (API): ' . $e->getMessage());
+
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            \Log::error('❌ STRIPE API ERROR: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error al procesar con Stripe: ' . $e->getMessage()
+                'message' => 'Error de Stripe: ' . $e->getError()->message
+            ], 400); // 400 es mejor para errores de cliente/config
+        } catch (\Exception $e) {
+            \Log::error('❌ SERVER ERROR en Rentar: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno en el servidor: ' . $e->getMessage()
             ], 500);
         }
     }
