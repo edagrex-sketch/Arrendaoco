@@ -32,6 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             '/arrendito/chat',
             'auth/*',
+            'logout',
+            'logout/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
