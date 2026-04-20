@@ -225,9 +225,9 @@
                                         </form>
                                     </div>
                                 </div>
-                            </div>
-                        @else
-                            <!-- Invitado: Login + Registro -->
+                                </div> {{-- Fin del sm:flex (Notificaciones y Perfil) --}}
+                            @else
+                                <!-- Invitado: Login + Registro -->
                             <a href="{{ route('login') }}"
                                 class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors">
                                 Iniciar Sesión
@@ -238,9 +238,9 @@
                                 Registrarse
                             </a>
                         @endauth
-                    </div> {{-- Fin de Desktop Auth Menu --}}
+                    </div> {{-- Fin de Desktop Auth Menu (lg:flex) --}}
 
-                    {{-- Botón de Hamburguesa (Siempre al final de la derecha en móvil) --}}
+                    {{-- Botón de Hamburguesa (Premium) --}}
                     <div class="flex lg:hidden ml-auto">
                         <button @click="mobileMenuOpen = !mobileMenuOpen"
                             class="relative text-white hover:text-brand-light transition-all p-2 rounded-xl focus:outline-none z-[80] bg-white/5 border border-white/10 shadow-lg">
