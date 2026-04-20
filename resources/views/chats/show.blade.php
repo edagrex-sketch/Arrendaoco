@@ -255,7 +255,7 @@
     <div class="p-4 sm:p-6 bg-white relative">
         {{-- Menú de Acciones Rápidas (Modal pequeño) --}}
         <div id="actions-menu" class="hidden absolute bottom-[100px] left-6 bg-white border border-gray-100 rounded-2xl shadow-2xl p-2 w-64 z-50 animate-slide-up">
-            @if(Auth::id() != $chat->inmueble->propietario_id)
+            @if($chat->inmueble && Auth::id() != $chat->inmueble->propietario_id)
                 {{-- Opciones para el Inquilino --}}
                 <button onclick="sendActionMessage('oferta')" class="w-full flex items-center gap-3 p-3 hover:bg-[#669BBC]/5 transition-colors rounded-xl text-left group">
                     <div class="p-2 bg-blue-50 text-[#003049] rounded-lg group-hover:bg-[#003049] group-hover:text-white transition-colors">
@@ -445,7 +445,7 @@
             : `Roco, ayúdame como mediador en este chat de renta por favor.`;
 
         if (window.openRocoWithContext) {
-            window.openRocoWithContext("{{ $chat->inmueble_id }}", prompt);
+            window.openRocoWithContext("{{ $chat->inmueble_id ?? '' }}", prompt);
         } else {
             console.warn("Roco no está cargado correctamente.");
         }
