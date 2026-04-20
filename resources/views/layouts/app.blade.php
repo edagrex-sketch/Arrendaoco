@@ -225,105 +225,122 @@
                 </div>
             </div>
 
-            <!-- Menú Móvil (Diseño Premium Restaurado) -->
+            <!-- Menú Lateral (Slide-over) Premium -->
             <div x-show="mobileMenuOpen" 
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 -translate-y-4" 
-                x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-200" 
-                x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 -translate-y-4"
-                class="lg:hidden bg-brand-dark border-t border-white/10 px-4 py-8 space-y-6 shadow-2xl overflow-y-auto max-h-[85vh]" x-cloak>
+                class="fixed inset-0 z-[100] lg:hidden" 
+                x-description="Mobile menu, show/hide based on mobile menu state." 
+                x-cloak>
+                
+                <!-- Fondo oscurecido con desenfoque -->
+                <div x-show="mobileMenuOpen" 
+                    x-transition:enter="transition-opacity ease-linear duration-300" 
+                    x-transition:enter-start="opacity-0" 
+                    x-transition:enter-end="opacity-100" 
+                    x-transition:leave="transition-opacity ease-linear duration-300" 
+                    x-transition:leave-start="opacity-100" 
+                    x-transition:leave-end="opacity-0" 
+                    @click="mobileMenuOpen = false"
+                    class="fixed inset-0 bg-brand-dark/40 backdrop-blur-sm"></div>
 
-                <div class="space-y-3">
-                    <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
-                        class="flex items-center gap-4 px-5 py-4 bg-white/5 rounded-2xl text-white hover:bg-white/10 transition-all group">
-                        <div class="p-2 rounded-xl bg-[#669BBC]/20 text-[#669BBC]">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        </div>
-                        <span class="text-lg font-bold">Inicio</span>
-                    </a>
+                <!-- Contenido del Slide-over -->
+                <div x-show="mobileMenuOpen" 
+                    x-transition:enter="transition ease-in-out duration-300 transform" 
+                    x-transition:enter-start="translate-x-full" 
+                    x-transition:enter-end="translate-x-0" 
+                    x-transition:leave="transition ease-in-out duration-300 transform" 
+                    x-transition:leave-start="translate-x-0" 
+                    x-transition:leave-end="translate-x-full" 
+                    class="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-2xl flex flex-col overflow-y-auto">
+                    
+                    <!-- Botón Cerrar y Header -->
+                    <div class="px-6 py-6 flex items-center justify-between border-b border-gray-100">
+                        <span class="text-xl font-black text-brand-dark">ArrendaOco</span>
+                        <button @click="mobileMenuOpen = false" class="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-brand-dark transition-colors">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
 
+                    <!-- Sección de Usuario (Datos Enriquecidos) -->
                     @auth
-                        @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
-                            <a href="{{ route('inmuebles.mis_rentas') }}"
-                                class="flex items-center gap-4 px-5 py-4 bg-white/5 rounded-2xl text-white hover:bg-white/10 transition-all group relative">
-                                <div class="p-2 rounded-xl bg-orange-500/20 text-orange-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                                </div>
-                                <span class="text-lg font-bold">Mi renta</span>
-                                @if($novedadRenta)
-                                    <span class="absolute top-4 right-5 w-2 h-2 bg-red-500 rounded-full"></span>
-                                @endif
-                            </a>
-                        @endunless
-                    @endauth
-
-                    <a href="{{ route('nosotros') }}"
-                        class="flex items-center gap-4 px-5 py-4 bg-white/5 rounded-2xl text-white hover:bg-white/10 transition-all group">
-                        <div class="p-2 rounded-xl bg-green-500/20 text-green-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0114 0z"/></svg>
-                        </div>
-                        <span class="text-lg font-bold">Nosotros</span>
-                    </a>
-                </div>
-
-                <div class="h-px bg-white/10 mx-2"></div>
-
-                @auth
-                    {{-- Tarjeta de Usuario Premium --}}
-                    <div class="bg-white/5 rounded-3xl p-6 border border-white/5">
+                    <div class="px-6 py-8 bg-[#f8f9fa]">
                         <div class="flex items-center gap-4 mb-6">
                             @if (Auth::user()->foto_perfil)
                                 <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}"
-                                    class="h-14 w-14 rounded-2xl object-cover border-2 border-white/10 shadow-lg">
+                                    class="h-16 w-16 rounded-2xl object-cover border-4 border-white shadow-md">
                             @else
-                                <div class="h-14 w-14 rounded-2xl bg-brand-light flex items-center justify-center font-black text-brand-dark text-xl shadow-lg">
+                                <div class="h-16 w-16 rounded-2xl bg-brand-dark flex items-center justify-center font-black text-white text-xl shadow-md uppercase">
                                     {{ substr(Auth::user()->nombre, 0, 1) }}
                                 </div>
                             @endif
-                            <div class="overflow-hidden">
-                                <p class="text-white font-black text-lg truncate">{{ Auth::user()->nombre }}</p>
-                                <p class="text-white/50 text-xs truncate">{{ Auth::user()->email }}</p>
+                            <div>
+                                <h3 class="font-black text-brand-dark leading-tight">{{ Auth::user()->nombre }}</h3>
+                                <p class="text-xs font-bold text-brand-light uppercase tracking-wider">{{ Auth::user()->roles->first()->nombre ?? 'Usuario' }}</p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 gap-2">
-                            <a href="{{ route('perfil.index') }}"
-                                class="flex items-center justify-between px-4 py-3 bg-white/5 rounded-xl text-white hover:bg-white/10 transition-colors">
-                                <span class="text-sm font-bold">Mi Perfil</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            </a>
-                            
-                            @if (Auth::user()->tieneRol('propietario'))
-                                <a href="{{ route('inmuebles.index') }}"
-                                    class="flex items-center justify-between px-4 py-3 bg-white/5 rounded-xl text-white hover:bg-white/10 transition-colors">
-                                    <span class="text-sm font-bold">Mis Propiedades</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                </a>
-                            @endif
-
-                            <form action="{{ route('logout') }}" method="POST" class="mt-2">
-                                @csrf
-                                <button type="submit"
-                                    class="w-full flex items-center justify-center py-4 bg-red-500/10 text-red-400 font-black rounded-xl hover:bg-red-500/20 transition-all">
-                                    Cerrar Sesión
-                                </button>
-                            </form>
+                        <!-- Fichas de Datos que faltaban -->
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-brand-dark shadow-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0v1m-4 0a2 2 0 014 0v1" /></svg>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] uppercase font-bold text-gray-400">ID de Cliente</p>
+                                    <p class="text-xs font-black text-brand-dark">#{{ str_pad(Auth::id(), 5, '0', STR_PAD_LEFT) }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-brand-dark shadow-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <p class="text-[10px] uppercase font-bold text-gray-400">Correo Electrónico</p>
+                                    <p class="text-xs font-bold text-brand-dark truncate">{{ Auth::user()->email }}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                @else
-                    <div class="grid grid-cols-1 gap-4 pt-4">
-                        <a href="{{ route('login') }}"
-                            class="flex items-center justify-center py-4 border-2 border-white text-white font-black rounded-2xl hover:bg-white hover:text-brand-dark transition-all">
-                            Acceder
+                    @endauth
+
+                    <!-- Enlaces de Navegación -->
+                    <nav class="flex-1 px-6 py-6 space-y-2">
+                        <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors text-gray-600 font-bold">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            Inicio
                         </a>
-                        <a href="{{ route('registro') }}"
-                            class="flex items-center justify-center py-4 bg-brand-light text-brand-dark font-black rounded-2xl shadow-xl shadow-brand-light/20 hover:scale-[1.02] transition-all">
-                            Crear Cuenta
-                        </a>
+
+                        @auth
+                            @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
+                                <a href="{{ route('inmuebles.mis_rentas') }}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors text-gray-600 font-bold">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                    Mi renta
+                                </a>
+                            @endunless
+                            <a href="{{ route('perfil.index') }}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors text-gray-600 font-bold">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                Mi Perfil
+                            </a>
+                        @else
+                            <div class="pt-4 space-y-4">
+                                <a href="{{ route('login') }}" class="block w-full py-4 bg-brand-dark text-white rounded-2xl text-center font-black shadow-lg">Iniciar Sesión</a>
+                                <a href="{{ route('registro') }}" class="block w-full py-4 border-2 border-brand-dark text-brand-dark rounded-2xl text-center font-black">Registrarse</a>
+                            </div>
+                        @endauth
+                    </nav>
+
+                    <!-- Logout Button -->
+                    @auth
+                    <div class="px-6 py-8 border-t border-gray-100">
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="w-full flex items-center justify-center gap-3 py-4 bg-red-50 text-red-600 font-black rounded-2xl hover:bg-red-100 transition-colors">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                Cerrar Sesión
+                            </button>
+                        </form>
                     </div>
-                @endauth
+                    @endauth
+                </div>
             </div>
         </nav>
         <!-- Contenido Principal: Posición fija arriba para evitar huecos al hacer scroll -->
