@@ -246,17 +246,17 @@
                                         <p class="text-xs text-amber-600 mt-1">El propietario ha sido notificado. Cuando confirme la renta, aparecerá aquí la opción para descargar el contrato físico.</p>
                                     </div>
                                 @elseif(isset($contrato) && $contrato->estatus === 'pdf_descargado')
-                                    <div class="mb-4 bg-[#FDF0D5] rounded-xl p-4 shadow-sm">
+                                    <div class="mb-4 bg-[#FDF0D5] rounded-xl p-4 shadow-sm border border-amber-200">
                                         <p class="text-sm text-[#003049] font-black mb-2 flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#669BBC]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                             ¡Solicitud Aprobada!
                                         </p>
-                                        <p class="text-xs text-[#003049] mt-1 mb-3 font-medium">Descarga tu contrato, imprímelo y llévalo a tu cita con el propietario para firmarlo físicamente.</p>
+                                        <p class="text-xs text-[#003049] mt-1 mb-3 font-medium">El propietario ha aceptado tu solicitud. Acuerda una cita con él/ella para la firma presencial del documento. <strong>Estamos a la espera de que el propietario suba el contrato firmado</strong> a la plataforma para iniciar formalmente tu renta.</p>
                                         <a href="{{ route('contratos.descargar-registrar', $contrato) }}" target="_blank" class="w-full bg-[#003049] text-white text-center font-bold py-2 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-[#002236] transition-colors shadow-md text-sm">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                             </svg>
-                                            Descargar Contrato PDF
+                                            Ver borrador del contrato
                                         </a>
                                     </div>
                                 @else
