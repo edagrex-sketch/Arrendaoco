@@ -42,7 +42,7 @@
         @endphp
         <img src="{{ str_starts_with($imagenPath, 'http') ? $imagenPath : asset('storage/'.$imagenPath) }}" 
              class="w-10 h-10 rounded-xl object-cover"
-             onerror="this.src='{{ asset('img/placeholder-house.jpg') }}'">
+             onerror="this.src='https://via.placeholder.com/150?text=Casa'">
         <div class="max-w-[150px]">
             <p class="text-[10px] font-black text-[#003049] truncate">{{ $chat->inmueble->titulo }}</p>
             <p class="text-[9px] font-bold text-[#669BBC]">${{ number_format($chat->inmueble->precio, 0) }}/mes</p>

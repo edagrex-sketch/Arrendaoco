@@ -28,12 +28,12 @@
         </button>
 
         {{-- Botón Chat --}}
-        <button class="assistant-toggle-btn" onclick="toggleMascotChat()" style="margin: 0; min-width: 170px; justify-content: center;">
-            <div class="flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button class="assistant-toggle-btn group" onclick="toggleMascotChat()" style="margin: 0; min-width: auto; justify-content: center; padding: 10px;">
+            <div class="flex items-center gap-2 px-1 sm:px-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
-                <span style="font-size: 13px; font-weight: 800;">HABLAR CON ROCO</span>
+                <span class="hidden sm:inline" style="font-size: 13px; font-weight: 800;">HABLAR CON ROCO</span>
             </div>
         </button>
     </div>
