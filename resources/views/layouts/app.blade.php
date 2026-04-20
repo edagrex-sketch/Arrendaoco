@@ -158,7 +158,8 @@
                                         <div class="px-5 py-4 border-b border-gray-50 bg-gray-50/50">
                                             <p class="text-xs font-black text-brand-dark uppercase tracking-widest">{{ Auth::user()->roles->first()->nombre ?? 'Usuario' }}</p>
                                             <p class="text-sm font-medium text-gray-500 truncate">{{ Auth::user()->email }}</p>
-                                        </di                                        <div class="py-2">
+                                        </div>
+                                        <div class="py-2">
                                             <a href="{{ route('perfil.index') }}"
                                                 class="flex items-center gap-3 px-5 py-3 text-[15px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 opacity-40">
@@ -218,7 +219,7 @@
                                                     Cerrar Sesión
                                                 </button>
                                             </form>
-                                        </div>/div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
