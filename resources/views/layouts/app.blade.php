@@ -24,7 +24,7 @@
 
 <body class="bg-background text-foreground font-sans antialiased">
 
-    <div class="min-h-screen flex flex-col">
+    <div class="min-h-screen flex flex-col justify-start items-stretch">
 
         <!-- Barra de Navegación -->
         @php
