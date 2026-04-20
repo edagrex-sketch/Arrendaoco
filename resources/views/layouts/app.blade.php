@@ -224,10 +224,10 @@
                                             </button>
                                         </form>
                                     </div>
-                                </div>
-                                </div> {{-- Fin del sm:flex (Notificaciones y Perfil) --}}
-                            @else
-                                <!-- Invitado: Login + Registro -->
+                                </div> {{-- Fin de Perfil (Línea 129) --}}
+                            </div> {{-- Fin de sm:flex (Línea 95) --}}
+                        @else
+                            <!-- Invitado: Login + Registro -->
                             <a href="{{ route('login') }}"
                                 class="text-sm font-medium text-white hover:text-[#669BBC] transition-colors">
                                 Iniciar Sesión
