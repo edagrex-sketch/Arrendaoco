@@ -174,6 +174,7 @@
             <h2 class="text-2xl font-black text-brand-dark">Propiedades Disponibles</h2>
             <span class="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
                 {{ $inmuebles->total() }} resultados
+                {{-- @guest <span>(Vista Invitado)</span> @endguest --}}
             </span>
         </div>
 

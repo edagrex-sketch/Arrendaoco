@@ -91,18 +91,20 @@
                                 </a>
                             @endif
 
-                            <!-- Perfil de Usuario con Dropdown -->
-                            <div x-data="{ openProfile: false }" class="relative hidden sm:flex items-center">
-                                <!-- Centro de Notificaciones -->
-                                <div x-data="{ openNotifications: false }" class="relative mr-4 flex-shrink-0">
+                            <!-- Contenedor de Usuario y Notificaciones -->
+                            <div class="hidden sm:flex items-center gap-3">
+                                
+                                <!-- 1. Centro de Notificaciones -->
+                                <div x-data="{ openNotifications: false }" class="relative">
                                     <button @click="openNotifications = !openNotifications; if(openNotifications) fetchNotifications()" 
-                                        class="relative p-2 text-white hover:text-brand-light transition-colors focus:outline-none group">
+                                        class="relative p-2 text-white hover:text-brand-light transition-colors focus:outline-none group flex items-center justify-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                         </svg>
                                         <span id="notification-badge" class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-brand-dark hidden">0</span>
                                     </button>
 
+                                    <!-- Dropdown de Notificaciones -->
                                     <div x-show="openNotifications" @click.away="openNotifications = false"
                                         x-transition:enter="transition ease-out duration-200"
                                         x-transition:enter-start="opacity-0 translate-y-4 scale-95"
@@ -123,37 +125,39 @@
                                     </div>
                                 </div>
 
-                                <button @click="openProfile = !openProfile" @click.away="openProfile = false"
-                                    class="flex items-center gap-2 text-sm font-bold text-white hover:text-brand-light transition-colors focus:outline-none">
-                                    @if (Auth::user()->foto_perfil)
-                                        <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}"
-                                            alt="Perfil" class="h-8 w-8 rounded-full object-cover border-2 border-white/20">
-                                    @else
-                                        <div class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-xs border-2 border-white/20">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-white">
-                                                <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
-                                            </svg>
-                                        </div>
-                                    @endif
-                                    <span class="truncate max-w-[120px] lg:max-w-[180px]">{{ Auth::user()->nombre }}</span>
-                                    <svg :class="{'rotate-180': openProfile}" class="h-4 w-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                </button>
+                                <!-- 2. Perfil de Usuario -->
+                                <div x-data="{ openProfile: false }" class="relative">
+                                    <button @click="openProfile = !openProfile" @click.away="openProfile = false"
+                                        class="flex items-center gap-2 text-sm font-bold text-white hover:text-brand-light transition-colors focus:outline-none">
+                                        @if (Auth::user()->foto_perfil)
+                                            <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}"
+                                                alt="Perfil" class="h-8 w-8 rounded-full object-cover border-2 border-white/20 flex-shrink-0">
+                                        @else
+                                            <div class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-xs border-2 border-white/20 flex-shrink-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-white">
+                                                    <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                        @endif
+                                        <span class="truncate max-w-[120px] lg:max-w-[170px]">{{ Auth::user()->nombre }}</span>
+                                        <svg :class="{'rotate-180': openProfile}" class="h-4 w-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </button>
 
-                                <!-- Dropdown Menu -->
-                                <div x-show="openProfile" x-transition:enter="transition ease-out duration-100"
-                                    x-transition:enter-start="transform opacity-0 scale-95"
-                                    x-transition:enter-end="transform opacity-100 scale-100"
-                                    x-transition:leave="transition ease-in duration-75"
-                                    x-transition:leave-start="transform opacity-100 scale-100"
-                                    x-transition:leave-end="transform opacity-0 scale-95"
-                                    class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden">
-                                    
-                                    <div class="px-5 py-3 border-b border-gray-100">
-                                        <p class="text-xs text-gray-500 font-medium">Conectado como</p>
-                                        <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::user()->email }}</p>
-                                    </div>
+                                    <!-- Dropdown de Perfil (El Slider) -->
+                                    <div x-show="openProfile" x-transition:enter="transition ease-out duration-100"
+                                        x-transition:enter-start="transform opacity-0 scale-95"
+                                        x-transition:enter-end="transform opacity-100 scale-100"
+                                        x-transition:leave="transition ease-in duration-75"
+                                        x-transition:leave-start="transform opacity-100 scale-100"
+                                        x-transition:leave-end="transform opacity-0 scale-95"
+                                        class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden" x-cloak>
+                                        
+                                        <div class="px-5 py-3 border-b border-gray-100">
+                                            <p class="text-xs text-gray-500 font-medium">Conectado como</p>
+                                            <p class="text-sm font-bold text-gray-900 truncate">{{ Auth::user()->email }}</p>
+                                        </div>
 
                                     @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
                                         <a href="{{ route('favoritos.index') }}"
