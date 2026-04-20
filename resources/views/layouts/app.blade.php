@@ -44,7 +44,7 @@
                     <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
                         class="flex items-center gap-3 hover:opacity-90 transition-opacity">
                         <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco" class="h-10 w-auto object-contain">
-                        <span class="text-xl font-black text-white tracking-tight hidden sm:block">
+                        <span class="text-xl font-black text-white tracking-tight">
                             ArrendaOco
                         </span>
                     </a>
