@@ -95,7 +95,7 @@ export async function sendFirebaseMessage(senderId, receiverId, text, extraData 
     formData.append('contenido', text);
     formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
 
-    const response = await fetch(`/chats/${laravelChatId}/messages`, {
+    const response = await fetch(`/chats/${laravelChatId}/mensaje`, {
         method: 'POST',
         body: formData,
         headers: {
