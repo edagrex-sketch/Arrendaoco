@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Login')
 @section('content')
-    <div class="flex items-center justify-center p-4">
+    <div class="flex justify-center p-4 sm:p-8">
         <!-- Card Container -->
         <div class="w-full max-w-5xl flex flex-col lg:flex-row bg-white rounded-3xl shadow-2xl overflow-hidden min-h-[600px]">
 
