@@ -710,6 +710,48 @@
     @auth
     <x-arrendito />
     @endauth
+    <!-- Firebase CDN Integration - Robust fall-back for production -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3_c0n242ffdr2s4vF9H9xEVgs8WD83k4",
+            authDomain: "arrendaoco-fad79.firebaseapp.com",
+            projectId: "arrendaoco-fad79",
+            storageBucket: "arrendaoco-fad79.firebasestorage.app",
+            messagingSenderId: "32992727938",
+            appId: "1:32992727938:web:22344c7c04f5087d9e359b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Definir funciones Globales para el Chat
+        window.FirebaseChat = {
+            getChatId: function(uid1, uid2) {
+                const ids = [uid1.toString(), uid2.toString()].sort();
+                return ids.join('_');
+            },
+            listenToAllChats: function(userId, callback) {
+                const q1 = query(collection(db, "chats"), where("usuario_1", "==", userId.toString()));
+                const q2 = query(collection(db, "chats"), where("usuario_2", "==", userId.toString()));
+                
+                const unsub1 = onSnapshot(q1, (snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "modified") callback(change.doc.data(), change.doc.id);
+                    });
+                });
+                const unsub2 = onSnapshot(q2, (snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "modified") callback(change.doc.data(), change.doc.id);
+                    });
+                });
+                return () => { unsub1(); unsub2(); };
+            }
+        };
+        console.log('🔥 Firebase cargado vía CDN exitosamente');
+    </script>
 </body>
 
 </html>

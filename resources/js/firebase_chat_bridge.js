@@ -1,4 +1,5 @@
 // resources/js/firebase_chat_bridge.js
+/*
 import { db } from './firebase';
 import { 
     collection, 
@@ -12,6 +13,7 @@ import {
     where,
     limit
 } from "firebase/firestore";
+*/
 
 /**
  * Genera el ID del chat de la misma forma que en la app móvil
