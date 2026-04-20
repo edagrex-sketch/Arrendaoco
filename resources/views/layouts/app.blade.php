@@ -225,63 +225,102 @@
                 </div>
             </div>
 
-            <!-- Menú Móvil (Abrir/Cerrar) -->
-            <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0"
+            <!-- Menú Móvil (Diseño Premium Restaurado) -->
+            <div x-show="mobileMenuOpen" 
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 -translate-y-4" 
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-200" 
+                x-transition:leave-start="opacity-100 translate-y-0"
                 x-transition:leave-end="opacity-0 -translate-y-4"
-                class="lg:hidden bg-brand-dark border-t border-white/10 px-4 py-6 space-y-4 shadow-2xl" x-cloak>
+                class="lg:hidden bg-brand-dark border-t border-white/10 px-4 py-8 space-y-6 shadow-2xl overflow-y-auto max-h-[85vh]" x-cloak>
 
-                <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
-                    class="block text-lg font-bold text-white hover:text-brand-light transition-colors px-4 py-2 bg-white/5 rounded-xl">
-                    Inicio
-                </a>
-                @auth
-                    @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
-                        <a href="{{ route('inmuebles.mis_rentas') }}"
-                            class="block text-lg font-bold text-white hover:text-brand-light transition-colors px-4 py-2 rounded-xl">
-                            Mi renta
-                        </a>
-                    @endunless
-                @endauth
-                <a href="{{ route('nosotros') }}"
-                    class="block text-lg font-bold text-white hover:text-brand-light transition-colors px-4 py-2 rounded-xl">
-                    Nosotros
-                </a>
-
-                <div class="h-px bg-white/10 mx-4 my-2"></div>
-
-                @auth
-                    <div class="flex items-center gap-3 px-4 py-4 bg-white/5 rounded-2xl">
-                        <div class="h-12 w-12 rounded-full bg-brand-light flex items-center justify-center font-black text-brand-dark border-2 border-white/20">
-                            {{ substr(Auth::user()->nombre, 0, 1) }}
+                <div class="space-y-3">
+                    <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
+                        class="flex items-center gap-4 px-5 py-4 bg-white/5 rounded-2xl text-white hover:bg-white/10 transition-all group">
+                        <div class="p-2 rounded-xl bg-[#669BBC]/20 text-[#669BBC]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         </div>
-                        <div>
-                            <p class="text-white font-bold">{{ Auth::user()->nombre }}</p>
-                            <p class="text-white/60 text-xs">{{ Auth::user()->email }}</p>
+                        <span class="text-lg font-bold">Inicio</span>
+                    </a>
+
+                    @auth
+                        @unless(Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
+                            <a href="{{ route('inmuebles.mis_rentas') }}"
+                                class="flex items-center gap-4 px-5 py-4 bg-white/5 rounded-2xl text-white hover:bg-white/10 transition-all group relative">
+                                <div class="p-2 rounded-xl bg-orange-500/20 text-orange-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                </div>
+                                <span class="text-lg font-bold">Mi renta</span>
+                                @if($novedadRenta)
+                                    <span class="absolute top-4 right-5 w-2 h-2 bg-red-500 rounded-full"></span>
+                                @endif
+                            </a>
+                        @endunless
+                    @endauth
+
+                    <a href="{{ route('nosotros') }}"
+                        class="flex items-center gap-4 px-5 py-4 bg-white/5 rounded-2xl text-white hover:bg-white/10 transition-all group">
+                        <div class="p-2 rounded-xl bg-green-500/20 text-green-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0114 0z"/></svg>
+                        </div>
+                        <span class="text-lg font-bold">Nosotros</span>
+                    </a>
+                </div>
+
+                <div class="h-px bg-white/10 mx-2"></div>
+
+                @auth
+                    {{-- Tarjeta de Usuario Premium --}}
+                    <div class="bg-white/5 rounded-3xl p-6 border border-white/5">
+                        <div class="flex items-center gap-4 mb-6">
+                            @if (Auth::user()->foto_perfil)
+                                <img src="{{ str_starts_with(Auth::user()->foto_perfil, 'http') ? Auth::user()->foto_perfil : asset('storage/' . Auth::user()->foto_perfil) }}"
+                                    class="h-14 w-14 rounded-2xl object-cover border-2 border-white/10 shadow-lg">
+                            @else
+                                <div class="h-14 w-14 rounded-2xl bg-brand-light flex items-center justify-center font-black text-brand-dark text-xl shadow-lg">
+                                    {{ substr(Auth::user()->nombre, 0, 1) }}
+                                </div>
+                            @endif
+                            <div class="overflow-hidden">
+                                <p class="text-white font-black text-lg truncate">{{ Auth::user()->nombre }}</p>
+                                <p class="text-white/50 text-xs truncate">{{ Auth::user()->email }}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-2">
+                            <a href="{{ route('perfil.index') }}"
+                                class="flex items-center justify-between px-4 py-3 bg-white/5 rounded-xl text-white hover:bg-white/10 transition-colors">
+                                <span class="text-sm font-bold">Mi Perfil</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            </a>
+                            
+                            @if (Auth::user()->tieneRol('propietario'))
+                                <a href="{{ route('inmuebles.index') }}"
+                                    class="flex items-center justify-between px-4 py-3 bg-white/5 rounded-xl text-white hover:bg-white/10 transition-colors">
+                                    <span class="text-sm font-bold">Mis Propiedades</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </a>
+                            @endif
+
+                            <form action="{{ route('logout') }}" method="POST" class="mt-2">
+                                @csrf
+                                <button type="submit"
+                                    class="w-full flex items-center justify-center py-4 bg-red-500/10 text-red-400 font-black rounded-xl hover:bg-red-500/20 transition-all">
+                                    Cerrar Sesión
+                                </button>
+                            </form>
                         </div>
                     </div>
-                    <a href="{{ route('perfil.index') }}"
-                        class="block text-lg font-bold text-white hover:text-brand-light px-4 py-2 rounded-xl">
-                        Mi Perfil
-                    </a>
-                    
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit"
-                            class="w-full text-left text-lg font-bold text-red-400 hover:text-red-300 px-4 py-2 rounded-xl">
-                            Cerrar Sesión
-                        </button>
-                    </form>
                 @else
-                    <div class="grid grid-cols-2 gap-3 pt-2">
+                    <div class="grid grid-cols-1 gap-4 pt-4">
                         <a href="{{ route('login') }}"
-                            class="flex items-center justify-center py-3.5 border-2 border-white text-white font-black rounded-2xl hover:bg-white hover:text-brand-dark transition-all">
-                            Login
+                            class="flex items-center justify-center py-4 border-2 border-white text-white font-black rounded-2xl hover:bg-white hover:text-brand-dark transition-all">
+                            Acceder
                         </a>
                         <a href="{{ route('registro') }}"
-                            class="flex items-center justify-center py-3.5 bg-brand-light text-brand-dark font-black rounded-2xl shadow-lg shadow-brand-light/20 hover:scale-[1.02] transition-all">
-                            Registro
+                            class="flex items-center justify-center py-4 bg-brand-light text-brand-dark font-black rounded-2xl shadow-xl shadow-brand-light/20 hover:scale-[1.02] transition-all">
+                            Crear Cuenta
                         </a>
                     </div>
                 @endauth
