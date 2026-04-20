@@ -238,21 +238,21 @@
                                 Registrarse
                             </a>
                         @endauth
-                    </div> {{-- Fin de Desktop Auth Menu (lg:flex) --}}
-
-                    {{-- Botón de Hamburguesa (Premium) --}}
-                    <div class="flex lg:hidden ml-auto">
-                        <button @click="mobileMenuOpen = !mobileMenuOpen"
-                            class="relative text-white hover:text-brand-light transition-all p-2 rounded-xl focus:outline-none z-[80] bg-white/5 border border-white/10 shadow-lg">
-                            <span class="sr-only">Menú</span>
-                            <div class="w-8 h-8 flex flex-col justify-center items-center gap-1.5 overflow-hidden">
-                                <span :class="mobileMenuOpen ? 'rotate-45 translate-y-2.5' : ''" class="w-full h-1 bg-white rounded-full transition-all duration-300 origin-center"></span>
-                                <span :class="mobileMenuOpen ? 'opacity-0 translate-x-12' : ''" class="w-full h-1 bg-white rounded-full transition-all duration-300"></span>
-                                <span :class="mobileMenuOpen ? '-rotate-45 -translate-y-2.5' : ''" class="w-full h-1 bg-white rounded-full transition-all duration-300 origin-center"></span>
-                            </div>
-                        </button>
-                    </div>
+                    </div> {{-- Fin de Desktop Auth Menu --}}
                 </div> {{-- Fin de Botones (Auth) --}}
+
+                {{-- Botón de Hamburguesa (Independiente) --}}
+                <div class="flex lg:hidden">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen"
+                        class="relative text-white hover:text-brand-light transition-all p-2 rounded-xl focus:outline-none z-[80] bg-white/5 border border-white/10 shadow-lg">
+                        <span class="sr-only">Menú</span>
+                        <div class="w-8 h-8 flex flex-col justify-center items-center gap-1.5 overflow-hidden">
+                            <span :class="mobileMenuOpen ? 'rotate-45 translate-y-2.5' : ''" class="w-full h-1 bg-white rounded-full transition-all duration-300 origin-center"></span>
+                            <span :class="mobileMenuOpen ? 'opacity-0 translate-x-12' : ''" class="w-full h-1 bg-white rounded-full transition-all duration-300"></span>
+                            <span :class="mobileMenuOpen ? '-rotate-45 -translate-y-2.5' : ''" class="w-full h-1 bg-white rounded-full transition-all duration-300 origin-center"></span>
+                        </div>
+                    </button>
+                </div>
             </div> {{-- Fin de h-16 --}}
 
             <!-- Menú Móvil Lateral (Premium Overlay) -->
