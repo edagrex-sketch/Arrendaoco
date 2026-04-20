@@ -14,6 +14,9 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Mail\EstadoCuentaMail;
 use Carbon\Carbon;
+use Stripe\Stripe;
+use Stripe\Checkout\Session;
+use Stripe\Exception\ApiErrorException;
 
 class ContratoController extends Controller
 {
@@ -230,17 +233,9 @@ class ContratoController extends Controller
         });
 
         // Generar sesión de Stripe para el móvil (Checkout URL)
-        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+        Stripe::setApiKey(config('services.stripe.secret'));
         try {
-            \Log::info("🚀 Generando Checkout Stripe - Contrato: {$contrato->id}");
-
-            // Construir metadatos para rastreo
-            $metadata = [
-                'contrato_id' => $contrato->id,
-                'inmueble_id' => $inmueble->id,
-                'inquilino_id' => $usuario->id,
-                'tipo_pago' => 'reserva_inicial'
-            ];
+            \Log::info("🚀 Generando Session para Contrato {$contrato->id}");
 
             $sessionParams = [
                 'payment_method_types' => ['card'],
@@ -249,33 +244,26 @@ class ContratoController extends Controller
                         'currency' => 'mxn',
                         'product_data' => [
                             'name' => 'Reserva: ' . $inmueble->titulo,
-                            'description' => 'Validación de fondos para contrato de arrendamiento.',
                         ],
                         'unit_amount' => (int) round($inmueble->renta_mensual * 100),
                     ],
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'payment_intent_data' => [
-                    'capture_method' => 'manual', // Bloqueo de fondos
-                    'metadata' => $metadata
-                ],
                 'success_url' => secure_url('/api/contratos/' . $contrato->id . '/success') . '?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => secure_url('/api/contratos/' . $contrato->id . '/cancel'),
-                'metadata' => $metadata,
             ];
 
-            // Solo añadir transferencia si el propietario tiene Stripe vinculado
-            if ($inmueble->propietario && $inmueble->propietario->stripe_account_id && $inmueble->propietario->stripe_onboarding_completed) {
-                // Verificamos que no sea el mismo usuario
-                if ($inmueble->propietario_id !== $usuario->id) {
-                    $sessionParams['payment_intent_data']['transfer_data'] = [
+            // Añadir transferencia si aplica
+            if ($inmueble->propietario && $inmueble->propietario->stripe_account_id && $inmueble->propietario_id !== $usuario->id) {
+                $sessionParams['payment_intent_data'] = [
+                    'transfer_data' => [
                         'destination' => $inmueble->propietario->stripe_account_id
-                    ];
-                }
+                    ]
+                ];
             }
 
-            $session = \Stripe\Checkout\Session::create($sessionParams);
+            $session = Session::create($sessionParams);
 
             return response()->json([
                 'success' => true,
@@ -283,18 +271,12 @@ class ContratoController extends Controller
                 'stripe_url' => $session->url 
             ]);
 
-        } catch (\Stripe\Exception\ApiErrorException $e) {
-            \Log::error('❌ STRIPE API ERROR: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de Stripe: ' . $e->getError()->message
-            ], 400); // 400 es mejor para errores de cliente/config
+        } catch (ApiErrorException $e) {
+            \Log::error('❌ Stripe Error: ' . $e->getMessage());
+            return response()->json(['message' => 'Stripe: ' . $e->getMessage()], 400);
         } catch (\Exception $e) {
-            \Log::error('❌ SERVER ERROR en Rentar: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error interno en el servidor: ' . $e->getMessage()
-            ], 500);
+            \Log::error('❌ General Error: ' . $e->getMessage());
+            return response()->json(['message' => 'Server Error: ' . $e->getMessage()], 500);
         }
     }
 
