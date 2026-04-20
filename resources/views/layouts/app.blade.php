@@ -41,15 +41,15 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <!-- 1. Logo y Nombre -->
                 <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
-                    class="flex items-center gap-2 group hover:opacity-90 transition-opacity">
+                    class="flex items-center gap-2 group hover:opacity-90 transition-opacity shrink-0">
                     <!-- Cuadrado del logo en un azul más claro para resaltar -->
-                    <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco" class="h-10 w-auto object-contain">
-                    <span class="text-xl font-bold text-white tracking-tight">
-                        ArrendaOco<span class="text-brand-light"></span>
+                    <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco" class="h-9 w-auto object-contain">
+                    <span class="text-xl font-bold text-white tracking-tight hidden lg:block">
+                        ArrendaOco
                     </span>
                 </a>
                 <!-- 2. Menú Central (Enlaces) -->
-                <div class="hidden md:flex items-center gap-8">
+                <div class="hidden lg:flex items-center gap-4 xl:gap-8">
                     <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
                         class="text-sm font-medium text-white hover:text-brand-light transition-colors border-b-2 border-transparent hover:border-brand-light py-1">
                         Inicio
@@ -139,7 +139,8 @@
                                                 </svg>
                                             </div>
                                         @endif
-                                        <span class="truncate max-w-[120px] lg:max-w-[170px]">{{ Auth::user()->nombre }}</span>
+                                        <span class="hidden xl:inline truncate max-w-[120px]">{{ Auth::user()->nombre }}</span>
+                                        <span class="xl:hidden truncate max-w-[80px]">{{ explode(' ', Auth::user()->nombre)[0] }}</span>
                                         <svg :class="{'rotate-180': openProfile}" class="h-4 w-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                         </svg>
