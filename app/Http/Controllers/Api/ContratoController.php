@@ -481,6 +481,12 @@ class ContratoController extends Controller
         ]);
 
         $nuevoEstado = $data['estado'];
+        
+        // SEGURIDAD: Solo el propietario puede aprobar (activar) un contrato
+        if (($nuevoEstado === 'activo' || $nuevoEstado === 'activa') && $usuario->id !== $contrato->propietario_id) {
+            return response()->json(['message' => 'Solo el propietario puede aprobar la renta.'], 403);
+        }
+
         // Normalización para la DB
         if (in_array($nuevoEstado, ['activa', 'activo'])) $nuevoEstado = 'activo';
         if (in_array($nuevoEstado, ['finalizada', 'cancelada', 'finalizado'])) $nuevoEstado = 'finalizado';
@@ -492,6 +498,11 @@ class ContratoController extends Controller
             $contrato->inmueble->update(['estatus' => 'disponible']);
             // Avisar a todos que vuelve a estar disponible
             event(new \App\Events\InmuebleStatusChanged($contrato->inmueble_id, 'disponible'));
+        }
+
+        if ($nuevoEstado === 'activo') {
+            $contrato->inmueble->update(['estatus' => 'rentado']);
+            event(new \App\Events\InmuebleStatusChanged($contrato->inmueble_id, 'rentado'));
         }
 
         // NOTIFICAR A AMBAS PARTES: El contrato ha cambiado de estatus
@@ -529,7 +540,7 @@ class ContratoController extends Controller
             ]);
 
             // Bloquear inmueble temporalmente
-            $contrato->inmueble->update(['estatus' => 'esperando_aprobacion']);
+            $contrato->inmueble->update(['estatus' => 'rentado']);
 
             // NOTIFICAR AL DUEÑO: Una nueva solicitud ha llegado
             event(new \App\Events\ContratoStatusChanged($contrato->id, 'pendiente_aprobacion', $contrato->propietario_id));
@@ -540,6 +551,7 @@ class ContratoController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            \Log::error("Error en successReserva: " . $e->getMessage());
             return "Error procesando el éxito del pago: " . $e->getMessage();
         }
     }
