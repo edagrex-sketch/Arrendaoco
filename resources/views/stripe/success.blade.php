@@ -29,21 +29,33 @@
         <div class="bg-slate-50 rounded-2xl p-4 mb-8">
             <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Estatus del trámite</p>
             <p class="text-blue-600 font-bold">Pendiente de aprobación</p>
+            <p class="text-[10px] text-slate-400 mt-2">Redireccionando a la app en <span id="countdown">3</span>s...</p>
         </div>
 
-        <button onclick="window.close();" class="w-full stunning-gradient text-white font-bold py-4 rounded-2xl shadow-lg hover:opacity-90 transition-all active:scale-95">
+        <a href="arrendaoco://success" class="block w-full stunning-gradient text-white text-center font-bold py-4 rounded-2xl shadow-lg hover:opacity-90 transition-all active:scale-95">
             VOLVER A LA APP
-        </button>
+        </a>
 
-        <p class="mt-6 text-slate-400 text-xs">Puedes cerrar esta ventana de forma segura.</p>
+        <p class="mt-6 text-slate-400 text-xs">Si no eres redirigido automáticamente, presiona el botón.</p>
     </div>
 
-    <!-- Script para avisar a la App móvil que el proceso terminó -->
     <script>
-        // Intentar comunicar con el sistema nativo de Flutter si fuera necesario
+        let count = 3;
+        const countdownEl = document.getElementById('countdown');
+        
+        const timer = setInterval(() => {
+            count--;
+            if (countdownEl) countdownEl.innerText = count;
+            if (count <= 0) {
+                clearInterval(timer);
+                window.location.href = "arrendaoco://success";
+            }
+        }, 1000);
+
+        // Intento inmediato
         setTimeout(() => {
-            console.log("PAGO_COMPLETADO");
-        }, 2000);
+            window.location.href = "arrendaoco://success";
+        }, 3500);
     </script>
 </body>
 </html>

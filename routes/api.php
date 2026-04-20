@@ -31,7 +31,7 @@ Route::get('/inmuebles/public-detail/{inmueble}', [InmuebleController::class, 's
 
 // Rutas públicas de retorno de Stripe para la App Móvil
 Route::get('/contratos/{contrato}/success', [ContratoController::class, 'successReserva']);
-Route::get('/contratos/{contrato}/cancel', function() { return "Reserva cancelada"; });
+Route::get('/contratos/{contrato}/cancel', function() { return view('stripe.cancel'); });
 Route::get('/pagos/{pago}/success', [PagoController::class, 'success']);
 Route::get('/pagos/{pago}/cancel', function() { return "Pago cancelado"; });
 

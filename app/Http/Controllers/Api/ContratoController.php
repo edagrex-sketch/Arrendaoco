@@ -232,6 +232,9 @@ class ContratoController extends Controller
         // Generar sesión de Stripe para el móvil (Checkout URL)
         \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
         try {
+            // Log para depuración en producción
+            \Log::info("🚀 Iniciando Checkout de Stripe para Contrato #{$contrato->id}");
+
             $paymentIntentData = [
                 'capture_method' => 'manual', // HOLD DE FONDOS
             ];
@@ -241,6 +244,10 @@ class ContratoController extends Controller
                     'destination' => $inmueble->propietario->stripe_account_id
                 ];
             }
+
+            // Usamos secure_url para garantizar que Stripe acepte las URLs de retorno
+            $successUrl = secure_url('/api/contratos/' . $contrato->id . '/success') . '?session_id={CHECKOUT_SESSION_ID}';
+            $cancelUrl = secure_url('/api/contratos/' . $contrato->id . '/cancel');
 
             $session = \Stripe\Checkout\Session::create([
                 'payment_method_types' => ['card'],
@@ -257,17 +264,23 @@ class ContratoController extends Controller
                 ]],
                 'mode' => 'payment',
                 'payment_intent_data' => $paymentIntentData,
-                'success_url' => url('/api/contratos/' . $contrato->id . '/success?session_id={CHECKOUT_SESSION_ID}'),
-                'cancel_url' => url('/api/contratos/' . $contrato->id . '/cancel'),
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
             ]);
+
+            \Log::info("✅ Checkout creado exitosamente: " . $session->url);
 
             return response()->json([
                 'success' => true,
                 'contrato_id' => $contrato->id,
-                'stripe_url' => $session->url // El móvil abrirá esto para el pago
+                'stripe_url' => $session->url 
             ]);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error con Stripe: ' . $e->getMessage()], 500);
+            \Log::error('❌ Error CRÍTICO en Stripe (API): ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar con Stripe: ' . $e->getMessage()
+            ], 500);
         }
     }
 
