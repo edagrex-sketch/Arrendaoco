@@ -197,7 +197,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/contratos/{contrato}/stripe-reserva-success', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
         if ($request->has('session_id')) {
             try {
-                $stripeSecret = env('STRIPE_SECRET') ?: config('services.stripe.secret');
+                $stripeSecret = config('services.stripe.secret');
                 \Stripe\Stripe::setApiKey($stripeSecret);
                 $session = \Stripe\Checkout\Session::retrieve($request->session_id);
 
@@ -274,7 +274,7 @@ Route::middleware('auth')->group(function () {
             }
 
             if ($contrato->stripe_payment_intent_id) {
-                \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+                \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
                 try {
                     $pi = \Stripe\PaymentIntent::retrieve($contrato->stripe_payment_intent_id);
                     if ($pi->status === 'requires_capture') {
@@ -322,7 +322,7 @@ Route::middleware('auth')->group(function () {
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
             if ($contrato->stripe_payment_intent_id) {
-                \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+                \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
                 try {
                     $pi = \Stripe\PaymentIntent::retrieve($contrato->stripe_payment_intent_id);
                     if ($pi->status === 'requires_capture' || $pi->status === 'requires_action') {
@@ -374,7 +374,7 @@ Route::middleware('auth')->group(function () {
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
             if ($contrato->stripe_payment_intent_id && $contrato->estatus === 'pendiente_aprobacion') {
-                \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+                \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
                 try {
                     $pi = \Stripe\PaymentIntent::retrieve($contrato->stripe_payment_intent_id);
                     if ($pi->status === 'requires_capture' || $pi->status === 'requires_action') {
@@ -574,7 +574,7 @@ Route::middleware('auth')->prefix('stripe-connect')->group(function () {
 Route::middleware('auth')->prefix('pagos')->group(function () {
 
     Route::post('/pagar-mensualidad/{contrato}', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
-        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
 
         try {
             $sessionData = [
@@ -613,7 +613,7 @@ Route::middleware('auth')->prefix('pagos')->group(function () {
 
     Route::match(['get', 'post'], '/mensualidad/success/{contrato}', function (\Illuminate\Http\Request $request, \App\Models\Contrato $contrato) {
         if ($request->has('session_id')) {
-            \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
             $session = \Stripe\Checkout\Session::retrieve($request->session_id);
             if ($session->payment_status !== 'paid' && $session->payment_status !== 'unpaid') {
                 return redirect()->route('inmuebles.mis_rentas')->with('error', 'El pago mensual no fue completado.');
