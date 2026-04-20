@@ -364,28 +364,28 @@
                 </div>
 
                 {{-- Bottom Action Row --}}
-                <div class="flex items-center justify-between mt-auto pt-6 border-t border-slate-100">
-                    <div class="text-2xl font-bold text-slate-800">
+                <div class="flex flex-col sm:flex-row items-center gap-3 mt-auto pt-6 border-t border-slate-100">
+                    <div class="text-2xl font-bold text-slate-800 w-full sm:w-auto text-center sm:text-left mb-4 sm:mb-0">
                         ${{ number_format($inmueble->renta_mensual, 2) }} <span
                             class="text-sm font-bold ml-1 uppercase text-slate-500">MXN</span>
                     </div>
 
-                    <div class="flex items-center gap-4">
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                         @if(Auth::id() === $inmueble->propietario_id)
                             @if($inmueble->estatus === 'rentado')
                                 <span
-                                    class="bg-[#003049] text-white px-6 py-3 rounded-xl text-sm font-black shadow-md uppercase tracking-widest border border-[#003049]">
+                                    class="w-full sm:w-auto bg-[#003049] text-white px-6 py-3 rounded-xl text-sm font-black shadow-md uppercase tracking-widest border border-[#003049] text-center">
                                     Rentado
                                 </span>
                             @else
                                 <a href="{{ route('inmuebles.edit', $inmueble) }}"
-                                    class="bg-[#729CB2] text-white px-6 py-3 rounded-xl text-sm font-bold shadow-md hover:bg-[#5C869C] transition-colors border border-[#5C869C]">
+                                    class="w-full sm:w-auto bg-[#729CB2] text-white px-6 py-3 rounded-xl text-sm font-bold shadow-md hover:bg-[#5C869C] transition-colors border border-[#5C869C] text-center">
                                     Editar Propiedad
                                 </a>
                             @endif
                         @else
                             <a href="{{ route('chats.start', ['otroUsuarioId' => $inmueble->propietario_id, 'inmuebleId' => $inmueble->id]) }}"
-                                class="bg-white text-[#729CB2] px-4 sm:px-6 py-3 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition-colors border border-[#729CB2] flex items-center gap-2">
+                                class="w-full sm:w-auto bg-white text-[#729CB2] px-6 py-3 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition-colors border border-[#729CB2] flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                                 </svg>
@@ -394,7 +394,7 @@
                             @if($inmueble->estatus === 'disponible')
                                 <a href="{{ route('contratos.ver', $inmueble) }}"
                                    id="btn-ver-contrato"
-                                   class="bg-[#003049] text-white px-6 sm:px-10 py-3 rounded-xl text-sm font-black shadow-xl shadow-[#003049]/20 hover:bg-[#002233] hover:-translate-y-0.5 transition-all border border-[#002233] flex items-center gap-2">
+                                   class="w-full sm:w-auto bg-[#003049] text-white px-8 py-3 rounded-xl text-sm font-black shadow-xl shadow-[#003049]/20 hover:bg-[#002233] hover:-translate-y-0.5 transition-all border border-[#002233] flex items-center justify-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
@@ -402,7 +402,7 @@
                                 </a>
                             @else
                                 <span
-                                    class="bg-gray-300 text-gray-500 px-6 sm:px-10 py-3 rounded-xl text-sm font-black shadow-sm border border-gray-400 cursor-not-allowed uppercase tracking-widest">
+                                    class="w-full sm:w-auto bg-gray-300 text-gray-500 px-10 py-3 rounded-xl text-sm font-black shadow-sm border border-gray-400 cursor-not-allowed uppercase tracking-widest text-center">
                                     Rentado
                                 </span>
                             @endif

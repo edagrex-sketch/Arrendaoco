@@ -776,285 +776,115 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        font-weight: 700;
     }
 
     /* --- 16. RESPONSIVE --- */
 
-    /* === Tablets y móviles grandes (≤768px) === */
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
         #roco-widget-container {
             bottom: 20px;
-            left: auto;
             right: 20px;
-            width: 180px;
-            transform-origin: bottom right;
+            left: auto;
+            width: 80px !important;
+            height: 80px !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
         }
 
-        #mascot-chat {
-            bottom: 20px;
-            left: 20px;
-            width: calc(100vw - 40px);
-            height: calc(100vh - 120px);
+        #roco-visual-group {
+            position: relative;
+            width: 75px;
+            height: 75px;
+            pointer-events: auto;
         }
 
         #roco-mascot-wrapper {
-            width: 100px !important;
-            height: 90px !important;
+            width: 70px !important;
+            height: 70px !important;
+            background: white;
+            border-radius: 50% !important;
+            border: 3px solid #003049;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            overflow: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
         }
 
         #roco-lottie {
-            width: 100px !important;
-            height: 90px !important;
+            width: 100% !important;
+            height: 100% !important;
+            transform: scale(1.4);
+            margin-top: 5px;
         }
 
-        .mascot-scene {
-            height: 80px;
+        #roco-bubble {
+            display: none !important;
         }
 
-        /* Burbuja compacta que no tape contenido */
-        .mascot-bubble {
-            max-width: 140px;
-            font-size: 0.7rem;
-            padding: 8px 12px;
-            margin-left: 0;
-            margin-bottom: -10px;
-            border-radius: 14px;
-            line-height: 1.4;
+        #roco-toggle-btn {
+            width: 30px !important;
+            height: 30px !important;
+            position: absolute !important;
+            bottom: -5px !important;
+            right: -5px !important;
+            z-index: 25 !important;
+            background: #003049 !important;
+            color: white !important;
+            border: 2px solid white !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
-        .mascot-bubble::after {
-            left: 20px;
-            width: 8px;
-            height: 8px;
+        #roco-toggle-btn svg {
+            width: 16px !important;
+            height: 16px !important;
         }
 
-        /* Tooltip más pequeño */
-        .chat-tooltip {
-            font-size: 11px;
-            padding: 6px 14px;
-            bottom: -35px;
-        }
-
-        .chat-tooltip::before {
-            width: 7px;
-            height: 7px;
-        }
-
-        /* Botón minimizar más pequeño */
-        .minimize-assistant-btn {
-            width: 28px;
-            height: 28px;
-            top: -8px;
-            left: -8px;
-        }
-
-        .minimize-assistant-btn svg {
-            width: 12px;
-            height: 12px;
-        }
-
-        /* Hueso más pequeño */
-        .yarn-pro {
-            width: 20px;
-            height: 8px;
-            right: 15px;
-            bottom: 10px;
-        }
-
-        .yarn-pro::before,
-        .yarn-pro::after {
-            width: 6px;
-            height: 6px;
-        }
-
-        .yarn-pro::before { left: -3px; }
-        .yarn-pro::after { right: -3px; }
-
-        /* Botón maximizar reposicionado */
         .assistant-toggle-btn {
-            bottom: 20px;
-            left: auto;
-            right: 12px;
-            padding: 10px 18px;
-            font-size: 12px;
+            display: none !important;
         }
 
-        /* Menú en pantalla completa con margen */
-        #mascot-menu {
-            width: calc(100vw - 32px);
-            left: 16px;
-            bottom: 110px;
-            border-radius: 18px;
-        }
-
-        .menu-header {
-            padding: 14px 18px;
-        }
-
-        .menu-header span {
-            font-size: 11px;
-            letter-spacing: 1px;
-        }
-
-        .menu-item {
-            padding: 10px 14px;
-            font-size: 0.82rem;
-            gap: 10px;
-        }
-
-        .menu-item .item-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
-            font-size: 1rem;
-        }
-
-        .menu-footer {
-            padding: 10px 16px;
-            font-size: 10px;
+        /* Ocultar elementos que no caben */
+        .mascot-scene, .chat-tooltip, .minimize-assistant-btn, .yarn-pro {
+            display: none !important;
         }
 
         /* Chat ocupa casi toda la pantalla */
         #mascot-chat {
-            width: calc(100vw - 16px);
-            left: 8px;
-            bottom: 8px;
-            height: calc(100vh - 70px);
-            height: calc(100dvh - 70px);
-            border-radius: 20px;
-        }
-
-        .chat-header {
-            padding: 12px 14px;
-        }
-
-        .chat-header .w-8.h-8 {
-            width: 28px !important;
-            height: 28px !important;
-        }
-
-        #chat-mascot-name {
-            font-size: 13px;
-        }
-
-        .chat-body {
-            padding: 14px;
-            gap: 10px;
-        }
-
-        .msg-ai, .msg-user {
-            max-width: 88%;
-            font-size: 0.82rem;
-            padding: 10px 14px;
-        }
-
-        .quick-replies {
-            gap: 6px;
-        }
-
-        .quick-reply-btn {
-            font-size: 11px;
-            padding: 6px 12px;
-        }
-
-        .chat-footer {
-            padding: 10px 12px;
-        }
-
-        #chat-input {
-            padding: 10px 14px;
-            padding-right: 45px;
-            font-size: 0.82rem;
-        }
-
-        #chat-send-btn {
-            width: 40px;
-            height: 40px;
-        }
-
-        .roco-powered-by {
-            font-size: 9px;
-            padding: 4px 12px 8px;
-        }
-    }
-
-    /* === Móviles medianos (≤480px) === */
-    @media (max-width: 480px) {
-        #roco-widget-container {
-            bottom: 15px;
-            right: 10px;
-            width: 150px;
-        }
-
-        #roco-mascot-wrapper {
-            width: 85px !important;
-            height: 75px !important;
-        }
-
-        #roco-lottie {
-            width: 85px !important;
-            height: 75px !important;
-        }
-
-        .mascot-bubble {
-            max-width: 120px;
-            font-size: 0.65rem;
-            padding: 6px 10px;
-        }
-
-        .assistant-toggle-btn {
-            padding: 8px 14px;
-            font-size: 11px;
-            gap: 6px;
-        }
-
-        #mascot-chat {
             width: calc(100vw - 20px);
             left: 10px;
             bottom: 10px;
-            height: calc(100vh - 80px);
-            height: calc(100dvh - 80px);
-            border-radius: 20px;
+            height: calc(100vh - 100px);
+            height: calc(100dvh - 100px);
+            border-radius: 24px;
+            z-index: 100000;
         }
     }
 
-    /* === Móviles muy pequeños (≤380px) === */
-    @media (max-width: 380px) {
+    /* === Tablets y móviles (≤1024px) === */
+    @media (max-width: 480px) {
         #roco-widget-container {
-            bottom: 10px;
-            right: 5px;
-            width: 130px;
+            bottom: 15px;
+            right: 15px;
         }
-
-        #roco-mascot-wrapper {
-            width: 75px !important;
-            height: 65px !important;
-        }
-
-        #roco-lottie {
-            width: 75px !important;
-            height: 65px !important;
-        }
-
-        .mascot-bubble {
-            max-width: 100px;
-            font-size: 0.6rem;
-            padding: 5px 8px;
-        }
-
+        
         #mascot-chat {
             width: 100vw;
-            left: 0;
-            bottom: 0;
             height: 100vh;
             height: 100dvh;
+            left: 0;
+            bottom: 0;
             border-radius: 0;
-        }
-
-        .assistant-toggle-btn {
-            padding: 8px 12px;
-            font-size: 10px;
         }
     }
 </style>

@@ -38,18 +38,20 @@
         @endphp
         <nav class="bg-brand-dark border-b border-brand-dark sticky top-0 z-50 shadow-lg"
             x-data="{ mobileMenuOpen: false }">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center">
                 <!-- 1. Logo y Nombre -->
-                <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
-                    class="flex items-center gap-2 group hover:opacity-90 transition-opacity shrink-0">
-                    <!-- Cuadrado del logo en un azul más claro para resaltar -->
-                    <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco" class="h-9 w-auto object-contain">
-                    <span class="text-xl font-bold text-white tracking-tight hidden lg:block">
-                        ArrendaOco
-                    </span>
-                </a>
-                <!-- 2. Menú Central (Enlaces) -->
-                <div class="hidden lg:flex items-center gap-4 xl:gap-8">
+                <div class="flex-shrink-0">
+                    <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
+                        class="flex items-center gap-3 hover:opacity-90 transition-opacity">
+                        <img src="{{ asset('logo1.png') }}" alt="Logo ArrendaOco" class="h-10 w-auto object-contain">
+                        <span class="text-xl font-black text-white tracking-tight hidden sm:block">
+                            ArrendaOco
+                        </span>
+                    </a>
+                </div>
+
+                <!-- 2. Menú Central (Enlaces) - Solo Escritorio -->
+                <div class="hidden lg:flex items-center gap-8 ml-10">
                     <a href="{{ Auth::check() ? route('inicio') : route('welcome') }}"
                         class="text-sm font-medium text-white hover:text-brand-light transition-colors border-b-2 border-transparent hover:border-brand-light py-1">
                         Inicio
@@ -70,9 +72,10 @@
                         Nosotros
                     </a>
                 </div>
-                <!-- 3. Botones (Auth) -->
-                <div class="flex items-center gap-4">
-                    {{-- Desktop Auth Menu (Visible only on LG+) --}}
+
+                <!-- 3. Acciones de Usuario / Hamburguesa (Empujado a la derecha) -->
+                <div class="ml-auto flex items-center gap-2">
+                    {{-- Content (Desktop Only) --}}
                     <div class="hidden lg:flex items-center gap-4">
                         @auth
                             @if (Auth::user()->tieneRol('admin') || Auth::user()->es_admin)
@@ -241,16 +244,21 @@
                     </div> {{-- Fin de Desktop Auth Menu --}}
                 </div> {{-- Fin de Botones (Auth) --}}
 
-                {{-- Botón de Hamburguesa (Independiente) --}}
-                <div class="flex lg:hidden">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen"
-                        class="relative text-white hover:text-brand-light transition-all p-2 rounded-xl focus:outline-none z-[80] bg-white/5 border border-white/10 shadow-lg">
-                        <span class="sr-only">Menú</span>
-                        <div class="w-8 h-8 flex flex-col justify-center items-center gap-1.5 overflow-hidden">
-                            <span :class="mobileMenuOpen ? 'rotate-45 translate-y-2.5' : ''" class="w-full h-1 bg-white rounded-full transition-all duration-300 origin-center"></span>
-                            <span :class="mobileMenuOpen ? 'opacity-0 translate-x-12' : ''" class="w-full h-1 bg-white rounded-full transition-all duration-300"></span>
-                            <span :class="mobileMenuOpen ? '-rotate-45 -translate-y-2.5' : ''" class="w-full h-1 bg-white rounded-full transition-all duration-300 origin-center"></span>
-                        </div>
+                    {{-- Botón Hamburguesa: SOLO visible en móvil (oculto en lg+) --}}
+                    <button
+                        @click="mobileMenuOpen = !mobileMenuOpen"
+                        id="nav-hamburger-btn"
+                        class="flex lg:hidden items-center justify-center w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all focus:outline-none"
+                        aria-label="Menú"
+                    >
+                        {{-- Ícono hamburguesa --}}
+                        <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-cloak>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        {{-- Ícono X --}}
+                        <svg x-show="mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-cloak>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
                     </button>
                 </div>
             </div> {{-- Fin de h-16 --}}
@@ -701,7 +709,7 @@
     @stack('scripts')
     @auth
     <x-arrendito />
-    @endunless
+    @endauth
 </body>
 
 </html>
