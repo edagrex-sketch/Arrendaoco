@@ -395,8 +395,8 @@
                 </div>
             </div>
         </nav>
-        <!-- Contenido Principal: Alineado arriba para evitar que flote en medio -->
-        <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <!-- Contenido Principal: Posición fija arriba para evitar huecos al hacer scroll -->
+        <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 sm:py-4">
             @yield('content')
         </main>
 
