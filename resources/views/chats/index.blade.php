@@ -1,99 +1,99 @@
 @extends('layouts.app')
 
-@section('title', 'Mis Mensajes - ArrendaOco')
-
 @section('content')
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-[#003049] tracking-tight">Mis Conversaciones</h1>
-        <p class="text-gray-500 mt-2">Gestiona tus dudas y acuerdos con arrendadores e inquilinos.</p>
-    </div>
-
-    <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 h-[700px] flex flex-col md:flex-row shadow-slate-200">
-        <!-- Sidebar: Lista de Chats -->
-        <div class="{{ isset($currentChat) ? 'hidden' : 'flex' }} md:flex w-full md:w-80 border-r border-gray-100 bg-gray-50/50 flex flex-col h-full">
-            <div class="p-6 border-b border-gray-100 bg-white">
-                <div class="relative">
-                    <input type="text" placeholder="Buscar chat..." 
-                        class="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-2xl text-sm focus:ring-2 focus:ring-[#669BBC] transition-all">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </div>
-            </div>
-
-            <div class="flex-1 overflow-y-auto">
-                @forelse($chats as $chat)
-                    @php 
-                        $otroUsuario = $chat->getOtroUsuario(Auth::id()); 
-                        $estaSeleccionado = isset($currentChat) && $currentChat->id == $chat->id;
-                    @endphp
-                    <a href="{{ route('chats.show', $chat) }}" 
-                        class="flex items-center gap-4 p-4 hover:bg-white transition-all border-b border-gray-50 {{ $estaSeleccionado ? 'bg-white border-l-4 border-l-[#669BBC]' : '' }}">
-                        <div class="relative flex-shrink-0">
-                            @if($otroUsuario->foto_perfil)
-                                <img src="{{ str_starts_with($otroUsuario->foto_perfil, 'http') ? $otroUsuario->foto_perfil : asset('storage/'.$otroUsuario->foto_perfil) }}" 
-                                    class="w-12 h-12 rounded-2xl object-cover shadow-sm">
-                            @else
-                                <div class="w-12 h-12 rounded-2xl bg-[#003049] text-white flex items-center justify-center font-bold text-lg shadow-sm">
-                                    {{ substr($otroUsuario->nombre, 0, 1) }}
-                                </div>
-                            @endif
-                            
-                            {{-- Miniatura de la Propiedad (Identificador de Contexto) --}}
-                            @if($chat->inmueble && $chat->inmueble->imagen)
-                                <div class="absolute -bottom-1 -left-2 w-7 h-7 rounded-lg border-2 border-white shadow-lg overflow-hidden ring-1 ring-[#003049]/10 hover:scale-125 transition-transform z-10" title="Negociando para: {{ $chat->inmueble->titulo }}">
-                                    <img src="{{ \App\Support\MediaUrl::fromStoragePath($chat->inmueble->imagen) }}" class="w-full h-full object-cover">
-                                </div>
-                            @endif
-
-                            {{-- Burbuja de Notificación del Chat --}}
-                            <div id="badge-chat-{{ $chat->id }}" class="{{ $chat->unread_count > 0 ? '' : 'hidden' }} absolute -top-2 -left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md z-20 animate-pulse">
-                                {{ $chat->unread_count }}
-                            </div>
-
-                            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full z-10"></div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            @if($chat->inmueble)
-                                <p class="text-[9px] text-[#669BBC] font-extrabold uppercase tracking-widest mb-0.5 leading-none">{{ $chat->inmueble->titulo }}</p>
-                            @endif
-                            <div class="flex justify-between items-baseline mb-0.5">
-                                <h3 class="font-bold text-[#003049] truncate leading-none">{{ $otroUsuario->nombre }}</h3>
-                                <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">
-                                    {{ $chat->last_message_at ? $chat->last_message_at->diffForHumans(null, true) : '' }}
-                                </span>
-                            </div>
-                            <p class="text-xs text-gray-500 truncate">
-                                {{ $chat->last_message ?? 'Inicia una conversación...' }}
-                            </p>
-                        </div>
-                    </a>
-                @empty
-                    <div class="p-8 text-center">
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                            </svg>
-                        </div>
-                        <p class="text-sm text-gray-400">No tienes chats activos todavía.</p>
-                    </div>
-                @endforelse
-            </div>
-        </div>
-
-        <!-- Main Chat Area -->
-        <div class="{{ isset($currentChat) ? 'flex' : 'hidden md:flex' }} flex-1 flex flex-col bg-white overflow-hidden">
-            @yield('chat_content')
+<div class="h-[calc(100vh-80px)] overflow-hidden bg-[#F8FAFC]">
+    <div class="max-w-[1600px] mx-auto h-full p-0 sm:p-4 md:p-6 lg:p-8">
+        <div class="bg-white h-full rounded-none sm:rounded-[32px] shadow-[0_20px_50px_rgba(0,48,73,0.05)] border border-gray-100 flex overflow-hidden relative">
             
-            @if(!View::hasSection('chat_content'))
-                <div class="flex-1 flex flex-col items-center justify-center p-12 text-center bg-gray-50/30">
-                    <img src="{{ asset('logo1.png') }}" class="w-24 h-24 opacity-20 mb-6 grayscale">
-                    <h2 class="text-2xl font-bold text-[#003049] opacity-40">Tus mensajes aparecerán aquí</h2>
-                    <p class="text-gray-400 mt-2 max-w-xs">Selecciona una conversación de la lista para empezar a chatear.</p>
+            <!-- Sidebar de Chats -->
+            <aside id="chat-sidebar" class="w-full md:w-[350px] lg:w-[400px] flex-shrink-0 border-r border-gray-100 flex flex-col bg-white z-40 transition-all duration-300 {{ isset($currentChat) ? 'hidden md:flex' : 'flex' }}">
+                <!-- Header del Sidebar -->
+                <div class="p-6 pb-2">
+                    <div class="flex items-center justify-between mb-6">
+                        <h1 class="text-2xl font-black text-[#003049] tracking-tight">Mensajes</h1>
+                        <div class="flex gap-2">
+                            <button class="p-2 bg-gray-50 rounded-xl text-gray-400 hover:text-[#003049] transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            @endif
+
+                <!-- Lista de Usuarios -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar px-3 py-4">
+                    @forelse($chats as $c)
+                        @php $otro = $c->getOtroUsuario(Auth::id()); @endphp
+                        <a href="{{ route('chats.show', $c) }}" 
+                           class="flex items-center gap-4 p-4 rounded-[24px] mb-2 transition-all duration-300 group {{ (isset($currentChat) && $currentChat->id == $c->id) ? 'bg-[#003049] shadow-lg shadow-[#003049]/20' : 'hover:bg-gray-50' }}">
+                            
+                            <!-- Avatar con Status -->
+                            <div class="relative flex-shrink-0">
+                                @if($otro->foto_perfil)
+                                    <img src="{{ str_starts_with($otro->foto_perfil, 'http') ? $otro->foto_perfil : asset('storage/'.$otro->foto_perfil) }}" 
+                                         class="w-14 h-14 rounded-2xl object-cover shadow-sm group-hover:scale-105 transition-transform">
+                                @else
+                                    <div class="w-14 h-14 rounded-2xl bg-[#669BBC]/10 text-[#003049] flex items-center justify-center font-black text-xl">
+                                        {{ substr($otro->nombre, 0, 1) }}
+                                    </div>
+                                @endif
+                                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                            </div>
+
+                            <!-- Info -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h3 class="font-bold truncate {{ (isset($currentChat) && $currentChat->id == $c->id) ? 'text-white' : 'text-[#003049]' }}">
+                                        {{ $otro->nombre }}
+                                    </h3>
+                                    <span class="text-[10px] uppercase font-bold {{ (isset($currentChat) && $currentChat->id == $c->id) ? 'text-white/60' : 'text-gray-400' }}">
+                                        {{ $c->last_message_at ? $c->last_message_at->diffForHumans(null, true) : '' }}
+                                    </span>
+                                </div>
+                                <p class="text-xs truncate {{ (isset($currentChat) && $currentChat->id == $c->id) ? 'text-white/80' : 'text-gray-500' }}">
+                                    {{ $c->last_message ?? 'Sin mensajes aún...' }}
+                                </p>
+                            </div>
+
+                            @if($c->unread_count > 0)
+                                <div class="w-5 h-5 bg-[#669BBC] text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse">
+                                    {{ $c->unread_count }}
+                                </div>
+                            @endif
+                        </a>
+                    @empty
+                        <div class="flex flex-col items-center justify-center h-full text-center p-8">
+                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.827-1.233L3 20l1.326-3.945C3.394 14.742 3 13.446 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            </div>
+                            <p class="text-gray-400 font-bold">No hay conversaciones</p>
+                        </div>
+                    @endforelse
+                </div>
+            </aside>
+
+            <!-- Área Principal de Contenido -->
+            <main class="flex-1 flex flex-col h-full bg-white relative overflow-hidden">
+                @yield('chat_content')
+
+                @if(!isset($currentChat))
+                    <div class="hidden md:flex flex-col items-center justify-center h-full bg-[#FCFDFF]">
+                        <div class="w-[300px] h-[300px] bg-slate-50 rounded-full flex items-center justify-center relative mb-8">
+                            <img src="{{ asset('img/arrendito_happy.png') }}" class="w-48 opacity-10 drop-shadow-2xl">
+                        </div>
+                        <h2 class="text-3xl font-black text-[#003049] mb-2 text-center">Tu Centro de Mensajes</h2>
+                        <p class="text-gray-400 font-medium">Selecciona una conversación para comenzar</p>
+                    </div>
+                @endif
+            </main>
+
         </div>
     </div>
 </div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E0; }
+</style>
 @endsection
