@@ -166,6 +166,9 @@ class ChatController extends Controller
             ]
         );
 
+        // Sincronización inicial con Firestore para que aparezca en la lista del móvil
+        \App\Services\FirestoreService::syncChat($chat);
+
         return response()->json([
             'data' => $chat->load(['usuario1', 'usuario2', 'inmueble'])
         ]);

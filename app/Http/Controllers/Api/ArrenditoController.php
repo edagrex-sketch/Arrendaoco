@@ -11,13 +11,15 @@ use App\Models\Inmueble;
 class ArrenditoController extends Controller
 {
     private const GEMINI_MODEL = 'gemini-1.5-flash';
-    private const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
+    private const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1/models/';
 
     /**
      * Chat principal de Arrendito (IA Gemini)
      */
     public function chat(Request $request)
     {
+        Log::info('🤖 ROCCO: Nueva consulta recibida', ['mensaje' => $request->message]);
+        
         $request->validate([
             'message' => 'required|string|max:500',
             'inmueble_id' => 'nullable|exists:inmuebles,id'
