@@ -38,8 +38,8 @@ class StripeConnectController extends Controller
         // Stripe will redirect the mobile browser to these web pages when done
         $accountLink = AccountLink::create([
             'account' => $user->stripe_account_id,
-            'refresh_url' => route('stripe.connect.refresh'),
-            'return_url' => route('stripe.connect.return'),
+            'refresh_url' => route('stripe.connect.refresh', ['platform' => 'mobile']),
+            'return_url' => route('stripe.connect.return', ['platform' => 'mobile']),
             'type' => 'account_onboarding',
         ]);
 
