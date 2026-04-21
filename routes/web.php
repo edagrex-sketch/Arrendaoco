@@ -18,6 +18,7 @@ use App\Http\Controllers\ResenaController;
 use App\Http\Controllers\FavoritoController;
 use App\Http\Controllers\ArrenditoChatController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\Admin\RespaldoController;
 use App\Http\Controllers\Auth\SocialAuthController;
 
 // Social Login Routes
@@ -480,6 +481,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('contratos', [AdminContratoController::class, 'index'])->name('contratos.index');
         Route::get('contratos/reporte', [AdminContratoController::class, 'reporte'])->name('contratos.reporte');
+
+        // Respaldos
+        Route::get('respaldos', [RespaldoController::class, 'index'])->name('respaldos.index');
+        Route::post('respaldos/configurar', [RespaldoController::class, 'configurar'])->name('respaldos.configurar');
+        Route::post('respaldos/ejecutar', [RespaldoController::class, 'ejecutar'])->name('respaldos.ejecutar');
+        Route::post('respaldos/{id}/restaurar', [RespaldoController::class, 'restaurar'])->name('respaldos.restaurar');
     });
 
     Route::get(

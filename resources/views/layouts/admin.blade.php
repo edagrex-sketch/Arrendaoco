@@ -186,6 +186,17 @@
                     </svg>
                     PDF Reseñas
                 </a>
+
+                <p class="px-4 mt-6 mb-3 text-[10px] font-black text-[#669BBC]/70 uppercase tracking-[0.2em]">Sistema</p>
+
+                <a href="{{ route('admin.respaldos.index') }}"
+                    class="admin-nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium border-l-4
+                    {{ request()->routeIs('admin.respaldos.*') ? 'active border-[#669BBC] text-white' : 'border-transparent text-gray-300 hover:text-white' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                    </svg>
+                    Respaldos
+                </a>
             </nav>
 
             {{-- Bottom Area --}}
