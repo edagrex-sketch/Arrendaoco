@@ -74,7 +74,7 @@ class PagoController extends Controller
         \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
 
         try {
-            $session = \Stripe\Checkout\Session::create([
+            $sessionParams = [
                 'payment_method_types' => ['card'],
                 'line_items' => [[
                     'price_data' => [
@@ -88,10 +88,21 @@ class PagoController extends Controller
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                // Usamos una ruta de éxito que marque el pago
                 'success_url' => url('/api/pagos/' . $pago->id . '/success?session_id={CHECKOUT_SESSION_ID}'),
                 'cancel_url' => url('/api/pagos/' . $pago->id . '/cancel'),
-            ]);
+            ];
+
+            // Inyectar transferencia si el dueño tiene Stripe Connect activo
+            $arrendador = $pago->contrato->inmueble->propietario;
+            if ($arrendador && $arrendador->stripe_account_id && $arrendador->stripe_onboarding_completed) {
+                $sessionParams['payment_intent_data'] = [
+                    'transfer_data' => [
+                        'destination' => $arrendador->stripe_account_id
+                    ]
+                ];
+            }
+
+            $session = \Stripe\Checkout\Session::create($sessionParams);
 
             return response()->json([
                 'url' => $session->url,

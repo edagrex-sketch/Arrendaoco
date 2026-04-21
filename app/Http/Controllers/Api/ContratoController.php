@@ -232,10 +232,19 @@ class ContratoController extends Controller
             return $nuevoContrato;
         });
 
-        // Generar sesión de Stripe para el móvil (Checkout URL)
-        Stripe::setApiKey(config('services.stripe.secret'));
-        try {
-            \Log::info("🚀 Generando Session para Contrato {$contrato->id}");
+            // Generar sesión de Stripe para el móvil (Checkout URL)
+            Stripe::setApiKey(config('services.stripe.secret'));
+            
+            $paymentIntentData = [
+                'capture_method' => 'manual',
+            ];
+
+            // Añadir transferencia si aplica (Stripe Connect)
+            if ($inmueble->propietario && $inmueble->propietario->stripe_account_id && $inmueble->propietario->stripe_onboarding_completed) {
+                $paymentIntentData['transfer_data'] = [
+                    'destination' => $inmueble->propietario->stripe_account_id
+                ];
+            }
 
             $sessionParams = [
                 'payment_method_types' => ['card'],
@@ -244,24 +253,17 @@ class ContratoController extends Controller
                         'currency' => 'mxn',
                         'product_data' => [
                             'name' => 'Reserva: ' . $inmueble->titulo,
+                            'description' => 'Validación de fondos y reserva de propiedad.',
                         ],
                         'unit_amount' => (int) round($inmueble->renta_mensual * 100),
                     ],
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
+                'payment_intent_data' => $paymentIntentData,
                 'success_url' => secure_url('/api/contratos/' . $contrato->id . '/success') . '?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => secure_url('/api/contratos/' . $contrato->id . '/cancel'),
             ];
-
-            // Añadir transferencia si aplica
-            if ($inmueble->propietario && $inmueble->propietario->stripe_account_id && $inmueble->propietario_id !== $usuario->id) {
-                $sessionParams['payment_intent_data'] = [
-                    'transfer_data' => [
-                        'destination' => $inmueble->propietario->stripe_account_id
-                    ]
-                ];
-            }
 
             $session = Session::create($sessionParams);
 
@@ -491,6 +493,25 @@ class ContratoController extends Controller
         if (in_array($nuevoEstado, ['activa', 'activo'])) $nuevoEstado = 'activo';
         if (in_array($nuevoEstado, ['finalizada', 'cancelada', 'finalizado'])) $nuevoEstado = 'finalizado';
         if (in_array($nuevoEstado, ['rechazada', 'rechazado'])) $nuevoEstado = 'rechazado';
+
+        // --- LÓGICA DE STRIPE (CAPTURA O CANCELACIÓN) ---
+        if ($contrato->stripe_payment_intent_id) {
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+            try {
+                $pi = \Stripe\PaymentIntent::retrieve($contrato->stripe_payment_intent_id);
+                
+                if ($nuevoEstado === 'activo' && $pi->status === 'requires_capture') {
+                    // El dueño aprobó -> Cobramos el dinero
+                    $pi->capture();
+                } elseif ($nuevoEstado === 'rechazado' && ($pi->status === 'requires_capture' || $pi->status === 'requires_action')) {
+                    // El dueño rechazó -> Liberamos el dinero al inquilino
+                    $pi->cancel();
+                }
+            } catch (\Exception $e) {
+                \Log::error("❌ Error procesando Stripe en Update: " . $e->getMessage());
+                // No bloqueamos el flujo para no dejar la BD inconsistente, pero logueamos
+            }
+        }
 
         $contrato->update(['estatus' => $nuevoEstado]);
 
