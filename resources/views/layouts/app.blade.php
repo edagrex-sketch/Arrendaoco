@@ -512,6 +512,50 @@
 
         // Cargar conteo inicial
         updateNotificationBadge();
+
+        @if (session('success'))
+            Swal.fire({
+                title: '¡Éxito!',
+                text: "{{ session('success') }}",
+                icon: 'success',
+                confirmButtonColor: '#003049',
+                borderRadius: '20px'
+            });
+        @endif
+
+        @if (session('error'))
+            Swal.fire({
+                title: 'Atención',
+                text: "{{ session('error') }}",
+                icon: 'warning',
+                confirmButtonColor: '#003049',
+                borderRadius: '20px'
+            });
+        @endif
+
+        @if (session('info'))
+            Swal.fire({
+                title: 'Información',
+                text: "{{ session('info') }}",
+                icon: 'info',
+                confirmButtonColor: '#003049',
+                borderRadius: '20px'
+            });
+        @endif
+
+        @if ($errors->any())
+            Swal.fire({
+                title: 'Ocurrió un error',
+                html: '<ul style="text-align: left; list-style-type: disc; padding-left: 1.5rem; font-size: 14px;">' +
+                    @foreach ($errors->all() as $error)
+                        '<li>{{ $error }}</li>' +
+                    @endforeach
+                    '</ul>',
+                icon: 'error',
+                confirmButtonColor: '#C1121F',
+                borderRadius: '20px'
+            });
+        @endif
     </script>
 
     @auth
