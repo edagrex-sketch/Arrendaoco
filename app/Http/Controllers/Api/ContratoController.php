@@ -232,9 +232,9 @@ class ContratoController extends Controller
             return $nuevoContrato;
         });
 
-            // Generar sesión de Stripe para el móvil (Checkout URL)
-            Stripe::setApiKey(config('services.stripe.secret'));
-            
+        // Generar sesión de Stripe para el móvil (Checkout URL)
+        Stripe::setApiKey(config('services.stripe.secret'));
+        try {
             $paymentIntentData = [
                 'capture_method' => 'manual',
             ];
