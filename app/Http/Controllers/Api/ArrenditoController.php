@@ -11,7 +11,7 @@ use App\Models\Inmueble;
 class ArrenditoController extends Controller
 {
     private const GEMINI_MODEL = 'gemini-1.5-flash';
-    private const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1/models/';
+    private const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
     /**
      * Chat principal de Arrendito (IA Gemini)
