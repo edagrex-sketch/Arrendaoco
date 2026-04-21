@@ -27,6 +27,7 @@ class ArrenditoController extends Controller
 
         $userMessage = $request->message;
         $apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY'));
+        $modelName = config('services.gemini.model', self::GEMINI_MODEL);
 
         if (empty($apiKey)) {
             return response()->json([
@@ -58,9 +59,9 @@ class ArrenditoController extends Controller
         $userContent = "{$contexto}Usuario pregunta: {$userMessage}";
 
         try {
-            $url = self::GEMINI_BASE_URL . self::GEMINI_MODEL . ":generateContent?key={$apiKey}";
+            $url = self::GEMINI_BASE_URL . $modelName . ":generateContent?key={$apiKey}";
 
-            $response = Http::timeout(30)
+            $response = Http::withoutVerifying()->timeout(30)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post($url, [
                     'systemInstruction' => [
@@ -81,14 +82,22 @@ class ArrenditoController extends Controller
             if ($response->successful()) {
                 $data = $response->json();
                 $resText = $data['candidates'][0]['content']['parts'][0]['text'] ?? '🦴 ¡Guau! No pude procesar eso, intenta de nuevo.';
-                return response()->json(['success' => true, 'reply' => $resText]);
+                return response()->json([
+                    'success' => true, 
+                    'reply' => $resText,
+                    'response' => $resText
+                ]);
             }
 
-            return response()->json(['success' => false, 'reply' => '🐾 Tuve un problemita al procesar tu mensaje.']);
+            $status = $response->status();
+            $body = $response->body();
+            Log::error("ROCO API Chat Error [$status]: $body");
+
+            return response()->json(['success' => false, 'reply' => '🐾 Tuve un problemita al procesar tu mensaje con Gemini.']);
 
         } catch (\Exception $e) {
             Log::error("ROCO API Chat Error: " . $e->getMessage());
-            return response()->json(['success' => false, 'reply' => '🐾 Error inesperado del sistema.']);
+            return response()->json(['success' => false, 'reply' => '🐾 Error inesperado del sistema de IA.']);
         }
     }
 
