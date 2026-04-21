@@ -489,7 +489,8 @@ class ContratoController extends Controller
             return response()->json(['message' => 'Solo el propietario puede aprobar la renta.'], 403);
         }
 
-        // Normalización para la DB
+        // Normalización para la DB y lógica de negocio
+        if (in_array($nuevoEstado, ['aprobada', 'aprobado'])) $nuevoEstado = 'disponible';
         if (in_array($nuevoEstado, ['activa', 'activo'])) $nuevoEstado = 'activo';
         if (in_array($nuevoEstado, ['finalizada', 'cancelada', 'finalizado'])) $nuevoEstado = 'finalizado';
         if (in_array($nuevoEstado, ['rechazada', 'rechazado'])) $nuevoEstado = 'rechazado';
@@ -500,11 +501,10 @@ class ContratoController extends Controller
             try {
                 $pi = \Stripe\PaymentIntent::retrieve($contrato->stripe_payment_intent_id);
                 
-                if ($nuevoEstado === 'activo' && $pi->status === 'requires_capture') {
-                    // El dueño aprobó -> Cobramos el dinero
+                // Si el dueño aprueba o activa, capturamos los fondos
+                if (in_array($nuevoEstado, ['disponible', 'activo']) && $pi->status === 'requires_capture') {
                     $pi->capture();
                 } elseif ($nuevoEstado === 'rechazado' && ($pi->status === 'requires_capture' || $pi->status === 'requires_action')) {
-                    // El dueño rechazó -> Liberamos el dinero al inquilino
                     $pi->cancel();
                 }
             } catch (\Exception $e) {
