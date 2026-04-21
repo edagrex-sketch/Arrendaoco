@@ -387,6 +387,11 @@
                         <p class="text-gray-400 text-sm leading-relaxed">
                             La plataforma líder en Ocosingo para la gestión de rentas y propiedades urbanas.
                         </p>
+                        <div class="mt-6">
+                            <a href='https://arrendaoco.en.uptodown.com/android' title='Download ArrendaOco' class="inline-block hover:opacity-80 transition-opacity">
+                                <img src='https://stc.utdstc.com/img/mediakit/download-gio-small-w.png' alt='Download ArrendaOco' class="h-10 w-auto">
+                            </a>
+                        </div>
                     </div>
                     <div>
                         <h4 class="text-sm font-bold uppercase tracking-widest mb-6 text-brand-light">Contacto</h4>
