@@ -82,6 +82,17 @@ class NotificationService
                                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
                                 'tag' => $notificacion->tipo === 'mensaje' ? 'chat_' . $notificacion->referencia_id : 'notif_' . $notificacion->id,
                             ],
+                            // Agregar clave de grupo para Android (FCM V1)
+                            'fcm_options' => [
+                                'analytics_label' => 'chat_group'
+                            ],
+                        ],
+                        'apns' => [
+                            'payload' => [
+                                'aps' => [
+                                    'thread-id' => $notificacion->tipo === 'mensaje' ? 'chat_' . $notificacion->referencia_id : 'default',
+                                ],
+                            ],
                         ],
                     ],
                 ],
