@@ -67,48 +67,79 @@ class ChatController extends Controller
 
     public function sendMessage(Request $request, Chat $chat)
     {
-        $request->validate([
-            'contenido' => 'required|string',
-            'parent_id' => 'nullable|exists:mensajes,id',
-            'tipo'      => 'nullable|string'
-        ]);
- 
-        $mensaje = $chat->mensajes()->create([
-            'sender_id' => Auth::id(),
-            'contenido' => $request->contenido,
-            'parent_id' => $request->parent_id,
-            'tipo'      => $request->tipo ?? 'texto',
-        ]);
- 
-        $chat->update([
-            'last_message' => $request->contenido,
-            'last_message_at' => now()
-        ]);
- 
-        // Disparar evento para tiempo real
-        broadcast(new MessageSent($mensaje->load('parent')))->toOthers();
+        \Log::info("📨 Intento de envío de mensaje en chat ID: {$chat->id} por usuario ID: " . \Auth::id());
 
-        // Notificación persistente en la campana para el receptor
-        $receiverId = ($chat->usuario_1 == Auth::id()) ? $chat->usuario_2 : $chat->usuario_1;
-        \App\Services\NotificationService::send(
-            $receiverId,
-            'Nuevo mensaje de ' . Auth::user()->nombre,
-            \Illuminate\Support\Str::limit($request->contenido, 50),
-            'mensaje',
-            $chat->id
-        );
+        // Validación de pertenencia (Seguridad adicional)
+        if ($chat->usuario_1 !== \Auth::id() && $chat->usuario_2 !== \Auth::id()) {
+            \Log::warning("⛔ Intento de envío de mensaje no autorizado en chat ID: {$chat->id}");
+            return response()->json(['error' => 'No autorizado'], 403);
+        }
 
-        // Sincronización Real-Time con Firebase Firestore (Móvil)
-        \App\Services\FirestoreService::syncMessage(
-            $chat->getFirebaseId(),
-            Auth::id(),
-            $request->contenido
-        );
- 
-        return response()->json([
-            'success' => true,
-            'mensaje' => $mensaje->load(['sender', 'parent'])
-        ]);
+        try {
+            $request->validate([
+                'contenido' => 'required|string',
+                'parent_id' => 'nullable|exists:mensajes,id',
+                'tipo'      => 'nullable|string'
+            ]);
+    
+            $mensaje = $chat->mensajes()->create([
+                'sender_id' => \Auth::id(),
+                'contenido' => $request->contenido,
+                'parent_id' => $request->parent_id,
+                'tipo'      => $request->tipo ?? 'texto',
+            ]);
+    
+            $chat->update([
+                'last_message' => $request->contenido,
+                'last_message_at' => now()
+            ]);
+
+            \Log::info("✅ Mensaje guardado en BD local: ID {$mensaje->id}");
+    
+            // Disparar evento para tiempo real (Broadcasting)
+            try {
+                broadcast(new MessageSent($mensaje->load('parent')))->toOthers();
+            } catch (\Exception $e) {
+                \Log::error("❌ Error en Broadcasting (Reverb): " . $e->getMessage());
+            }
+
+            // Notificación persistente
+            try {
+                $receiverId = ($chat->usuario_1 == \Auth::id()) ? $chat->usuario_2 : $chat->usuario_1;
+                \App\Services\NotificationService::send(
+                    $receiverId,
+                    'Nuevo mensaje de ' . \Auth::user()->nombre,
+                    \Illuminate\Support\Str::limit($request->contenido, 50),
+                    'mensaje',
+                    $chat->id
+                );
+            } catch (\Exception $e) {
+                \Log::error("❌ Error en NotificationService: " . $e->getMessage());
+            }
+
+            // Sincronización Real-Time con Firebase Firestore
+            try {
+                \App\Services\FirestoreService::syncMessage(
+                    $chat->getFirebaseId(),
+                    \Auth::id(),
+                    $request->contenido
+                );
+            } catch (\Exception $e) {
+                \Log::error("❌ Error en FirestoreService: " . $e->getMessage());
+            }
+     
+            return response()->json([
+                'success' => true,
+                'mensaje' => $mensaje->load(['sender', 'parent'])
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error("❌ ERROR FATAL al enviar mensaje: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function startChat($otroUsuarioId, $inmuebleId = null)

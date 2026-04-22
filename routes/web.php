@@ -162,11 +162,11 @@ use App\Http\Controllers\NotificacionController;
 // ... (existing imports)
 
 // Logout
-Route::prefix('notifications')->name('notifications.')->middleware('auth')->group(function () {
-    Route::get('/list', [NotificacionController::class, 'index'])->name('list');
-    Route::get('/unread-count', [NotificacionController::class, 'unreadCount'])->name('unread_count');
-    Route::post('/mark-read/{notificacion}', [NotificacionController::class, 'markAsRead'])->name('mark_read');
-    Route::post('/mark-all-read', [NotificacionController::class, 'markAllAsRead'])->name('mark_all_read');
+// Notificaciones (Unificadas con el frontend)
+Route::prefix('notificaciones')->middleware('auth')->group(function () {
+    Route::get('/', [NotificacionController::class, 'index'])->name('notifications.index');
+    Route::get('/unread-count', [NotificacionController::class, 'unreadCount'])->name('notifications.unread_count');
+    Route::post('/mark-all-read', [NotificacionController::class, 'markAllAsRead'])->name('notifications.mark_all_read');
 });
 
 Route::match(['get', 'post'], '/logout', function (Request $request) {
@@ -290,6 +290,11 @@ Route::middleware('auth')->group(function () {
             $contrato->estatus = 'pdf_descargado';
             $contrato->save();
 
+            // Inmediatamente marcar el inmueble como rentado para que ya no aparezca disponible
+            if ($contrato->inmueble) {
+                $contrato->inmueble->update(['estatus' => 'rentado']);
+            }
+
             // Notificación al inquilino
             \App\Services\NotificationService::send(
                 $contrato->inquilino_id,
@@ -299,10 +304,12 @@ Route::middleware('auth')->group(function () {
                 $contrato->id
             );
 
-            // 2. Notificar al inquilino (opcional)
+            // 2. Notificar al inquilino vía correo (Evitar 504 Cloudflare / Forge)
             try {
                 $contrato->load('inmueble', 'inquilino');
-                Mail::to(optional($contrato->inquilino)->email)->send(new RentaRespondidaMail($contrato, 'aprobada'));
+                // IMPORTANTE: En el entorno de Forge a veces SMTP bloquea o tarda. 
+                // Usamos "queue" para que se procese en segundo plano y la carga de la vista sea veloz.
+                \Illuminate\Support\Facades\Mail::to(optional($contrato->inquilino)->email)->queue(new \App\Mail\RentaRespondidaMail($contrato, 'aprobada'));
             } catch (\Exception $e) {}
 
             \Illuminate\Support\Facades\DB::commit();

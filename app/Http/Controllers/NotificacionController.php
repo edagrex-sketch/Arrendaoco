@@ -11,12 +11,16 @@ class NotificacionController extends Controller
     /**
      * Devuelve la vista parcial con la lista de notificaciones recientes.
      */
-    public function index()
+    public function index(Request $request)
     {
         $notificaciones = Notificacion::where('usuario_id', Auth::id())
             ->latest()
             ->take(10)
             ->get();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json($notificaciones);
+        }
 
         return view('partials.notifications_list', compact('notificaciones'))->render();
     }
