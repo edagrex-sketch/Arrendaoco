@@ -219,10 +219,10 @@ class InmuebleController extends Controller
     }
 
     //cargar las ultimas 9 casas disponibles
-    public function home()
+    public function home(Request $request)
     {
         // Admin users get redirected to their dedicated dashboard
-        if (auth()->user()->es_admin || auth()->user()->tieneRol('admin')) {
+        if (auth()->check() && (auth()->user()->es_admin || auth()->user()->tieneRol('admin'))) {
             return redirect()->route('admin.dashboard');
         }
 
@@ -232,6 +232,10 @@ class InmuebleController extends Controller
         $favoritosIds = [];
         if (auth()->check()) {
             $favoritosIds = auth()->user()->favoritos()->pluck('inmueble_id')->toArray();
+        }
+
+        if ($request->ajax()) {
+            return view('inmuebles.partials.list_inicio', compact('inmuebles', 'favoritosIds'))->render();
         }
 
         return view('inicio', compact('inmuebles', 'inmueblesMapa', 'favoritosIds'));

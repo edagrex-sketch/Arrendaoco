@@ -8,12 +8,12 @@ use App\Http\Controllers\Api\NotificacionController;
 use App\Http\Controllers\Api\PagoController;
 use App\Http\Controllers\Api\ReporteController;
 use App\Http\Controllers\Api\FavoritoController;
-use App\Http\Controllers\Api\ArrenditoController;
 use App\Http\Controllers\Api\ResenaController;
 use App\Http\Controllers\Api\PerfilController;
 use App\Http\Controllers\Api\EventoController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\StripeConnectController;
+use App\Http\Controllers\ArrenditoChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,8 +39,7 @@ Route::get('/pagos/{pago}/cancel', function() { return "Pago cancelado"; });
 Route::get('/resenas/{resena}', [ResenaController::class, 'show']);
 Route::get('/inmuebles/{inmueble}/resenas', [ResenaController::class, 'index']);
 
-// Arrendito Chat (IA)
-Route::post('/arrendito/chat', [ArrenditoController::class, 'chat']);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -119,6 +118,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/chats/enviar-a-usuario/{otroUsuarioId}', [ChatController::class, 'sendToUser']);
     Route::post('/chats/iniciar/{otroUsuarioId}/{inmuebleId?}', [ChatController::class, 'startChat']);
     Route::post('/fcm-token', [ChatController::class, 'updateFcmToken']);
+
+    // Arrendito Chat (IA)
+    Route::post('/arrendito/chat', [ArrenditoChatController::class, 'chat']);
 
     // Stripe Connect (Propietarios)
     Route::get('/stripe/onboarding-link', [StripeConnectController::class, 'getOnboardingLink']);

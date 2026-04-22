@@ -57,6 +57,8 @@ class Inmueble extends Model
         'banco',
         'registrado_desde',
         'plataforma_metadata',
+        'largo',
+        'ancho',
     ];
 
 

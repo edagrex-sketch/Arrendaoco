@@ -18,7 +18,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'nombre' => $this->nombre,
             'email' => $this->email,
-            'foto_perfil' => $this->foto_perfil ? url('storage/' . $this->foto_perfil) : null,
+            'foto_perfil' => $this->foto_perfil ? (str_starts_with($this->foto_perfil, 'http') ? $this->foto_perfil : url('storage/' . $this->foto_perfil)) : null,
             'roles' => $this->roles->pluck('nombre'),
             'es_admin' => $this->es_admin,
             'estatus' => $this->estatus,

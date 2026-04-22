@@ -72,12 +72,26 @@ class NotificationService
                             'id' => (string) $notificacion->id,
                             'tipo' => $notificacion->tipo,
                             'referencia_id' => (string) $notificacion->referencia_id,
+                            'chat_id' => $notificacion->tipo === 'mensaje' ? (string) $notificacion->referencia_id : '',
+                            'sender_id' => $notificacion->tipo === 'mensaje' ? (string) \Illuminate\Support\Facades\Auth::id() : '',
                         ],
                         'android' => [
                             'priority' => 'high',
                             'notification' => [
                                 'sound' => 'default',
                                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                                'tag' => $notificacion->tipo === 'mensaje' ? 'chat_' . $notificacion->referencia_id : 'notif_' . $notificacion->id,
+                            ],
+                            // Agregar clave de grupo para Android (FCM V1)
+                            'fcm_options' => [
+                                'analytics_label' => 'chat_group'
+                            ],
+                        ],
+                        'apns' => [
+                            'payload' => [
+                                'aps' => [
+                                    'thread-id' => $notificacion->tipo === 'mensaje' ? 'chat_' . $notificacion->referencia_id : 'default',
+                                ],
                             ],
                         ],
                     ],
