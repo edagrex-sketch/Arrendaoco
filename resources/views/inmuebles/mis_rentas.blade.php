@@ -365,7 +365,7 @@
                                              
                                          $mensajeModal = in_array($contrato->estatus, ['pendiente_aprobacion', 'disponible', 'pdf_descargado'])
                                              ? 'Si cancelas ahora, la solicitud se anulará y el propietario ya no la tendrá en cuenta.'
-                                             : 'Al cancelar tu renta, se suspenderán los pagos futuros de forma automática. Mantendrás el acceso al inmueble únicamente hasta tu fecha de corte correspondiente al último pago que realizaste.';
+                                             : 'Al cancelar tu renta de forma inmediata, se suspenderán los cobros y perderás el derecho de acceso al inmueble a partir de este momento. El inmueble quedará disponible para otros usuarios.';
                                      @endphp
 
                                      @if(in_array($contrato->estatus, $estatusCancelable))

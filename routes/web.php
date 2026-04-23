@@ -392,51 +392,32 @@ Route::middleware('auth')->group(function () {
                 }
             }
 
-            $mensajeExito = 'Suscripción de renta cancelada.';
+            $mensajeExito = 'Renta cancelada exitosamente.';
             $fechaCorte = now();
             
-            if ($contrato->estatus === 'activo') {
-                $proximoPago = \App\Models\Pago::where('contrato_id', $contrato->id)
-                    ->where('estatus', 'pendiente')
-                    ->orderBy('anio')->orderBy('mes')->first();
-                    
-                if ($proximoPago) {
-                    $diaPago = \Carbon\Carbon::parse($contrato->fecha_inicio)->day;
-                    $fechaCorte = \Carbon\Carbon::create($proximoPago->anio, $proximoPago->mes, $diaPago);
-                    
-                    if ($fechaCorte->isPast()) {
-                        $fechaCorte = now();
-                    }
-                } else {
-                    $fechaCorte = $contrato->fecha_fin ?: now();
-                }
+            $contrato->update([
+                'estatus' => 'cancelado',
+                'fecha_fin' => $fechaCorte
+            ]);
 
-                $contrato->update([
-                    'estatus' => 'cancelado',
-                    'fecha_fin' => $fechaCorte
-                ]);
-
+            if ($contrato->estatus === 'activo' || in_array($contrato->estatus, ['pdf_descargado'])) {
                 if ($contrato->inmueble && $contrato->inmueble->propietario) {
                     try {
                         \Illuminate\Support\Facades\Mail::raw(
-                            "Hola, tu inquilino ha cancelado la renta del inmueble '{$contrato->inmueble->titulo}'. La suscripción dejará de generar cobros futuros. El inquilino mantendrá el acceso hasta el {$fechaCorte->format('d/m/Y')}. A partir de esa fecha, podrás marcar tu inmueble como Disponible nuevamente.",
+                            "Hola, tu inquilino ha cancelado la renta del inmueble '{$contrato->inmueble->titulo}'. La cancelación es inmediata, no se le harán más cobros futuros. Tu inmueble ha sido marcado como 'Disponible' nuevamente de forma automática.",
                             function ($msg) use ($contrato) {
                                 $msg->to($contrato->inmueble->propietario->email)
-                                    ->subject('Aviso de Cancelación de Renta');
+                                    ->subject('Aviso de Cancelación Inmediata de Renta');
                             }
                         );
                     } catch (\Exception $e) {}
                 }
-                
-                $mensajeExito = "Renta cancelada exitosamente. No se te harán más cobros y tendrás acceso al inmueble hasta tu fecha de corte ({$fechaCorte->format('d/m/Y')}).";
-            } else {
-                $contrato->update(['estatus' => 'cancelado']);
             }
 
-            // 2. Liberar inmueble SOLO si la fecha de corte es hoy o en el pasado
-            if ($contrato->inmueble && now()->startOfDay()->gte($fechaCorte->startOfDay())) {
+            // 2. Liberar inmueble COMPLETAMENTE e INMEDIATAMENTE
+            if ($contrato->inmueble) {
                 $contrato->inmueble->update(['estatus' => 'disponible']);
-                $mensajeExito .= " El inmueble ha quedado disponible nuevamente.";
+                $mensajeExito = "Renta cancelada exitosamente. Tu acceso ha finalizado y el inmueble quedó libre.";
             }
 
             // 3. Eliminar pagos pendientes
