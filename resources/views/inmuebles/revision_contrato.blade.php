@@ -113,15 +113,15 @@
                     </div>
                     <div class="flex justify-between text-gray-600 border-t pt-2 mt-2">
                         <span class="text-xs font-bold text-[#669BBC] uppercase">Renta/mes</span>
-                        <span class="font-black text-[#003049]">${{ number_format($contrato->renta_mensual, 2) }}</span>
+                        <span class="font-black text-[#003049]">${{ number_format($contrato->renta_mensual, 0) }}</span>
                     </div>
                     <div class="flex justify-between text-gray-600">
                         <span class="text-xs font-bold text-[#669BBC] uppercase">Depósito</span>
-                        <span class="font-black text-[#003049]">${{ number_format($contrato->deposito ?? 0, 2) }}</span>
+                        <span class="font-black text-[#003049]">${{ number_format($contrato->deposito ?? 0, 0) }}</span>
                     </div>
                     <div class="flex justify-between border-t pt-2">
                         <span class="text-xs font-bold text-[#669BBC] uppercase">Total congelado</span>
-                        <span class="font-black text-lg text-[#003049]">${{ number_format($contrato->renta_mensual + ($contrato->deposito ?? 0), 2) }}</span>
+                        <span class="font-black text-lg text-[#003049]">${{ number_format($contrato->renta_mensual + ($contrato->deposito ?? 0), 0) }}</span>
                     </div>
                 </div>
             </div>

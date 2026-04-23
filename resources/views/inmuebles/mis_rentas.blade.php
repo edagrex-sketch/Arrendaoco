@@ -81,7 +81,7 @@
                     </div>
                     <div>
                         <p class="font-bold text-[#003049] text-base">{{ optional($contratoRechazado->inmueble)->titulo ?? 'Propiedad' }}</p>
-                        <p class="text-xs text-gray-500 mt-0.5">Renta: ${{ number_format($contratoRechazado->renta_mensual, 2) }}/mes · Inicio solicitado: {{ \Carbon\Carbon::parse($contratoRechazado->fecha_inicio)->format('d/m/Y') }}</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Renta: ${{ number_format($contratoRechazado->renta_mensual, 0) }}/mes · Inicio solicitado: {{ \Carbon\Carbon::parse($contratoRechazado->fecha_inicio)->format('d/m/Y') }}</p>
                         <p class="text-xs text-gray-400 mt-1">Tus fondos pre-autorizados han sido <strong class="text-[#003049]">liberados</strong>. No se realizó ningún cargo.</p>
                     </div>
                 </div>
@@ -265,7 +265,7 @@
                                             <div>
                                                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Renta Mensual</p>
                                                 <p class="text-[#003049] font-black text-lg">
-                                                    ${{ number_format($contrato->renta_mensual, 2) }}</p>
+                                                    ${{ number_format($contrato->renta_mensual, 0) }}</p>
                                             </div>
                                             <div class="w-px h-10 bg-slate-200 mx-2"></div>
                                             <div>

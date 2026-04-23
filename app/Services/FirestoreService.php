@@ -63,6 +63,46 @@ class FirestoreService
     }
 
     /**
+     * Sincroniza la metadata de un chat (usado al crear el chat)
+     */
+    public static function syncChat($chat)
+    {
+        try {
+            $accessToken = self::getAccessToken();
+            if (!$accessToken) return;
+
+            $configJson = env('FCM_SERVICE_ACCOUNT_JSON');
+            $config = json_decode($configJson, true);
+            $projectId = $config['project_id'] ?? 'arrendaoco-fad79';
+            $chatId = $chat->getFirebaseId();
+
+            $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/chats/{$chatId}";
+
+            $client = new Client();
+            $client->patch($url, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => [
+                    'fields' => [
+                        'usuario_1' => ['stringValue' => (string)$chat->usuario_1],
+                        'usuario_2' => ['stringValue' => (string)$chat->usuario_2],
+                        'last_message' => ['stringValue' => 'Chat iniciado...'],
+                        'last_message_at' => ['timestampValue' => now()->toRfc3339String()],
+                        'otro_nombre' => ['stringValue' => $chat->usuario2->nombre] // Metadata para la lista
+                    ]
+                ],
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("❌ Error creando chat en Firestore: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Genera un Access Token para Google API (mismo método que NotificationService)
      */
     private static function getAccessToken()

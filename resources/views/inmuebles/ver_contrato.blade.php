@@ -131,11 +131,11 @@
                     </li>
                     <li class="flex justify-between items-center py-2 border-b border-slate-50">
                         <span class="text-slate-500 font-medium">Renta mensual</span>
-                        <span class="font-black text-brand-dark">${{ number_format($inmueble->renta_mensual, 2) }}</span>
+                        <span class="font-black text-brand-dark">${{ number_format($inmueble->renta_mensual, 0) }}</span>
                     </li>
                     <li class="flex justify-between items-center py-2 border-b border-slate-50">
                         <span class="text-slate-500 font-medium">Depósito</span>
-                        <span class="font-bold text-brand-dark">${{ number_format($inmueble->deposito ?? 0, 2) }}</span>
+                        <span class="font-bold text-brand-dark">${{ number_format($inmueble->deposito ?? 0, 0) }}</span>
                     </li>
                     <li class="flex justify-between items-center py-2 border-b border-slate-50">
                         <span class="text-slate-500 font-medium">Duración</span>

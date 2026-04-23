@@ -45,7 +45,7 @@ class StripeConnectController extends Controller
         return redirect($accountLink->url);
     }
 
-    public function handleReturn()
+    public function handleReturn(Request $request)
     {
         $user = auth()->user();
         Stripe::setApiKey(config('services.stripe.secret'));
@@ -55,7 +55,16 @@ class StripeConnectController extends Controller
         if ($account->details_submitted) {
             $user->stripe_onboarding_completed = true;
             $user->save();
+            
+            if ($request->platform === 'mobile') {
+                return view('auth.stripe_mobile_return');
+            }
+
             return redirect()->route('perfil.index')->with('success', '¡Cuenta bancaria configurada exitosamente! Ahora puedes realizar cobros automáticos.');
+        }
+
+        if ($request->platform === 'mobile') {
+            return redirect()->away('arrendaoco://verify-stripe?error=1');
         }
 
         return redirect()->route('perfil.index')->with('error', 'El proceso de configuración no fue completado. Por favor, intenta de nuevo cuando estés listo.');

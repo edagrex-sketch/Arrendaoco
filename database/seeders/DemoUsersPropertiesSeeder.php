@@ -113,6 +113,8 @@ class DemoUsersPropertiesSeeder extends Seeder
                     'clausulas_extra' => "1. No ruidos molestos después de las 11 PM.\n2. El mantenimiento de áreas comunes está incluido.\n3. Prohibido subarrendar la propiedad.",
                     'banco' => 'BBVA',
                     'clabe_interbancaria' => '012' . rand(100000000000000, 999999999999999),
+                    'largo' => $largo,
+                    'ancho' => $ancho,
                     'registrado_desde' => 'seeder'
                 ]);
 
