@@ -13,15 +13,15 @@ class FirestoreService
     public static function syncMessage($chatId, $senderId, $texto, $referenciaId = null)
     {
         try {
-            $accessToken = self::getAccessToken();
-            if (!$accessToken) return;
+            $config = self::getFirebaseConfig();
+            if (!$config) return false;
 
-            $configJson = env('FCM_SERVICE_ACCOUNT_JSON');
-            $config = json_decode($configJson, true);
-            $projectId = $config['project_id'] ?? 'arrendaoco-fad79';
+            $accessToken = self::getAccessToken($config);
+            if (!$accessToken) return false;
+
+            $projectId = $config['project_id'];
 
             // Estructura para Firestore (Rest API)
-            // chats/{chatId}/mensajes/{random_id}
             $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/chats/{$chatId}/mensajes";
 
             $client = new Client();
@@ -40,7 +40,7 @@ class FirestoreService
                 ],
             ]);
 
-            // Actualizar el puntero del último mensaje en el documento padre del chat
+            // Actualizar el puntero del último mensaje
             $parentUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/chats/{$chatId}?updateMask.fieldPaths=last_message&updateMask.fieldPaths=updated_at";
             $client->patch($parentUrl, [
                 'headers' => [
@@ -63,17 +63,18 @@ class FirestoreService
     }
 
     /**
-     * Sincroniza la metadata de un chat (usado al crear el chat)
+     * Sincroniza la metadata de un chat
      */
     public static function syncChat($chat)
     {
         try {
-            $accessToken = self::getAccessToken();
-            if (!$accessToken) return;
+            $config = self::getFirebaseConfig();
+            if (!$config) return false;
 
-            $configJson = env('FCM_SERVICE_ACCOUNT_JSON');
-            $config = json_decode($configJson, true);
-            $projectId = $config['project_id'] ?? 'arrendaoco-fad79';
+            $accessToken = self::getAccessToken($config);
+            if (!$accessToken) return false;
+
+            $projectId = $config['project_id'];
             $chatId = $chat->getFirebaseId();
 
             $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/chats/{$chatId}";
@@ -90,7 +91,7 @@ class FirestoreService
                         'usuario_2' => ['stringValue' => (string)$chat->usuario_2],
                         'last_message' => ['stringValue' => 'Chat iniciado...'],
                         'last_message_at' => ['timestampValue' => now()->toRfc3339String()],
-                        'otro_nombre' => ['stringValue' => $chat->usuario2->nombre] // Metadata para la lista
+                        'otro_nombre' => ['stringValue' => $chat->usuario2->nombre]
                     ]
                 ],
             ]);
@@ -103,14 +104,43 @@ class FirestoreService
     }
 
     /**
-     * Genera un Access Token para Google API (mismo método que NotificationService)
+     * Obtiene y sanitiza la configuración de Firebase
      */
-    private static function getAccessToken()
+    private static function getFirebaseConfig()
     {
-        $configJson = env('FCM_SERVICE_ACCOUNT_JSON');
-        if (!$configJson) return null;
+        $configJson = config('firebase.service_account');
+        if (!$configJson) {
+            Log::error("❌ FirestoreService: La configuración firebase.service_account está vacía.");
+            return null;
+        }
 
+        // 1. Decodificar URL si es necesario (Viene corrupto del .env a veces)
+        if (str_contains($configJson, '%40')) {
+            $configJson = urldecode($configJson);
+        }
+
+        // 2. Intentar decodificar JSON
         $config = json_decode($configJson, true);
+
+        // 3. Si falla, intentar reparar backslashes que deberían ser saltos de línea (\n)
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $repaired = preg_replace('/\\\\([^n])/', "\\n$1", $configJson);
+            $config = json_decode($repaired, true);
+        }
+
+        if (!$config) {
+            Log::error("❌ FirestoreService: El JSON de la cuenta de servicio es inválido y no pudo ser reparado. Error: " . json_last_error_msg());
+            return null;
+        }
+
+        return $config;
+    }
+
+    /**
+     * Genera un Access Token para Google API
+     */
+    private static function getAccessToken($config)
+    {
         $now = time();
         $header = json_encode(['alg' => 'RS256', 'typ' => 'JWT']);
         $payload = json_encode([
@@ -125,7 +155,10 @@ class FirestoreService
         $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
 
         $signature = '';
-        openssl_sign($base64UrlHeader . "." . $base64UrlPayload, $signature, $config['private_key'], 'SHA256');
+        if (!openssl_sign($base64UrlHeader . "." . $base64UrlPayload, $signature, $config['private_key'], 'SHA256')) {
+            Log::error("❌ getAccessToken: Error al firmar el JWT con openssl_sign. Verifique la clave privada.");
+            return null;
+        }
         $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
 
         $jwt = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
@@ -141,6 +174,7 @@ class FirestoreService
             $data = json_decode($response->getBody()->getContents(), true);
             return $data['access_token'];
         } catch (\Exception $e) {
+            Log::error("❌ getAccessToken: Error en la petición a Google OAuth: " . $e->getMessage());
             return null;
         }
     }
