@@ -357,12 +357,12 @@ class InmuebleController extends Controller
             'tipo' => 'required|string',
             'precio' => [
                 'required',
-                'numeric',
+                'integer',
                 'min:0',
             ],
             'deposito' => [
                 'nullable',
-                'numeric',
+                'integer',
                 'min:0',
             ],
             'habitaciones' => 'required|integer|min:0',
@@ -501,12 +501,12 @@ class InmuebleController extends Controller
             'nombre' => 'required|string|max:255',
             'precio' => [
                 'required',
-                'numeric',
+                'integer',
                 'min:0',
             ],
             'deposito' => [
                 'nullable',
-                'numeric',
+                'integer',
                 'min:0',
             ],
             'contrato_documento' => 'nullable|file|mimes:pdf|max:5120',

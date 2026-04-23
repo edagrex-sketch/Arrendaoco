@@ -115,7 +115,7 @@
                                 <label class="block text-sm font-medium mb-1">Renta Mensual <span class="text-red-500">*</span></label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-3 text-gray-500">$</span>
-                                    <input type="number" name="precio" x-model="precio" placeholder="0.00" required :min="minPrecio" step="any" oninput="if(this.value < 0) this.value = '';" class="w-full rounded-lg border-input bg-white border py-3 pl-8 px-4">
+                                    <input type="number" name="precio" x-model="precio" placeholder="0" required :min="minPrecio" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value < 0) this.value = '';" class="w-full rounded-lg border-input bg-white border py-3 pl-8 px-4">
                                 </div>
                             </div>
                             
@@ -138,7 +138,7 @@
                                     <div class="flex flex-col sm:flex-row gap-4 mb-4">
                                         <label class="flex items-center gap-2 cursor-pointer">
                                             <input type="radio" x-model="tipoDeposito" value="mensualidad" class="text-primary focus:ring-primary h-4 w-4">
-                                            <span class="text-sm">Una renta mensual (<span x-text="precio ? '$' + precio : '$0.00'" class="font-bold text-[#003049]"></span>)</span>
+                                            <span class="text-sm">Una renta mensual (<span x-text="precio ? '$' + precio : '$0'" class="font-bold text-[#003049]"></span>)</span>
                                         </label>
                                         <label class="flex items-center gap-2 cursor-pointer">
                                             <input type="radio" x-model="tipoDeposito" value="otra" class="text-primary focus:ring-primary h-4 w-4">
@@ -150,7 +150,7 @@
                                         <div class="relative w-full sm:w-1/2">
                                             <span class="absolute left-3 top-3 text-gray-500">$</span>
                                             <input type="text" x-model="depositoManual" placeholder="Ej. 1500" 
-                                                oninput="this.value = this.value.replace(/[^0-9.]/g, ''); if(this.value < 0) this.value = '';" 
+                                                oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value < 0) this.value = '';" 
                                                 class="w-full rounded-lg border-input bg-white border py-3 pl-8 px-4" 
                                                 x-bind:required="requiereDeposito === 'si' && tipoDeposito === 'otra'">
                                         </div>

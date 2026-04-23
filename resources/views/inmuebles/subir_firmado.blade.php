@@ -47,7 +47,7 @@
             </div>
             <div>
                 <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Renta Mensual</p>
-                <p class="font-black text-brand-dark mt-1">${{ number_format($contrato->renta_mensual, 2) }}</p>
+                <p class="font-black text-brand-dark mt-1">${{ number_format($contrato->renta_mensual, 0) }}</p>
             </div>
             <div>
                 <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Plazo</p>

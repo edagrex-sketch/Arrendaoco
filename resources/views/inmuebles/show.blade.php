@@ -366,7 +366,7 @@
                 {{-- Bottom Action Row --}}
                 <div class="flex flex-col sm:flex-row items-center gap-3 mt-auto pt-6 border-t border-slate-100">
                     <div class="text-2xl font-bold text-slate-800 w-full sm:w-auto text-center sm:text-left mb-4 sm:mb-0">
-                        ${{ number_format($inmueble->renta_mensual, 2) }} <span
+                        ${{ number_format($inmueble->renta_mensual, 0) }} <span
                             class="text-sm font-bold ml-1 uppercase text-slate-500">MXN</span>
                     </div>
 
@@ -754,7 +754,7 @@
                                 </div>
                             </div>
                             <div class="shrink-0 text-left sm:text-right bg-slate-50/50 sm:bg-transparent p-3 sm:p-0 rounded-xl w-full sm:w-auto border border-slate-100 sm:border-none">
-                                <p class="text-3xl font-black text-[#003049]">${{ number_format($contratoActivo->renta_mensual, 2) }} <span class="text-xs text-gray-400 font-bold">MXN</span></p>
+                                <p class="text-3xl font-black text-[#003049]">${{ number_format($contratoActivo->renta_mensual, 0) }} <span class="text-xs text-gray-400 font-bold">MXN</span></p>
                                 <p class="text-[10px] font-bold text-gray-400 mt-1">Vence: {{ $vence->format('d/m/Y') }}</p>
                             </div>
                         </div>
@@ -802,7 +802,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-5 text-sm font-medium text-gray-500">{{ \Carbon\Carbon::parse($contratoActivo->fecha_inicio)->format('d/m/Y') }}</td>
-                                <td class="px-6 py-5 text-sm font-black text-[#003049]">${{ number_format($contratoActivo->renta_mensual + ($contratoActivo->deposito ?? 0), 2) }}</td>
+                                <td class="px-6 py-5 text-sm font-black text-[#003049]">${{ number_format($contratoActivo->renta_mensual + ($contratoActivo->deposito ?? 0), 0) }}</td>
                                 <td class="px-6 py-5 text-right">
                                     <span class="px-3 py-1 bg-[#669BBC]/20 text-[#003049] text-[8px] font-black uppercase tracking-widest rounded-full">Recibido</span>
                                 </td>
@@ -1224,13 +1224,13 @@
                                     </td>
                                     <td class="px-8 py-6">
                                         <p class="font-bold text-[#003049] whitespace-nowrap">Renta + Depósito Inicial</p>
-                                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Depósito: ${{ number_format($contrato->deposito ?? 0, 2) }}</p>
+                                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Depósito: ${{ number_format($contrato->deposito ?? 0, 0) }}</p>
                                     </td>
                                     <td class="px-8 py-6 text-sm font-medium text-gray-600 whitespace-nowrap">
                                         {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d/m/Y') }}
                                     </td>
                                     <td class="px-8 py-6 text-lg font-black text-[#003049] whitespace-nowrap">
-                                        ${{ number_format($contrato->renta_mensual, 2) }}
+                                        ${{ number_format($contrato->renta_mensual, 0) }}
                                     </td>
                                     <td class="px-8 py-6 text-right">
                                         <div class="flex items-center justify-end gap-3">
