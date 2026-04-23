@@ -6,12 +6,12 @@
     // Si hay contrato usamos los datos del contrato, sino estimamos para la vista de pago
     if ($contrato) {
         $inquilino = optional($contrato->inquilino)->nombre ?? 'El Inquilino';
-        $fechaCelebracionStr = \Carbon\Carbon::parse($contrato->created_at)->translatedFormat('d \d\e F \d\e\l Y');
-        $fechaInicioStr = \Carbon\Carbon::parse($contrato->fecha_inicio)->translatedFormat('d \d\e F \d\e\l Y');
+        $fechaCelebracionStr = \Carbon\Carbon::parse($contrato->created_at)->locale('es')->translatedFormat('d \d\e F \d\e\l Y');
+        $fechaInicioStr = \Carbon\Carbon::parse($contrato->fecha_inicio)->locale('es')->translatedFormat('d \d\e F \d\e\l Y');
         $plazoStr = $contrato->plazo;
     } else {
         $inquilino = auth()->check() ? auth()->user()->nombre : 'El Inquilino';
-        $fechaCelebracionStr = \Carbon\Carbon::now()->translatedFormat('d \d\e F \d\e\l Y');
+        $fechaCelebracionStr = \Carbon\Carbon::now()->locale('es')->translatedFormat('d \d\e F \d\e\l Y');
         $fechaInicioStr = 'la fecha seleccionada en el registro';
         $plazoStr = 'el plazo acordado al procesar el pago';
     }
@@ -35,13 +35,13 @@
     </h4>
     
     <p>
-        <strong>{{ $arrendador }}</strong>, actuando en su propio nombre y derecho. De aquí en adelante el “Arrendador”.
+        <strong>{{ $arrendador }}</strong>, con copia de credencial oficial adjunta al presente, actuando en su propio nombre y derecho. De aquí en adelante el “Arrendador”.
     </p>
     
     <p style="text-align: center; margin: 10px 0; color: #666;">- Y -</p>
     
     <p>
-        <strong>{{ $inquilino }}</strong>, actuando en su propio nombre y derecho. De aquí en adelante el “Inquilino”.
+        <strong>{{ $inquilino }}</strong>, con copia de credencial oficial adjunta al presente, actuando en su propio nombre y derecho. De aquí en adelante el “Inquilino”.
     </p>
 
     <p style="margin-top: 15px;">
@@ -138,13 +138,13 @@
 
     <p style="font-weight: bold; margin-top: 20px; margin-bottom: 5px;">7. INTERMEDIACIÓN TECNOLÓGICA (EXENCIÓN DE RESPONSABILIDAD ARRENDAOCO)</p>
     <ul style="margin-left: 20px; margin-bottom: 15px; padding-left: 15px;">
-        <li style="margin-bottom: 8px;">Ambas Partes reconocen y aceptan que la plataforma <strong>ArrendaOco actúa única y exclusivamente como un intermediario tecnológico</strong> que facilita la conexión entre Propietarios e Inquilinos y la gestión de firmas digitales, sin adquirir la figura de representante legal, apoderado o responsable solidario de ninguna de las partes.</li>
+        <li style="margin-bottom: 8px;">Ambas Partes reconocen y aceptan que la plataforma <strong>ArrendaOco actúa única y exclusivamente como un intermediario tecnológico</strong> que facilita la conexión entre Propietarios e Inquilinos y la generación de acuerdos para su formalización física, sin adquirir la figura de representante legal, apoderado o responsable solidario de ninguna de las partes.</li>
         <li style="margin-bottom: 8px;">ArrendaOco queda totalmente exonerado de cualquier responsabilidad derivada del estado físico del inmueble, daños ocasionados a la propiedad, impago extendido o discrepancias de convivencia.</li>
         <li style="margin-bottom: 8px;">Cualquier conflicto de índole legal, controversia, denuncia o exigimiento de pago no conciliables de manera pacífica, deberán ser resueltos única y exclusivamente de manera directa entre el Arrendador y el Inquilino mediante diálogo, o en su defecto, ante las instancias o tribunales correspondientes a la jurisdicción de la ubicación de la propiedad.</li>
     </ul>
 
     <p style="margin-top: 40px; margin-bottom: 20px; text-align: center; font-weight: bold; font-style: italic; font-size: 11px;">
-        Leído y aceptado electrónicamente por ambas Partes, este documento constata y ratifica su completa voluntad mutua de apegarse a los términos estipulados.
+        Leído y aprobado por ambas Partes, quienes plasman su firma autógrafa al calce, este documento constata y ratifica su completa voluntad mutua de apegarse a los términos estipulados.
     </p>
 
 </div>
