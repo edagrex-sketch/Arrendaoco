@@ -25,7 +25,7 @@ class FirestoreService
             $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/chats/{$chatId}/mensajes";
 
             $client = new Client();
-            $client->post($url, [
+            $response = $client->post($url, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $accessToken,
                     'Content-Type'  => 'application/json',
@@ -39,9 +39,11 @@ class FirestoreService
                     ]
                 ],
             ]);
+            
+            Log::info("✅ Firestore Message Synced: " . $chatId);
 
             // Actualizar el puntero del último mensaje
-            $parentUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/chats/{$chatId}?updateMask.fieldPaths=last_message&updateMask.fieldPaths=updated_at";
+            $parentUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/chats/{$chatId}?updateMask.fieldPaths=last_message&updateMask.fieldPaths=last_message_at&updateMask.fieldPaths=updated_at";
             $client->patch($parentUrl, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $accessToken,
@@ -50,6 +52,7 @@ class FirestoreService
                 'json' => [
                     'fields' => [
                         'last_message' => ['stringValue' => $texto],
+                        'last_message_at' => ['timestampValue' => now()->toRfc3339String()],
                         'updated_at' => ['timestampValue' => now()->toRfc3339String()],
                     ]
                 ],
@@ -114,8 +117,8 @@ class FirestoreService
             return null;
         }
 
-        // 1. Decodificar URL si es necesario (Viene corrupto del .env a veces)
-        if (str_contains($configJson, '%40')) {
+        // 1. Decodificar URL si es necesario
+        if (str_contains($configJson, '%')) {
             $configJson = urldecode($configJson);
         }
 
@@ -129,8 +132,22 @@ class FirestoreService
         }
 
         if (!$config) {
-            Log::error("❌ FirestoreService: El JSON de la cuenta de servicio es inválido y no pudo ser reparado. Error: " . json_last_error_msg());
+            Log::error("❌ FirestoreService: El JSON es inválido. Error: " . json_last_error_msg());
             return null;
+        }
+
+        // 4. Limpieza "brutal" de la clave privada para OpenSSL
+        if (isset($config['private_key'])) {
+            $key = $config['private_key'];
+            $body = str_replace([
+                '-----BEGIN PRIVATE KEY-----', 
+                '-----END PRIVATE KEY-----', 
+                "\n", "\r", " ", "\\n", "\\"
+            ], '', $key);
+            
+            $config['private_key'] = "-----BEGIN PRIVATE KEY-----\n" . 
+                                   chunk_split($body, 64, "\n") . 
+                                   "-----END PRIVATE KEY-----";
         }
 
         return $config;

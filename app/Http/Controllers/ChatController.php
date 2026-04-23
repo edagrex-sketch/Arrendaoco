@@ -162,6 +162,13 @@ class ChatController extends Controller
             ]
         );
 
+        // Sincronizar con Firebase para que aparezca en el móvil
+        try {
+            \App\Services\FirestoreService::syncChat($chat);
+        } catch (\Exception $e) {
+            \Log::error("❌ Error sincronizando chat inicial: " . $e->getMessage());
+        }
+
         return redirect()->route('chats.show', $chat);
     }
 }

@@ -57,7 +57,7 @@ class Chat extends Model
     public function getFirebaseId()
     {
         $ids = [(string)$this->usuario_1, (string)$this->usuario_2];
-        sort($ids);
+        sort($ids, SORT_STRING);
         return implode('_', $ids);
     }
 }
