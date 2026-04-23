@@ -58,8 +58,8 @@
                         <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Renta Mensual
                             ($)</label>
                         <input type="number" name="precio" id="precio-input" value="{{ $inmueble->renta_mensual }}" required
-                            min="{{ $inmueble->tipo === 'Cuarto' ? 300 : 500 }}"
-                            oninput="if(this.value < 0) this.value = '';"
+                            min="{{ $inmueble->tipo === 'Cuarto' ? 300 : 500 }}" step="1"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value < 0) this.value = '';"
                             class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                     </div>
 
@@ -68,8 +68,8 @@
                         <label class="block text-sm font-bold text-[#003049] uppercase tracking-wider mb-2">Depósito
                             ($) <span class="text-xs font-normal text-muted-foreground">(Opcional)</span></label>
                         <input type="number" name="deposito" id="deposito-input" value="{{ $inmueble->deposito }}"
-                            min="0"
-                            oninput="if(this.value < 0) this.value = '';"
+                            min="0" step="1"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value < 0) this.value = '';"
                             class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#003049] outline-none">
                     </div>
                 </div>

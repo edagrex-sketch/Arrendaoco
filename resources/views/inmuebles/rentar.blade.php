@@ -126,12 +126,12 @@
                     <div class="space-y-4 mb-8 pt-4 border-t border-gray-100">
                         <div class="flex justify-between items-center text-sm">
                             <p class="text-gray-500 font-bold">1er Mes de Renta</p>
-                            <p class="font-black text-[#003049]">${{ number_format($inmueble->renta_mensual, 2) }}</p>
+                            <p class="font-black text-[#003049]">${{ number_format($inmueble->renta_mensual, 0) }}</p>
                         </div>
                         @if(isset($inmueble->deposito) && $inmueble->deposito > 0)
                             <div class="flex justify-between items-center text-sm">
                                 <p class="text-gray-500 font-bold">Depósito (Reembolsable)</p>
-                                <p class="font-black text-[#003049]">${{ number_format($inmueble->deposito, 2) }}</p>
+                                <p class="font-black text-[#003049]">${{ number_format($inmueble->deposito, 0) }}</p>
                             </div>
                         @else
                             <div class="flex justify-between items-center text-sm">
@@ -147,7 +147,7 @@
                         <div class="pt-6 mt-6 border-t border-gray-200 border-dashed flex justify-between items-end">
                             <p class="font-black text-[#003049] uppercase tracking-widest text-sm mb-1">Total</p>
                             <p class="text-4xl font-black text-[#003049] tracking-tighter">
-                                ${{ number_format($inmueble->renta_mensual + ($inmueble->deposito ?? 0), 2) }}</p>
+                                ${{ number_format($inmueble->renta_mensual + ($inmueble->deposito ?? 0), 0) }}</p>
                         </div>
                         <p class="text-[10px] text-right text-gray-400 font-bold uppercase tracking-wider mt-1">Suma en
                             Pesos Mexicanos MXN</p>
