@@ -370,7 +370,7 @@
 
                                      @if(in_array($contrato->estatus, $estatusCancelable))
                                          <div x-data="{ showModal: false }" class="w-full">
-                                             <button type="button" @click="showModal = true"
+                                             <button type="button" @click.prevent="showModal = true"
                                                  class="w-full bg-red-50 text-red-500 hover:text-white hover:bg-red-500 text-center font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
                                                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -379,7 +379,7 @@
                                              </button>
 
                                              <!-- Modal de Confirmación -->
-                                             <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                                             <div x-show="showModal" style="display: none;" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
                                                  <div x-show="showModal" 
                                                       x-transition:enter="transition ease-out duration-300"
                                                       x-transition:enter-start="opacity-0"
