@@ -379,55 +379,57 @@
                                              </button>
 
                                              <!-- Modal de Confirmación -->
-                                             <div x-show="showModal" style="display: none;" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
-                                                 <div x-show="showModal" 
-                                                      x-transition:enter="transition ease-out duration-300"
-                                                      x-transition:enter-start="opacity-0"
-                                                      x-transition:enter-end="opacity-100"
-                                                      x-transition:leave="transition ease-in duration-200"
-                                                      x-transition:leave-start="opacity-100"
-                                                      x-transition:leave-end="opacity-0"
-                                                      class="fixed inset-0 bg-[#003049]/60" 
-                                                      @click="showModal = false">
-                                                 </div>
+                                             <template x-teleport="body">
+                                                 <div x-show="showModal" style="display: none;" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                                                     <div x-show="showModal" 
+                                                          x-transition:enter="transition ease-out duration-300"
+                                                          x-transition:enter-start="opacity-0"
+                                                          x-transition:enter-end="opacity-100"
+                                                          x-transition:leave="transition ease-in duration-200"
+                                                          x-transition:leave-start="opacity-100"
+                                                          x-transition:leave-end="opacity-0"
+                                                          class="fixed inset-0 bg-[#003049]/60" 
+                                                          @click="showModal = false">
+                                                     </div>
 
-                                                 <div x-show="showModal" 
-                                                      x-transition:enter="transition ease-out duration-300"
-                                                      x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                                                      x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                                                      x-transition:leave="transition ease-in duration-200"
-                                                      x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                                                      x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                                                      class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full relative z-10 text-center border-2 border-red-50">
-                                                     
-                                                     <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
-                                                         <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                         </svg>
-                                                     </div>
-                                                     
-                                                     <h3 class="text-xl font-black text-[#003049] mb-3">{{ $tituloModal }}</h3>
-                                                     <p class="text-sm text-slate-500 mb-8">{{ $mensajeModal }}</p>
-                                                     
-                                                     <div class="flex flex-col sm:flex-row gap-3">
-                                                         <button type="button" @click="showModal = false"
-                                                             class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-colors">
-                                                             Mejor no
-                                                         </button>
+                                                     <div x-show="showModal" 
+                                                          x-transition:enter="transition ease-out duration-300"
+                                                          x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                                                          x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                                          x-transition:leave="transition ease-in duration-200"
+                                                          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                                          x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                                                          class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full relative z-10 text-center border-2 border-red-50">
                                                          
-                                                         <form action="{{ route('rentas.cancelar', $contrato) }}" method="POST" class="w-full">
-                                                             @csrf
-                                                             @method('DELETE')
-                                                             <button type="submit" 
-                                                                 class="w-full px-4 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/30">
-                                                                 Sí, quiero cancelar
+                                                         <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
+                                                             <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                             </svg>
+                                                         </div>
+                                                         
+                                                         <h3 class="text-xl font-black text-[#003049] mb-3">{{ $tituloModal }}</h3>
+                                                         <p class="text-sm text-slate-500 mb-8">{{ $mensajeModal }}</p>
+                                                         
+                                                         <div class="flex flex-col sm:flex-row gap-3">
+                                                             <button type="button" @click="showModal = false"
+                                                                 class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-colors">
+                                                                 Mejor no
                                                              </button>
-                                                         </form>
+                                                             
+                                                             <form action="{{ route('rentas.cancelar', $contrato) }}" method="POST" class="w-full">
+                                                                 @csrf
+                                                                 @method('DELETE')
+                                                                 <button type="submit" 
+                                                                     class="w-full px-4 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/30">
+                                                                     Sí, quiero cancelar
+                                                                 </button>
+                                                             </form>
+                                                         </div>
                                                      </div>
                                                  </div>
-                                             </div>
+                                             </template>
                                          </div>
-                                    @else
+                                     @else
                                         <div class="w-full bg-slate-100 text-slate-400 text-center font-bold py-3 rounded-xl cursor-not-allowed text-sm flex items-center justify-center gap-2">
                                             {{ $contrato->estatus === 'rechazado' ? 'Solicitud rechazada' : 'Renta cancelada/finalizada' }}
                                         </div>
