@@ -49,30 +49,36 @@ return new class extends Migration
         // Orden de vida de un contrato:
         //   disponible → pdf_descargado → activo → finalizado
         //                                        ↘ cancelado | rechazado
-        DB::statement("ALTER TABLE contratos MODIFY COLUMN estatus ENUM(
-            'disponible',           -- Contrato listo, el inquilino puede verlo y descargarlo
-            'pdf_descargado',       -- Al menos una parte descargó el PDF, esperando firma física
-            'activo',               -- Propietario subió el escaneo firmado → arrendamiento vigente
-            'finalizado',           -- Contrato terminado correctamente al vencimiento
-            'cancelado',            -- Cancelado por cualquiera de las partes
-            'rechazado',            -- Propietario rechazó explícitamente al inquilino
-            'pendiente_aprobacion', -- LEGADO: contratos del flujo anterior (no se usará para nuevos)
-            'pendiente',            -- LEGADO: compatibilidad con registros viejos
-            'borrador'              -- Reservado para uso futuro (pre-publicación)
-        ) DEFAULT 'disponible'");
+        try {
+            DB::statement("ALTER TABLE contratos MODIFY COLUMN estatus ENUM(
+                'disponible',
+                'pdf_descargado',
+                'activo',
+                'finalizado',
+                'cancelado',
+                'rechazado',
+                'pendiente_aprobacion',
+                'pendiente',
+                'borrador'
+            ) DEFAULT 'disponible'");
+        } catch (\Throwable $e) {
+        }
     }
 
     public function down(): void
     {
         // Revertir el ENUM al estado original
-        DB::statement("ALTER TABLE contratos MODIFY COLUMN estatus ENUM(
-            'pendiente_aprobacion',
-            'pendiente',
-            'activo',
-            'finalizado',
-            'cancelado',
-            'rechazado'
-        ) DEFAULT 'pendiente_aprobacion'");
+        try {
+            DB::statement("ALTER TABLE contratos MODIFY COLUMN estatus ENUM(
+                'pendiente_aprobacion',
+                'pendiente',
+                'activo',
+                'finalizado',
+                'cancelado',
+                'rechazado'
+            ) DEFAULT 'pendiente_aprobacion'");
+        } catch (\Throwable $e) {
+        }
 
         Schema::table('contratos', function (Blueprint $table) {
             foreach (['archivo_firmado', 'pdf_descargado_at', 'archivo_subido_at'] as $col) {

@@ -17,14 +17,17 @@ return new class extends Migration
         });
 
         // Ampliar el ENUM de estatus para incluir 'pendiente_aprobacion' y 'rechazado'
-        DB::statement("ALTER TABLE contratos MODIFY COLUMN estatus ENUM(
-            'pendiente_aprobacion',
-            'pendiente',
-            'activo',
-            'finalizado',
-            'cancelado',
-            'rechazado'
-        ) DEFAULT 'pendiente_aprobacion'");
+        try {
+            DB::statement("ALTER TABLE contratos MODIFY COLUMN estatus ENUM(
+                'pendiente_aprobacion',
+                'pendiente',
+                'activo',
+                'finalizado',
+                'cancelado',
+                'rechazado'
+            ) DEFAULT 'pendiente_aprobacion'");
+        } catch (\Throwable $e) {
+        }
     }
 
     public function down(): void
@@ -33,6 +36,9 @@ return new class extends Migration
             $table->dropColumn('firma_propietario');
         });
 
-        DB::statement("ALTER TABLE contratos MODIFY COLUMN estatus ENUM('activo', 'finalizado', 'cancelado', 'pendiente') DEFAULT 'pendiente'");
+        try {
+            DB::statement("ALTER TABLE contratos MODIFY COLUMN estatus ENUM('activo', 'finalizado', 'cancelado', 'pendiente') DEFAULT 'pendiente'");
+        } catch (\Throwable $e) {
+        }
     }
 };
