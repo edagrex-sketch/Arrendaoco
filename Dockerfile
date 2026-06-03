@@ -21,7 +21,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader \
-    && npm ci \
+    && npm install \
     && npm run build \
     && php artisan storage:link
 
